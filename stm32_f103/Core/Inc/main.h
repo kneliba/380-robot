@@ -66,6 +66,8 @@ void Error_Handler(void);
 #define RIGHT_PWM_GPIO_Port GPIOA
 #define BATTERY_Pin GPIO_PIN_4
 #define BATTERY_GPIO_Port GPIOA
+#define SWITCH_Pin GPIO_PIN_5
+#define SWITCH_GPIO_Port GPIOA
 #define FRONT_TRIG_Pin GPIO_PIN_6
 #define FRONT_TRIG_GPIO_Port GPIOA
 #define FRONT_ECHO_Pin GPIO_PIN_7
