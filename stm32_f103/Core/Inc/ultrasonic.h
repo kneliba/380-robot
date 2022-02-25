@@ -19,7 +19,7 @@ typedef struct
 
 // Function Prototypes
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
-void HCSR04_Read_Front (void);
-void HCSR04_Read_Side (void);
+void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
+void HCSR04_Read_Side (TIM_HandleTypeDef *htim);
 
 #endif /* ULTRASONIC_H */

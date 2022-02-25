@@ -3,6 +3,7 @@
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f1xx_hal_gpio.h"
 #include "stm32f103xb.h"
+#include "main.h"
 
 static HCSR04_Type Front_US =
 {
@@ -78,21 +79,21 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 			}
 }
 
-void HCSR04_Read_Front (void)
+void HCSR04_Read_Front (TIM_HandleTypeDef *htim)
 {
 	HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_SET);  // pull the TRIG pin HIGH
-	delay(10);  // wait for 10 us
+	delay_us(10);  // wait for 10 us
 	HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_RESET);  // pull the TRIG pin low
 
-	HAL_TIM_IC_Start_IT(TIM3, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
+	HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
 }
 
-void HCSR04_Read_Side (void)
+void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
 {
 	HAL_GPIO_WritePin(SIDE_TRIG_GPIO_Port, SIDE_TRIG_Pin, GPIO_PIN_SET);  // pull the TRIG pin HIGH
-	delay(10);  // wait for 10 us
+	delay_us(10);  // wait for 10 us
 	HAL_GPIO_WritePin(SIDE_TRIG_GPIO_Port, SIDE_TRIG_Pin, GPIO_PIN_RESET);  // pull the TRIG pin low
 
-	HAL_TIM_IC_Start_IT(TIM3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
+	HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
 }
 
