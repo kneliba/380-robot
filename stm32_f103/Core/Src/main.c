@@ -81,7 +81,7 @@ int speed = 0;
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-	counter = ___HAL_TIM_GET_COUNTER(htim);
+	counter = __HAL_TIM_GET_COUNTER(htim);
 	//count becomes negative rather than jumping to 65000
 	count = (int16_t)counter;
 	//a single count normally is counted by 4 points, will have to test the number
@@ -128,7 +128,7 @@ int main(void)
   MX_FATFS_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  //Motor Encoders
+  //Right Motor Encoder
   HAL_TIME_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
   /* USER CODE END 2 */
 
