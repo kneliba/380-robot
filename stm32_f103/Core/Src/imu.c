@@ -6,48 +6,24 @@
 #include "stm32f103xb.h"
 #include "main.h"
 
-axises ICM20948_Read_Gyro()
+axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1)
 {
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
 
-	// send write request to accelerometer
-    ret = HAL_I2C_Master_Transmit(&hi2c1, AK09916_ADDR << 1, &(B0_GYRO_XOUT_H), 1, 1000);
+	// send write request to gyro
+    ret = HAL_I2C_Master_Transmit(hi2c1, ICM20948_ADDRESS << 1, &B0_GYRO_XOUT_H, 1, 1000);
 
     if(ret != HAL_OK)
     {
-    	return; // error message
+    	// error message
     }
 
 	HAL_Delay(1);
 
 	// read data
-	HAL_I2C_Master_Receive(&hi2c1, AK09916_ADDR << 1, temp, 6, 1000);
-
-	data.x = (int16_t)(temp[0] << 8 | temp[1]);
-	data.y = (int16_t)(temp[2] << 8 | temp[3]);
-	data.z = (int16_t)(temp[4] << 8 | temp[5]);
-}
-
-axises ICM20948_Read_Accel()
-{
-	HAL_StatusTypeDef ret;
-	axises data;
-	uint8_t temp[6];
-
-	// send write request to accelerometer
-    ret = HAL_I2C_Master_Transmit(&hi2c1, AK09916_ADDR << 1, &(B0_ACCEL_XOUT_H), 1, 1000);
-
-    if(ret != HAL_OK)
-    {
-    	return; // error message
-    }
-
-	HAL_Delay(1);
-
-	// read data
-	HAL_I2C_Master_Receive(&hi2c1, AK09916_ADDR << 1, temp, 6, 1000);
+	HAL_I2C_Master_Receive(hi2c1, ICM20948_ADDRESS << 1, temp, 6, 1000);
 
 	data.x = (int16_t)(temp[0] << 8 | temp[1]);
 	data.y = (int16_t)(temp[2] << 8 | temp[3]);
@@ -56,24 +32,50 @@ axises ICM20948_Read_Accel()
 	return data;
 }
 
-axises ICM20948_Read_Magn()
+axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1)
+{
+	HAL_StatusTypeDef ret;
+	axises data;
+	uint8_t temp[6];
+
+	// send write request to accelerometer
+    ret = HAL_I2C_Master_Transmit(hi2c1, ICM20948_ADDRESS << 1, &B0_ACCEL_XOUT_H, 1, 1000);
+
+    if(ret != HAL_OK)
+    {
+    	// error message
+    }
+
+	HAL_Delay(1);
+
+	// read data
+	HAL_I2C_Master_Receive(hi2c1, ICM20948_ADDRESS << 1, temp, 6, 1000);
+
+	data.x = (int16_t)(temp[0] << 8 | temp[1]);
+	data.y = (int16_t)(temp[2] << 8 | temp[3]);
+	data.z = (int16_t)(temp[4] << 8 | temp[5]);
+
+	return data;
+}
+
+axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
 {
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
 
 	// send write request to AK09916
-    ret = HAL_I2C_Master_Transmit(&hi2c1, AK09916_ADDR << 1, &(MAG_HXL), 1, 1000);
+    ret = HAL_I2C_Master_Transmit(hi2c1, AK09916_ADDR << 1, &MAG_HXL, 1, 1000);
 
     if(ret != HAL_OK)
     {
-    	return;
+    	// error message
     }
 
 	HAL_Delay(1);
 
 	// read data starting from lower x-axis
-	HAL_I2C_Master_Receive(&hi2c1, AK09916_ADDR << 1, temp, 6, 1000);
+	HAL_I2C_Master_Receive(hi2c1, AK09916_ADDR << 1, temp, 6, 1000);
 
 	// separate data into axises
     data.x = (int16_t)(temp[1] << 8 | temp[0]);
@@ -85,12 +87,12 @@ axises ICM20948_Read_Magn()
 
 // need function to select user bank ?
 
-void ICM20948_Calibrate()
+void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c1)
 {
 	 axises gyro_bias, accel_bias;
 
 	for(int i=0; i<50; i++){
-		axises accRawVal = ICM20948_Read_Accel();
+		axises accRawVal = ICM20948_Read_Accel(hi2c1);
 		accel_bias.x += accRawVal.x;
 		accel_bias.y += accRawVal.y;
 		accel_bias.z += accRawVal.z;
@@ -103,7 +105,7 @@ void ICM20948_Calibrate()
 	accel_bias.z -= 16384.0; // 16384 LSB/g
 
 	for(int i=0; i<50; i++){
-		axises gyrRawVal = ICM20948_Read_Gyro();
+		axises gyrRawVal = ICM20948_Read_Gyro(hi2c1);
 		gyro_bias.x += gyrRawVal.x;
 		gyro_bias.y += gyrRawVal.y;
 		gyro_bias.z += gyrRawVal.z;

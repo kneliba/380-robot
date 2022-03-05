@@ -1,3 +1,5 @@
+#include "main.h"
+
 // Axis typedef
 typedef struct
 {
@@ -7,13 +9,13 @@ typedef struct
 } axises;
 
 // Read gyroscope
-axises ICM20948_Read_Gyro();
+axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1);
 
 // Read accelerometer
-axises ICM20948_Read_Accel();
+axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1);
 
 // Read magnetometer
-axises ICM20948_Read_Magn();
+axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1);
 
 // Calibrate gyroscope and accelerometer
 void ICM20948_Calibrate();
@@ -22,10 +24,12 @@ void ICM20948_Calibrate();
 #define READ							0x80
 #define WRITE							0x00
 
-#define B0_GYRO_XOUT_H					0x33
-#define B0_ACCEL_XOUT_H					0x2D
+// Define gyroscope and accelerometer registers
+uint8_t ICM20948_ADDRESS = 0x68;
+uint8_t B0_GYRO_XOUT_H = 0x33;
+uint8_t B0_ACCEL_XOUT_H = 0x2D;
 
 // Define magnetometer registers
-#define AK09916_ADDR 				0x0C
-#define MAG_HXL							0x11
+uint8_t AK09916_ADDR = 0x0C;
+uint8_t MAG_HXL = 0x11;
 
