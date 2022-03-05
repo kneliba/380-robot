@@ -115,6 +115,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  ICM20948_Calibrate(&hi2c1);
+	  ICM20948_Read_Gyro(&hi2c1);
+	  ICM20948_Read_Accel(&hi2c1);
+	  ICM20948_Read_Magn(&hi2c1);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

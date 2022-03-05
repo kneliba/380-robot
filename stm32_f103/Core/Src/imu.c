@@ -6,11 +6,19 @@
 #include "stm32f103xb.h"
 #include "main.h"
 
+void Select_Bank(userbank ub, I2C_HandleTypeDef *hi2c1)
+{
+	uint8_t Trans[2]={REG_BANK_SEL, ub};
+	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS,Trans,2, 1000);
+}
+
+
 axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1)
 {
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
+	Select_Bank(0, hi2c1);
 
 	// send write request to gyro
     ret = HAL_I2C_Master_Transmit(hi2c1, ICM20948_ADDRESS << 1, &B0_GYRO_XOUT_H, 1, 1000);
@@ -37,6 +45,7 @@ axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1)
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
+	Select_Bank(0, hi2c1);
 
 	// send write request to accelerometer
     ret = HAL_I2C_Master_Transmit(hi2c1, ICM20948_ADDRESS << 1, &B0_ACCEL_XOUT_H, 1, 1000);
@@ -63,6 +72,7 @@ axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
+	Select_Bank(0, hi2c1);
 
 	// send write request to AK09916
     ret = HAL_I2C_Master_Transmit(hi2c1, AK09916_ADDR << 1, &MAG_HXL, 1, 1000);
@@ -85,11 +95,11 @@ axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
 	return data;
 }
 
-// need function to select user bank ?
-
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c1)
 {
 	 axises gyro_bias, accel_bias;
+
+	Select_Bank(0, hi2c1);
 
 	for(int i=0; i<50; i++){
 		axises accRawVal = ICM20948_Read_Accel(hi2c1);
