@@ -52,6 +52,11 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+extern int16_t position;
+int16_t oldpos = 0;
+extern int speed;
+int indx = 0;
+
 
 /* USER CODE END 0 */
 
@@ -184,7 +189,14 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
+	indx++;
+	if ( indx == 500)
+	{
+		//speed in clicks per second
+		speed = ((position - oldpos)*2);
+		oldpos = position;
+		indx = 0;
+	}
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */

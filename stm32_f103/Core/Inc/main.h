@@ -29,7 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-#include "motor_encoder.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -81,8 +80,6 @@ void Error_Handler(void);
 #define I2C_IMU_SCL_GPIO_Port GPIOB
 #define I2C_IMU_SDA_Pin GPIO_PIN_11
 #define I2C_IMU_SDA_GPIO_Port GPIOB
-#define RIGHT_ENCODER_A_Pin GPIO_PIN_9
-#define RIGHT_ENCODER_A_GPIO_Port GPIOA
 #define RIGHT_ENCODER_B_Pin GPIO_PIN_10
 #define RIGHT_ENCODER_B_GPIO_Port GPIOA
 #define LEFT_ENCODER_A_Pin GPIO_PIN_11
