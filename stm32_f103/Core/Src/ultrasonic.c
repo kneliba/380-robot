@@ -5,7 +5,7 @@
 #include "stm32f103xb.h"
 #include "main.h"
 
-static HCSR04_Type Front_US =
+HCSR04_Type Front_US =
 {
 	FRONT_TRIG_GPIO_Port,
 	FRONT_TRIG_Pin,
@@ -18,7 +18,7 @@ static HCSR04_Type Front_US =
 	0
 };
 
-static HCSR04_Type Side_US =
+HCSR04_Type Side_US =
 {
 	SIDE_TRIG_GPIO_Port,
 	SIDE_TRIG_Pin,
@@ -49,7 +49,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	}
 	if (ultrasonic->FIRST_CAPTURED==0) // if the first value is not captured
 			{
-				ultrasonic->VAL1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2); // read the first value
+				ultrasonic->VAL1 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH); // read the first value
 				ultrasonic->FIRST_CAPTURED = 1;  // set the first captured as true
 				// Now change the polarity to falling edge
 				__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_FALLING);

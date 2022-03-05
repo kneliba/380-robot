@@ -82,7 +82,7 @@ void delay_us (uint32_t us);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t MSG[35];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -118,6 +118,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HCSR04_Read_Front(&htim3);
+//	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
+	  sprintf(MSG, "123");
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

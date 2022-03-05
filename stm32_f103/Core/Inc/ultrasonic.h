@@ -17,6 +17,9 @@ typedef struct
     uint32_t	   DISTANCE;
 }HCSR04_Type;
 
+HCSR04_Type Front_US;
+HCSR04_Type Side_US;
+
 // Function Prototypes
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
