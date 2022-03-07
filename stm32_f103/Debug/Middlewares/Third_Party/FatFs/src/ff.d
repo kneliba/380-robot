@@ -31,6 +31,7 @@ Middlewares/Third_Party/FatFs/src/ff.o: \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
+ ../Core/Inc/right_motor_encoder.h \
  ../Middlewares/Third_Party/FatFs/src/diskio.h
 
 ../Middlewares/Third_Party/FatFs/src/ff.h:
@@ -98,5 +99,7 @@ Middlewares/Third_Party/FatFs/src/ff.o: \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
+
+../Core/Inc/right_motor_encoder.h:
 
 ../Middlewares/Third_Party/FatFs/src/diskio.h:

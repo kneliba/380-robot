@@ -32,7 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "right_motor_encoder.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
