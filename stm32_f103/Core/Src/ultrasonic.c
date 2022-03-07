@@ -75,7 +75,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 				// set polarity to rising edge
 				__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_RISING);
-				HAL_TIM_IC_Stop_IT(htim, ultrasonic->IC_TIM_CH);
+				__HAL_TIM_DISABLE_IT(htim, ultrasonic->IC_TIM_CH);
 			}
 }
 
@@ -84,8 +84,8 @@ void HCSR04_Read_Front (TIM_HandleTypeDef *htim)
 	HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_SET);  // pull the TRIG pin HIGH
 	delay_us(10);  // wait for 10 us
 	HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_RESET);  // pull the TRIG pin low
+	__HAL_TIM_ENABLE_IT(htim, TIM_IT_CC2);
 
-	HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
 }
 
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
@@ -93,7 +93,6 @@ void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
 	HAL_GPIO_WritePin(SIDE_TRIG_GPIO_Port, SIDE_TRIG_Pin, GPIO_PIN_SET);  // pull the TRIG pin HIGH
 	delay_us(10);  // wait for 10 us
 	HAL_GPIO_WritePin(SIDE_TRIG_GPIO_Port, SIDE_TRIG_Pin, GPIO_PIN_RESET);  // pull the TRIG pin low
-
-	HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
+	__HAL_TIM_ENABLE_IT(htim, TIM_IT_CC3);
 }
 

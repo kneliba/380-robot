@@ -72,7 +72,14 @@ void delay_us (uint32_t us);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int _write(int file, char *ptr, int len)
+{
+  /* Implement your write code here, this is used by puts and printf for example */
+  int i=0;
+  for(i=0 ; i<len ; i++)
+    ITM_SendChar((*ptr++));
+  return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -82,7 +89,7 @@ void delay_us (uint32_t us);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t MSG[35];
+	uint8_t MSG[35] = {'\0'};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -111,7 +118,10 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-
+  // Initialize Timer3 for delay purposes
+  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,10 +129,10 @@ int main(void)
   while (1)
   {
 	  HCSR04_Read_Front(&htim3);
-//	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
-	  sprintf(MSG, "123");
+	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_Delay(1000);
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	  HAL_Delay(25);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
