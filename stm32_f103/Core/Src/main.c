@@ -115,6 +115,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	  HAL_Delay(25);
+
 	  ICM20948_Calibrate(&hi2c1);
 	  sprintf(MSG, "testing calibrate");
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
