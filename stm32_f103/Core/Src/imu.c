@@ -4,12 +4,11 @@
 #include "stm32f1xx_hal_gpio.h"
 #include "stm32f1xx_hal_gpio.h"
 #include "stm32f103xb.h"
-#include "main.h"
 
 void Select_Bank(userbank ub, I2C_HandleTypeDef *hi2c1)
 {
 	uint8_t Trans[2]={REG_BANK_SEL, ub};
-	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS,Trans,2, 1000);
+	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS,Trans,2,1000);
 }
 
 

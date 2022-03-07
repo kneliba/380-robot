@@ -80,7 +80,7 @@ static void MX_TIM2_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t MSG[35];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -116,9 +116,24 @@ int main(void)
   while (1)
   {
 	  ICM20948_Calibrate(&hi2c1);
+	  sprintf(MSG, "testing calibrate");
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  HAL_Delay(1000);
+
 	  ICM20948_Read_Gyro(&hi2c1);
+	  sprintf(MSG, "testing gyro");
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  HAL_Delay(1000);
+
 	  ICM20948_Read_Accel(&hi2c1);
+	  sprintf(MSG, "testing accel");
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  HAL_Delay(1000);
+
 	  ICM20948_Read_Magn(&hi2c1);
+	  sprintf(MSG, "testing magn");
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
