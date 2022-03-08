@@ -11,17 +11,40 @@ uint8_t ICM20948_ADDRESS = 0x68;
 uint8_t REG_BANK_SEL = 0x7F;
 uint8_t B0_GYRO_XOUT_H = 0x33;
 uint8_t B0_ACCEL_XOUT_H = 0x2D;
+uint8_t GYRO_CONFIG_1 = 0x01;
+uint8_t ACCEL_CONFIG = 0x14;
+uint8_t ICM20948_WHO_AM_I = 0x00;
+
+uint8_t PWR_MGMT_2 = 0x07;
 
 // Define magnetometer registers
 uint8_t AK09916_ADDR = 0x0C;
 uint8_t MAG_HXL = 0x11;
 
-void Select_Bank(userbank ub, I2C_HandleTypeDef *hi2c1)
+void Write_8(I2C_HandleTypeDef *hi2c1, uint8_t register_address,uint8_t data)
 {
-	uint8_t Trans[2]={REG_BANK_SEL, ub};
-	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS,Trans,2,1000);
+	uint8_t Trans[2]={register_address, data};
+	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS << 1,Trans,2, 1000);
 }
 
+uint8_t Read_8(I2C_HandleTypeDef *hi2c1,uint8_t register_address){
+	uint8_t Trans[1]={register_address};
+	uint8_t Receive[1];
+	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS << 1,Trans,1,1000);
+	HAL_I2C_Master_Receive(hi2c1,ICM20948_ADDRESS << 1,Receive,1,1000);
+	return Receive[0];
+}
+
+void Select_Bank(userbank ub, I2C_HandleTypeDef *hi2c1)
+{
+	Write_8(hi2c1, REG_BANK_SEL, ub);
+}
+
+uint8_t ICM_who_am_i(I2C_HandleTypeDef *hi2c1){
+	Select_Bank(0, hi2c1);
+	// should return 0xEA
+	return Read_8(hi2c1,ICM20948_WHO_AM_I);
+}
 
 axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1)
 {
@@ -107,16 +130,22 @@ axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
 
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c1)
 {
-	 axises gyro_bias, accel_bias;
+	axises gyro_bias, accel_bias;
 
-	Select_Bank(0, hi2c1);
+	//	Select_Bank(0, hi2c1);
+	//	Write_8(hi2c1, PWR_MGMT_2, 0x80);
+	//	Write_8(hi2c1, PWR_MGMT_2, 0x09);
+
+	Select_Bank(2, hi2c1);
+	Write_8(hi2c1, GYRO_CONFIG_1, 0x03); // set gyro range
+	Write_8(hi2c1, ACCEL_CONFIG, 0x03); // set accel range
 
 	for(int i=0; i<50; i++){
 		axises accRawVal = ICM20948_Read_Accel(hi2c1);
 		accel_bias.x += accRawVal.x;
 		accel_bias.y += accRawVal.y;
 		accel_bias.z += accRawVal.z;
-		HAL_Delay(1);
+		HAL_Delay(10);
 	}
 
 	accel_bias.x /= 50;

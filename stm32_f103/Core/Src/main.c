@@ -79,7 +79,7 @@ static void MX_TIM2_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t MSG[35];
+ uint8_t MSG[35] = {'\0'};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -117,8 +117,10 @@ int main(void)
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	  HAL_Delay(25);
 
-	  ICM20948_Calibrate(&hi2c1);
-	  sprintf(MSG, "testing calibrate");
+	  ICM_who_am_i(&hi2c1);
+
+	  uint8_t who_am_i = ICM_who_am_i(&hi2c1);
+	  sprintf(MSG, "should be 0xEA: %d\n", who_am_i);
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
 

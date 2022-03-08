@@ -18,6 +18,9 @@ typedef enum
 	ub_3 = 3 << 4
 } userbank;
 
+// Detect ICM 20948 for testing purposes
+uint8_t ICM_who_am_i(I2C_HandleTypeDef *hi2c1);
+
 // Read gyroscope
 axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1);
 
