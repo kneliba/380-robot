@@ -122,6 +122,8 @@ int main(void)
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
 
+	  // ICM20948_Calibrate(&hi2c2);
+
 	  axises gyro_raw = ICM20948_Read_Gyro(&hi2c2);
 	  sprintf(MSG, "gyro x %d\r\n", gyro_raw.x);
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
@@ -131,12 +133,12 @@ int main(void)
 	  HAL_Delay(1000);
 
 
-	  ICM20948_Read_Accel(&hi2c2);
+	  axises accel_raw = ICM20948_Read_Accel(&hi2c2);
 	  sprintf(MSG, "testing accel");
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
 
-	  ICM20948_Read_Magn(&hi2c2);
+	  axises magn_raw = ICM20948_Read_Magn(&hi2c2);
 	  sprintf(MSG, "testing magn");
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
