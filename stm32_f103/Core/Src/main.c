@@ -117,24 +117,26 @@ int main(void)
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	  HAL_Delay(25);
 
-	  ICM_who_am_i(&hi2c1);
-
-	  uint8_t who_am_i = ICM_who_am_i(&hi2c1);
-	  sprintf(MSG, "should be 0xEA: %d\n", who_am_i);
+	  uint8_t who_am_i = ICM_who_am_i(&hi2c2, &huart2);
+	  sprintf(MSG, "should be 0xEA: %d\r\n", who_am_i);
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
 
-	  ICM20948_Read_Gyro(&hi2c1);
-	  sprintf(MSG, "testing gyro");
+	  axises gyro_raw = ICM20948_Read_Gyro(&hi2c2);
+	  sprintf(MSG, "gyro x %d\r\n", gyro_raw.x);
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  HAL_Delay(1000);
+	  sprintf(MSG, "gyro y %d\r\n", gyro_raw.y);
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
 
-	  ICM20948_Read_Accel(&hi2c1);
+
+	  ICM20948_Read_Accel(&hi2c2);
 	  sprintf(MSG, "testing accel");
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
 
-	  ICM20948_Read_Magn(&hi2c1);
+	  ICM20948_Read_Magn(&hi2c2);
 	  sprintf(MSG, "testing magn");
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_Delay(1000);
@@ -285,9 +287,9 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.ClockSpeed = 400000;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.OwnAddress1 = 208;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c2.Init.OwnAddress2 = 0;
@@ -528,4 +530,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

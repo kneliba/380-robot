@@ -19,18 +19,18 @@ typedef enum
 } userbank;
 
 // Detect ICM 20948 for testing purposes
-uint8_t ICM_who_am_i(I2C_HandleTypeDef *hi2c1);
+uint8_t ICM_who_am_i(I2C_HandleTypeDef *hi2c2, UART_HandleTypeDef *huart2);
 
 // Read gyroscope
-axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1);
+axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c2);
 
 // Read accelerometer
-axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1);
+axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c2);
 
 // Read magnetometer
-axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1);
+axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c2);
 
 // Calibrate gyroscope and accelerometer
-void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c1);
+void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c2);
 
 #endif /* IMU_H */

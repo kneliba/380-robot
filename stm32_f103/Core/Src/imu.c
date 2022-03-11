@@ -21,40 +21,54 @@ uint8_t PWR_MGMT_2 = 0x07;
 uint8_t AK09916_ADDR = 0x0C;
 uint8_t MAG_HXL = 0x11;
 
-void Write_8(I2C_HandleTypeDef *hi2c1, uint8_t register_address,uint8_t data)
+void Write_8(I2C_HandleTypeDef *hi2c2, uint8_t register_address,uint8_t data)
 {
 	uint8_t Trans[2]={register_address, data};
-	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS << 1,Trans,2, 1000);
+	HAL_I2C_Master_Transmit(hi2c2,ICM20948_ADDRESS << 1,Trans,2, 1000);
 }
 
-uint8_t Read_8(I2C_HandleTypeDef *hi2c1,uint8_t register_address){
+uint8_t Read_8(I2C_HandleTypeDef *hi2c2,uint8_t register_address, UART_HandleTypeDef *huart2){
 	uint8_t Trans[1]={register_address};
 	uint8_t Receive[1];
-	HAL_I2C_Master_Transmit(hi2c1,ICM20948_ADDRESS << 1,Trans,1,1000);
-	HAL_I2C_Master_Receive(hi2c1,ICM20948_ADDRESS << 1,Receive,1,1000);
+	HAL_StatusTypeDef ret;
+	uint8_t MSGimu[35] = {'\0'};
+	ret = HAL_I2C_Master_Transmit(hi2c2,ICM20948_ADDRESS << 1,Trans,1,1000);
+	sprintf(MSGimu, "in read 8 function \n");
+	 HAL_UART_Transmit(&huart2, MSGimu, sizeof(MSGimu), 100);
+    if(ret != HAL_OK)
+    {
+    	sprintf(MSGimu, "transmit error \n");
+    	HAL_UART_Transmit(&huart2, MSGimu, sizeof(MSGimu), 100);
+    }
+	ret = HAL_I2C_Master_Receive(hi2c2,ICM20948_ADDRESS << 1,Receive,1,1000);
+	if(ret != HAL_OK)
+	{
+		sprintf(MSGimu, "receive error");
+		HAL_UART_Transmit(&huart2, MSGimu, sizeof(MSGimu), 100);
+	}
 	return Receive[0];
 }
 
-void Select_Bank(userbank ub, I2C_HandleTypeDef *hi2c1)
+void Select_Bank(userbank ub, I2C_HandleTypeDef *hi2c2)
 {
-	Write_8(hi2c1, REG_BANK_SEL, ub);
+	Write_8(hi2c2, REG_BANK_SEL, ub);
 }
 
-uint8_t ICM_who_am_i(I2C_HandleTypeDef *hi2c1){
-	Select_Bank(0, hi2c1);
+uint8_t ICM_who_am_i(I2C_HandleTypeDef *hi2c2, UART_HandleTypeDef *huart2){
+	Select_Bank(0, hi2c2);
 	// should return 0xEA
-	return Read_8(hi2c1,ICM20948_WHO_AM_I);
+	return Read_8(hi2c2,ICM20948_WHO_AM_I, huart2);
 }
 
-axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1)
+axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c2)
 {
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
-	Select_Bank(0, hi2c1);
+	Select_Bank(0, hi2c2);
 
 	// send write request to gyro
-    ret = HAL_I2C_Master_Transmit(hi2c1, ICM20948_ADDRESS << 1, &B0_GYRO_XOUT_H, 1, 1000);
+    ret = HAL_I2C_Master_Transmit(hi2c2, ICM20948_ADDRESS << 1, &B0_GYRO_XOUT_H, 1, 1000);
 
     if(ret != HAL_OK)
     {
@@ -64,7 +78,7 @@ axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1)
 	HAL_Delay(1);
 
 	// read data
-	HAL_I2C_Master_Receive(hi2c1, ICM20948_ADDRESS << 1, temp, 6, 1000);
+	HAL_I2C_Master_Receive(hi2c2, ICM20948_ADDRESS << 1, temp, 6, 1000);
 
 	data.x = (int16_t)(temp[0] << 8 | temp[1]);
 	data.y = (int16_t)(temp[2] << 8 | temp[3]);
@@ -73,15 +87,15 @@ axises ICM20948_Read_Gyro(I2C_HandleTypeDef *hi2c1)
 	return data;
 }
 
-axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1)
+axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c2)
 {
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
-	Select_Bank(0, hi2c1);
+	Select_Bank(0, hi2c2);
 
 	// send write request to accelerometer
-    ret = HAL_I2C_Master_Transmit(hi2c1, ICM20948_ADDRESS << 1, &B0_ACCEL_XOUT_H, 1, 1000);
+    ret = HAL_I2C_Master_Transmit(hi2c2, ICM20948_ADDRESS << 1, &B0_ACCEL_XOUT_H, 1, 1000);
 
     if(ret != HAL_OK)
     {
@@ -91,7 +105,7 @@ axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1)
 	HAL_Delay(1);
 
 	// read data
-	HAL_I2C_Master_Receive(hi2c1, ICM20948_ADDRESS << 1, temp, 6, 1000);
+	HAL_I2C_Master_Receive(hi2c2, ICM20948_ADDRESS << 1, temp, 6, 1000);
 
 	data.x = (int16_t)(temp[0] << 8 | temp[1]);
 	data.y = (int16_t)(temp[2] << 8 | temp[3]);
@@ -100,15 +114,15 @@ axises ICM20948_Read_Accel(I2C_HandleTypeDef *hi2c1)
 	return data;
 }
 
-axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
+axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c2)
 {
 	HAL_StatusTypeDef ret;
 	axises data;
 	uint8_t temp[6];
-	Select_Bank(0, hi2c1);
+	Select_Bank(0, hi2c2);
 
 	// send write request to AK09916
-    ret = HAL_I2C_Master_Transmit(hi2c1, AK09916_ADDR << 1, &MAG_HXL, 1, 1000);
+    ret = HAL_I2C_Master_Transmit(hi2c2, AK09916_ADDR << 1, &MAG_HXL, 1, 1000);
 
     if(ret != HAL_OK)
     {
@@ -118,7 +132,7 @@ axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
 	HAL_Delay(1);
 
 	// read data starting from lower x-axis
-	HAL_I2C_Master_Receive(hi2c1, AK09916_ADDR << 1, temp, 6, 1000);
+	HAL_I2C_Master_Receive(hi2c2, AK09916_ADDR << 1, temp, 6, 1000);
 
 	// separate data into axises
     data.x = (int16_t)(temp[1] << 8 | temp[0]);
@@ -128,20 +142,20 @@ axises ICM20948_Read_Magn(I2C_HandleTypeDef *hi2c1)
 	return data;
 }
 
-void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c1)
+void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c2)
 {
 	axises gyro_bias, accel_bias;
 
-	//	Select_Bank(0, hi2c1);
-	//	Write_8(hi2c1, PWR_MGMT_2, 0x80);
-	//	Write_8(hi2c1, PWR_MGMT_2, 0x09);
+	//	Select_Bank(0, hi2c2);
+	//	Write_8(hi2c2, PWR_MGMT_2, 0x80);
+	//	Write_8(hi2c2, PWR_MGMT_2, 0x09);
 
-	Select_Bank(2, hi2c1);
-	Write_8(hi2c1, GYRO_CONFIG_1, 0x03); // set gyro range
-	Write_8(hi2c1, ACCEL_CONFIG, 0x03); // set accel range
+	Select_Bank(2, hi2c2);
+	Write_8(hi2c2, GYRO_CONFIG_1, 0x03); // set gyro range
+	Write_8(hi2c2, ACCEL_CONFIG, 0x03); // set accel range
 
 	for(int i=0; i<50; i++){
-		axises accRawVal = ICM20948_Read_Accel(hi2c1);
+		axises accRawVal = ICM20948_Read_Accel(hi2c2);
 		accel_bias.x += accRawVal.x;
 		accel_bias.y += accRawVal.y;
 		accel_bias.z += accRawVal.z;
@@ -154,7 +168,7 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c1)
 	accel_bias.z -= 16384.0; // 16384 LSB/g
 
 	for(int i=0; i<50; i++){
-		axises gyrRawVal = ICM20948_Read_Gyro(hi2c1);
+		axises gyrRawVal = ICM20948_Read_Gyro(hi2c2);
 		gyro_bias.x += gyrRawVal.x;
 		gyro_bias.y += gyrRawVal.y;
 		gyro_bias.z += gyrRawVal.z;
