@@ -8,10 +8,12 @@
  * 1ms -> full speed reverse
  * 2ms -> full speed forward
  * 1.5ms -> stop
- * ESC runs at 50Hz (20ms)
  *
- *  Created on: Feb. 25, 2022
- *      Author: jcwon
+ * PSC = 36-1
+ * ARR = 40000-1
+ * F_clk = 72MHz
+ * F_pwm = 50Hz (20ms)
+ *
  */
 
 #ifndef ESC_H_
@@ -25,9 +27,6 @@ void drive_forward (uint32_t speed);
 void stop (TIM_HandleTypeDef *htim);
 
 // turn right
-void turn_right (void);
-
-// turn left
-void turn_left (void);
+void turn_right (TIM_HandleTypeDef *htim);
 
 #endif /* ESC_H_ */

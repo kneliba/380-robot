@@ -1,10 +1,5 @@
-/*
- * ESC.c
- *
- *  Created on: Feb. 25, 2022
- *      Author: jcwon
- */
-
+#include "ESC.h"
+#include "main.h"
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
 
@@ -28,5 +23,7 @@ void stop (TIM_HandleTypeDef *htim)
 }
 
 // turn right
+void turn_right (TIM_HandleTypeDef *htim)
+{
 
-// turn left
+}
