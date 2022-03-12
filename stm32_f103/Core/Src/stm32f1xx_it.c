@@ -23,6 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "right_motor_encoder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,6 +58,11 @@ int16_t oldpos = 0;
 extern int speed;
 int indx = 0;
 
+//struct motor_encoder
+//{
+//  struct Motor_Encoder *p;
+//};
+extern Motor_Encoder right_encoder;
 
 /* USER CODE END 0 */
 
@@ -189,6 +195,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
+
 	indx++;
 	if ( indx == 500)
 	{
@@ -196,6 +203,7 @@ void SysTick_Handler(void)
 		speed = ((position - oldpos)*2);
 		oldpos = position;
 		indx = 0;
+		right_encoder.speed = speed;
 	}
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();

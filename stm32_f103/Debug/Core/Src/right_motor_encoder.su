@@ -1,0 +1,1 @@
+right_motor_encoder.c:20:6:HAL_TIM_IC_CaptureCallback	24	static

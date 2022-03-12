@@ -16,7 +16,6 @@ RM := rm -rf
 -include Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
--include subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -41,8 +40,8 @@ $(wildcard ../makefile.targets) \
 
 BUILD_ARTIFACT_NAME := MTE380_robot_project
 BUILD_ARTIFACT_EXTENSION := elf
-BUILD_ARTIFACT_PREFIX := 
-BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME).$(BUILD_ARTIFACT_EXTENSION)
+BUILD_ARTIFACT_PREFIX :=
+BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
@@ -65,8 +64,8 @@ all: main-build
 main-build: MTE380_robot_project.elf secondary-outputs
 
 # Tool invocations
-MTE380_robot_project.elf: $(OBJS) $(USER_OBJS) C:\Users\Joseph\Documents\Github\380-robot\stm32_f103\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "MTE380_robot_project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Joseph\Documents\Github\380-robot\stm32_f103\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="MTE380_robot_project.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+MTE380_robot_project.elf: $(OBJS) $(USER_OBJS) /Users/kamilaneliba/Documents/GitHub/380-robot/stm32_f103/STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "MTE380_robot_project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/kamilaneliba/Documents/GitHub/380-robot/stm32_f103/STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="MTE380_robot_project.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -87,7 +86,7 @@ MTE380_robot_project.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_D
 
 # Other Targets
 clean:
-	-$(RM) *
+	-$(RM) MTE380_robot_project.bin MTE380_robot_project.elf MTE380_robot_project.list default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
@@ -99,7 +98,6 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents fail-specified-linker-script-missing warn-no-linker-script-specified
-.SECONDARY:
+.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
 
 -include ../makefile.targets
