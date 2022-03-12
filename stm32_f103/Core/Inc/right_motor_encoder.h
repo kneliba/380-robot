@@ -16,7 +16,9 @@ typedef struct
 	int16_t 	count;
 	int16_t 	position;
 	double 		speed;
+	double 		velocity;
 	double 		distance;
+	double 		wheel_radius;
 }Motor_Encoder;
 
 Motor_Encoder right_encoder;

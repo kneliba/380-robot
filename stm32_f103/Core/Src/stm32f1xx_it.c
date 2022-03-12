@@ -58,6 +58,11 @@ int16_t oldpos = 0;
 extern double speed;
 int indx = 0;
 
+//values in meters
+double position_m;
+double oldpos_m;
+extern double velocity;
+
 //struct motor_encoder
 //{
 //  struct Motor_Encoder *p;
@@ -197,13 +202,20 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
 	indx++;
-	if ( indx == 500)
+	if ( indx == 500) //calculated every half second
 	{
 		//speed in clicks per second
 		speed = ((position - oldpos)*2);
+		right_encoder.speed = speed;
+
+		//velocity
+		position_m = (2*3.1415*0.07042) * position;
+		oldpos_m = (2*3.1415*0.07042) * oldpos;
+		velocity = ((position_m - oldpos_m)*2);
+		right_encoder.velocity = velocity;
+
 		oldpos = position;
 		indx = 0;
-		right_encoder.speed = speed;
 	}
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();

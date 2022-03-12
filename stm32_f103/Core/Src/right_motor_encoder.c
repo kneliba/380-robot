@@ -8,14 +8,18 @@
 uint32_t counter = 0;
 int16_t count = 0;
 int16_t position = 0;
-int speed = 0;
+double speed = 0;
+double velocity = 0;
+double distance = 0;
 
 Motor_Encoder right_encoder = {
 		0,
 		0,
 		0,
 		0,
-		0
+		0,
+		0,
+		0.07042,
 };
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
@@ -37,7 +41,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		position = count/4;
 		right_motor_encoder->position = position;
 
-		//distance = ((2*pi*radius_wheel)) * position ;
+		distance = (2*3.1415*right_motor_encoder->wheel_radius) * position; // might have consider gear ratio in this calculation
+		right_motor_encoder->distance = distance;
 	}
 }
 
@@ -55,14 +60,14 @@ int16_t get_distance_travelled()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
-	return right_motor_encoder->position; // should be distance
+	return right_motor_encoder->position; // should be distance once wheel attached
 }
 
 int get_velocity()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
-	return right_motor_encoder->speed;
+	return right_motor_encoder->speed; //should be velocuty once wheel is attached
 }
 
 int16_t get_encoder_count()
