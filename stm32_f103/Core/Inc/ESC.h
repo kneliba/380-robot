@@ -21,12 +21,12 @@
 #include "main.h"
 
 // drive forward
-void drive_forward (uint32_t speed);
+void drive_forward (TIM_HandleTypeDef *htim, uint32_t speed);
 
 // stop
 void stop (TIM_HandleTypeDef *htim);
 
 // turn right
-void turn_right (TIM_HandleTypeDef *htim);
+//void turn_right (TIM_HandleTypeDef *htim);
 
 #endif /* ESC_H_ */
