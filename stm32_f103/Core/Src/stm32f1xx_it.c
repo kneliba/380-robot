@@ -55,7 +55,7 @@
 /* USER CODE BEGIN 0 */
 extern int16_t position;
 int16_t oldpos = 0;
-extern int speed;
+extern double speed;
 int indx = 0;
 
 //struct motor_encoder

@@ -14,6 +14,7 @@ Motor_Encoder right_encoder = {
 		0,
 		0,
 		0,
+		0,
 		0
 };
 
@@ -36,6 +37,38 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		position = count/4;
 		right_motor_encoder->position = position;
 
-		//distance = ((2*pi*radius_wheel)/steps_per_click) * Pos ;
+		//distance = ((2*pi*radius_wheel)) * position ;
 	}
 }
+
+void reset_distance()
+{
+	Motor_Encoder *right_motor_encoder;
+	right_motor_encoder= &right_encoder;
+	right_motor_encoder->counter = 0;
+	right_motor_encoder->count = 0;
+	right_motor_encoder->position = 0;
+	right_motor_encoder->distance = 0;
+}
+
+int16_t get_distance_travelled()
+{
+	Motor_Encoder *right_motor_encoder;
+	right_motor_encoder= &right_encoder;
+	return right_motor_encoder->position; // should be distance
+}
+
+int get_velocity()
+{
+	Motor_Encoder *right_motor_encoder;
+	right_motor_encoder= &right_encoder;
+	return right_motor_encoder->speed;
+}
+
+int16_t get_encoder_count()
+{
+	Motor_Encoder *right_motor_encoder;
+	right_motor_encoder= &right_encoder;
+	return right_motor_encoder->count;
+}
+

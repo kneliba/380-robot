@@ -1,1 +1,5 @@
-right_motor_encoder.c:20:6:HAL_TIM_IC_CaptureCallback	24	static
+right_motor_encoder.c:21:6:HAL_TIM_IC_CaptureCallback	24	static
+right_motor_encoder.c:44:6:reset_distance	16	static
+right_motor_encoder.c:54:9:get_distance_travelled	16	static
+right_motor_encoder.c:61:5:get_velocity	16	static
+right_motor_encoder.c:68:9:get_encoder_count	16	static
