@@ -1,0 +1,2 @@
+esp.c:11:6:ESP_send	32	static
+esp.c:17:6:ESP_receive	32	static
