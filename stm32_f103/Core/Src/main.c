@@ -79,7 +79,8 @@ static void MX_TIM2_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
- uint8_t MSG[35] = {'\0'};
+  char uart_buffer[200];
+   uint8_t MSG[35] = {'\0'};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -107,7 +108,10 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
+  ICM_SelectBank(&hi2c2, USER_BANK_0);
+  	HAL_Delay(10);
+  	ICM_PowerOn(&hi2c2);
+  	HAL_Delay(10);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -117,31 +121,56 @@ int main(void)
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	  HAL_Delay(25);
 
-	  uint8_t who_am_i = ICM_who_am_i(&hi2c2, &huart2);
-	  sprintf(MSG, "should be 0xEA: %d\r\n", who_am_i);
-	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_Delay(1000);
+//	  uint8_t who_am_i = ICM_WHOAMI(&hi2c2);
+//	  sprintf(MSG, "should be 0xEA: %d\r\n", who_am_i);
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_Delay(10);
 
-	  // ICM20948_Calibrate(&hi2c2);
+	  // Select User Bank 0
+	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+	  HAL_Delay(10);
 
-	  axises gyro_raw = ICM20948_Read_Gyro(&hi2c2);
-	  sprintf(MSG, "gyro x %d\r\n", gyro_raw.x);
-	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_Delay(1000);
-	  sprintf(MSG, "gyro y %d\r\n", gyro_raw.y);
-	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_Delay(1000);
+	  // Obtain accelerometer and gyro data
+	  ICM_ReadAccelGyro(&hi2c2);
 
+	  // Obtain magnetometer data
+	  int16_t mag_data[3];
+	  ICM_ReadMag(&hi2c2, mag_data);
 
-	  axises accel_raw = ICM20948_Read_Accel(&hi2c2);
-	  sprintf(MSG, "testing accel");
-	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_Delay(1000);
+	  // Print raw, but joined, axis data values to screen
+	  sprintf(uart_buffer,
+			"(Ax: %u | Ay: %u | Az: %u) \n"
+			"(Gx: %u | Gy: %u | Gz: %u) \n"
+			"(Mx: %i | My: %i | Mz: %i) \n"
+			" \r\n",
+			accel_data[0], accel_data[1], accel_data[2],
+			gyro_data[0], gyro_data[1], gyro_data[2],
+			mag_data[0], mag_data[1], mag_data[2]);
+	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
+	  HAL_Delay(5);
 
-	  axises magn_raw = ICM20948_Read_Magn(&hi2c2);
-	  sprintf(MSG, "testing magn");
-	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_Delay(1000);
+//	  uint8_t who_am_i = ICM_WHOAMI(&hi2c2);
+//	  sprintf(MSG, "should be 0xEA: %d\r\n", who_am_i);
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_Delay(1000);
+
+//	  // ICM20948_Calibrate(&hi2c2);
+//
+//	  axises gyro_raw = ICM20948_Read_Gyro(&hi2c2);
+//	  sprintf(MSG, "testing gyro \r\n");
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_Delay(1000);
+//
+//
+//	  axises accel_raw = ICM20948_Read_Accel(&hi2c2);
+//	  sprintf(MSG, "testing accel \r\n");
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_Delay(1000);
+//
+//	  axises magn_raw = ICM20948_Read_Magn(&hi2c2);
+//	  sprintf(MSG, "testing magn \r\n");
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
