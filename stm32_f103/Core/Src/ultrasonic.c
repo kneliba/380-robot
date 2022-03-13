@@ -6,17 +6,17 @@
 #include "main.h"
 
 static HCSR04_Type Front_US =
-	{
-		FRONT_TRIG_GPIO_Port,
-		FRONT_TRIG_Pin,
-		TIM3,
-		TIM_CHANNEL_2,
-		0,
-		0,
-		0,
-		0,
-		0
-	};
+{
+	FRONT_TRIG_GPIO_Port,
+	FRONT_TRIG_Pin,
+	TIM3,
+	TIM_CHANNEL_2,
+	0,
+	0,
+	0,
+	0,
+	0
+};
 
 static HCSR04_Type Side_US =
 {
@@ -94,5 +94,21 @@ void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
 	delay_us(10);  // wait for 10 us
 	HAL_GPIO_WritePin(SIDE_TRIG_GPIO_Port, SIDE_TRIG_Pin, GPIO_PIN_RESET);  // pull the TRIG pin low
 	__HAL_TIM_ENABLE_IT(htim, TIM_IT_CC3);
+}
+
+double get_front_distance (TIM_HandleTypeDef *htim)
+{
+	/*
+	 * some filtering
+	 */
+	return Front_US.DISTANCE;
+}
+
+double get_side_distance (TIM_HandleTypeDef *htim)
+{
+	/*
+	 * some filtering
+	 */
+	return Side_US.DISTANCE;
 }
 

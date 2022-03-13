@@ -10,11 +10,11 @@ typedef struct
     uint16_t       TRIG_PIN;
     TIM_TypeDef*   TIM_Instance;
     uint32_t       IC_TIM_CH;
-    uint32_t	   VAL1;
-    uint32_t	   VAL2;
-    uint32_t	   DIFFERENCE;
+    double	   	   VAL1;
+    double	   	   VAL2;
+    double	       DIFFERENCE;
     uint8_t		   FIRST_CAPTURED;
-    uint32_t	   DISTANCE;
+    double	   	   DISTANCE;
 }HCSR04_Type;
 
 static HCSR04_Type Front_US;
@@ -24,5 +24,7 @@ static HCSR04_Type Side_US;
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim);
+double get_front_distance (TIM_HandleTypeDef *htim);
+double get_side_distance (TIM_HandleTypeDef *htim);
 
 #endif /* ULTRASONIC_H */
