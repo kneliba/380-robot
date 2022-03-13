@@ -3,6 +3,8 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f103xb.h"
+//#include "ultrasonic.h"
+//#include "right_motor_encoder.h"
 
 static double ARR = 40000.0;
 
@@ -61,14 +63,24 @@ void decelerate (TIM_HandleTypeDef *htim)
 	}
 }
 
+/* Integration functions
+ *
 // drive a set distance (with encoder)
 void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance)
 {
-
+	reset_distance();
+	int16_t  encoder_dist = get_distance_travelled();
+	drive_forward(htim, speed);
+	while (encoder_dist < distance) {}
+	stop(htim);
 }
 
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim, double speed, double distance)
 {
-
+	double ultrasonic_dist = get_front_distance();
+	drive_foward(htim, speed);
+	while (ultrasonic_dist < distance) {}
+	stop(htim);
 }
+*/
