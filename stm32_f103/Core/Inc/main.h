@@ -108,5 +108,3 @@ void delay_us (uint32_t us);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

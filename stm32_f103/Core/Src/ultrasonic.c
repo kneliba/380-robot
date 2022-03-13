@@ -5,20 +5,20 @@
 #include "stm32f103xb.h"
 #include "main.h"
 
-HCSR04_Type Front_US =
-{
-	FRONT_TRIG_GPIO_Port,
-	FRONT_TRIG_Pin,
-	TIM3,
-	TIM_CHANNEL_2,
-	0,
-	0,
-	0,
-	0,
-	0
-};
+static HCSR04_Type Front_US =
+	{
+		FRONT_TRIG_GPIO_Port,
+		FRONT_TRIG_Pin,
+		TIM3,
+		TIM_CHANNEL_2,
+		0,
+		0,
+		0,
+		0,
+		0
+	};
 
-HCSR04_Type Side_US =
+static HCSR04_Type Side_US =
 {
 	SIDE_TRIG_GPIO_Port,
 	SIDE_TRIG_Pin,
