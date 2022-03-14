@@ -80,7 +80,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
   char uart_buffer[200];
-   uint8_t MSG[35] = {'\0'};
+  // uint8_t MSG[35] = {'\0'};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -109,9 +109,11 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   ICM_SelectBank(&hi2c2, USER_BANK_0);
-  	HAL_Delay(10);
-  	ICM_PowerOn(&hi2c2);
-  	HAL_Delay(10);
+  HAL_Delay(10);
+  ICM_PowerOn(&hi2c2);
+  HAL_Delay(10);
+  ICM20948_Calibrate(&hi2c2);
+  HAL_Delay(10);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -130,10 +132,10 @@ int main(void)
 	  ICM_SelectBank(&hi2c2, USER_BANK_0);
 	  HAL_Delay(10);
 
-	  // Obtain accelerometer and gyro data
+	  // Obtain raw accelerometer and gyro data
 	  ICM_ReadAccelGyro(&hi2c2);
 
-	  // Obtain magnetometer data
+	  // Obtain raw magnetometer data
 	  int16_t mag_data[3];
 	  ICM_ReadMag(&hi2c2, mag_data);
 
@@ -149,28 +151,22 @@ int main(void)
 	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
 	  HAL_Delay(5);
 
-//	  uint8_t who_am_i = ICM_WHOAMI(&hi2c2);
-//	  sprintf(MSG, "should be 0xEA: %d\r\n", who_am_i);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_Delay(1000);
 
-//	  // ICM20948_Calibrate(&hi2c2);
-//
-//	  axises gyro_raw = ICM20948_Read_Gyro(&hi2c2);
-//	  sprintf(MSG, "testing gyro \r\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_Delay(1000);
-//
-//
-//	  axises accel_raw = ICM20948_Read_Accel(&hi2c2);
-//	  sprintf(MSG, "testing accel \r\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_Delay(1000);
-//
-//	  axises magn_raw = ICM20948_Read_Magn(&hi2c2);
-//	  sprintf(MSG, "testing magn \r\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_Delay(1000);
+	  // Obtain corrected accelerometer and gyro data
+	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+
+	  // Print corrected axis data values to screen
+	  sprintf(uart_buffer,
+			"(Ax: %u | Ay: %u | Az: %u) \n"
+			"(Gx: %u | Gy: %u | Gz: %u) \n"
+			"(Mx: %i | My: %i | Mz: %i) \n"
+			" \r\n",
+			corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+			corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+			mag_data[0], mag_data[1], mag_data[2]);
+	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
+	  HAL_Delay(5);
+
 
     /* USER CODE END WHILE */
 
