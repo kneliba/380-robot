@@ -279,7 +279,5 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 	gyro_offset[0] /= 50;
 	gyro_offset[1] /= 50;
 	gyro_offset[2] /= 50;
-
-	// set both offsets somewhere to use when reading accel and gyro values
 }
 

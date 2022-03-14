@@ -167,6 +167,22 @@ int main(void)
 	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
 	  HAL_Delay(5);
 
+	  // Apply Madgwick to get pitch, roll, and yaw
+	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+						 mag_data[0], mag_data[1], mag_data[2]);
+
+	  uint32_t roll = getRoll();
+	  uint32_t pitch = getPitch();
+	  uint32_t heading = getYaw();
+
+	  // Print corrected axis data values to screen
+	  	  sprintf(uart_buffer,
+	  			"roll: %u, pitch: %u, heading: %u \r\n",
+				roll, pitch, heading);
+	  	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
+	  	  HAL_Delay(5);
+
 
     /* USER CODE END WHILE */
 

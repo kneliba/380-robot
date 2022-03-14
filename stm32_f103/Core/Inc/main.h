@@ -35,6 +35,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include "imu.h"
+#include "MadgwickAHRS.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

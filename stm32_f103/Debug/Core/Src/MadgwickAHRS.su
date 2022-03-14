@@ -1,0 +1,7 @@
+MadgwickAHRS.c:45:6:MadgwickAHRSupdate	200	static
+MadgwickAHRS.c:149:6:MadgwickAHRSupdateIMU	120	static
+MadgwickAHRS.c:221:10:invSqrt	40	static
+MadgwickAHRS.c:231:6:computeAngles	16	static
+MadgwickAHRS.c:239:10:getRoll	8	static
+MadgwickAHRS.c:243:10:getPitch	8	static
+MadgwickAHRS.c:247:10:getYaw	8	static
