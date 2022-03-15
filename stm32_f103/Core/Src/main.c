@@ -53,7 +53,8 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+extern HCSR04_Type Front_US;
+extern HCSR04_Type Side_US;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

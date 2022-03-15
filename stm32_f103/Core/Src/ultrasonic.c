@@ -5,7 +5,7 @@
 #include "stm32f103xb.h"
 #include "main.h"
 
-static HCSR04_Type Front_US =
+HCSR04_Type Front_US =
 {
 	FRONT_TRIG_GPIO_Port,
 	FRONT_TRIG_Pin,
@@ -18,7 +18,7 @@ static HCSR04_Type Front_US =
 	0
 };
 
-static HCSR04_Type Side_US =
+HCSR04_Type Side_US =
 {
 	SIDE_TRIG_GPIO_Port,
 	SIDE_TRIG_Pin,
@@ -31,9 +31,33 @@ static HCSR04_Type Side_US =
 	0
 };
 
+//void HCSR04_Init (void)
+//{
+//	Front_US.TRIG_GPIO = FRONT_TRIG_GPIO_Port;
+//	Front_US.TRIG_PIN = FRONT_TRIG_Pin;
+//	Front_US.TIM_Instance = TIM3;
+//	Front_US.IC_TIM_CH = TIM_CHANNEL_2;
+//	Front_US.VAL1 = 0;
+//	Front_US.VAL2 = 0;
+//	Front_US.DIFFERENCE = 0;
+//	Front_US.FIRST_CAPTURED = 0;
+//	Front_US.DISTANCE = 0;
+//
+//	Side_US.TRIG_GPIO = SIDE_TRIG_GPIO_Port;
+//	Side_US.TRIG_PIN = SIDE_TRIG_Pin;
+//	Side_US.TIM_Instance = TIM3;
+//	Side_US.IC_TIM_CH = TIM_CHANNEL_3;
+//	Side_US.VAL1 = 0;
+//	Side_US.VAL2 = 0;
+//	Side_US.DIFFERENCE = 0;
+//	Side_US.FIRST_CAPTURED = 0;
+//	Side_US.DISTANCE = 0;
+//}
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	HCSR04_Type *ultrasonic;
+	double sensor_val;
 	if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // Front Trig
 	{
 		ultrasonic = &Front_US;
@@ -70,8 +94,11 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 					ultrasonic->DIFFERENCE = (0xffff - ultrasonic->VAL1) + ultrasonic->VAL2;
 				}
 
-				ultrasonic->DISTANCE = ultrasonic->DIFFERENCE * .034/2;
-				ultrasonic->FIRST_CAPTURED = 0; // set it back to false
+				// Filter sensor data
+				sensor_val = ultrasonic->DIFFERENCE * .034/2;
+				ultrasonic->DISTANCE = filter(sensor_val, ultrasonic->DISTANCE);
+
+				ultrasonic->FIRST_CAPTURED = 0; // set back to false
 
 				// set polarity to rising edge
 				__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_RISING);
@@ -96,19 +123,19 @@ void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
 	__HAL_TIM_ENABLE_IT(htim, TIM_IT_CC3);
 }
 
-double get_front_distance (TIM_HandleTypeDef *htim)
+double get_front_distance (void)
 {
-	/*
-	 * some filtering
-	 */
 	return Front_US.DISTANCE;
 }
 
-double get_side_distance (TIM_HandleTypeDef *htim)
+double get_side_distance (void)
 {
-	/*
-	 * some filtering
-	 */
 	return Side_US.DISTANCE;
+}
+
+double filter (double Sv, double old_Kv)
+{
+	double Kv = Sv*r + old_Kv*(1-r);
+	return Kv;
 }
 
