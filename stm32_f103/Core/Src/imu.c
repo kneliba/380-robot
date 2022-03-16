@@ -134,7 +134,6 @@ void ICM_ReadMag(I2C_HandleTypeDef *hi2c, int16_t magn[3]) {
  *
  */
 void ICM_PowerOn(I2C_HandleTypeDef *hi2c) {
-	// uint8_t test = ICM_WHOAMI(hi2c);
 	HAL_Delay(10);
 	ICM_SelectBank(hi2c, USER_BANK_0);
 	HAL_Delay(10);
@@ -201,24 +200,16 @@ void ICM_ReadAccelGyro(I2C_HandleTypeDef *hi2c) {
 	gyro_data[0] = (raw_data[6] << 8) | raw_data[7];
 	gyro_data[1] = (raw_data[8] << 8) | raw_data[9];
 	gyro_data[2] = (raw_data[10] << 8) | raw_data[11];
-
-	accel_data[0] = accel_data[0] / 8;
-	accel_data[1] = accel_data[1] / 8;
-	accel_data[2] = accel_data[2] / 8;
-
-	gyro_data[0] = gyro_data[0] / 250;
-	gyro_data[1] = gyro_data[1] / 250;
-	gyro_data[2] = gyro_data[2] / 250;
 }
 
 void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, uint16_t raw_accel_data[3], uint16_t raw_gyro_data[3]) {
-	corr_accel_data[0] = (raw_accel_data[0] - (accel_offset[0] / (1<<GYRO_RATE_250)));
-	corr_accel_data[1] = (raw_accel_data[1] - (accel_offset[1] / (1<<GYRO_RATE_250)));
-	corr_accel_data[2] = (raw_accel_data[2] - (accel_offset[2] / (1<<GYRO_RATE_250)));
+	corr_accel_data[0] = (raw_accel_data[0] - (accel_offset[0] / (1<<0x04))) * (1<<0x04) / 16384.0;
+	corr_accel_data[1] = (raw_accel_data[1] - (accel_offset[1] / (1<<0x04))) * (1<<0x04) / 16384.0;
+	corr_accel_data[2] = (raw_accel_data[2] - (accel_offset[2] / (1<<0x04))) * (1<<0x04) / 16384.0;
 
-	corr_gyro_data[0] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<0x04)));
-	corr_gyro_data[1] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<0x04)));
-	corr_gyro_data[2] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<0x04)));
+	corr_gyro_data[0] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+	corr_gyro_data[1] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+	corr_gyro_data[2] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
 }
 
 void ICM_SelectBank(I2C_HandleTypeDef *hi2c, uint8_t bank) {
@@ -265,7 +256,7 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 	accel_offset[0] /= 50;
 	accel_offset[1] /= 50;
 	accel_offset[2] /= 50;
-	accel_offset[2] -= 16384.0; // 16384 LSB/g
+	accel_offset[2] -= 4096.0; // 4096 LSB/g
 
 	// Calibrate gyroscope
 	for(int i=0; i<50; i++){

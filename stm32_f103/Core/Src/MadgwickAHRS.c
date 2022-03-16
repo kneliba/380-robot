@@ -19,7 +19,6 @@
 #include <math.h>
 #include "main.h"
 
-//---------------------------------------------------------------------------------------------------
 // Definitions
 
 #define sampleFreq	512.0f		// sample frequency in Hz
@@ -28,26 +27,35 @@
 //---------------------------------------------------------------------------------------------------
 // Variable definitions
 
-uint32_t beta = betaDef;								// 2 * proportional gain (Kp)
-uint32_t q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
-
-//---------------------------------------------------------------------------------------------------
-// Function declarations
-
-uint32_t invSqrt(uint32_t x);
+float beta = betaDef;								// 2 * proportional gain (Kp)
+float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
+float roll = 0, pitch = 0, yaw = 0;
 
 //====================================================================================================
 // Functions
 
+// Fast inverse square-root
+// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
+
+float invSqrt(float x) {
+	float halfx = 0.5f * x;
+	float y = x;
+	long i = *(long*)&y;
+	i = 0x5f3759df - (i>>1);
+	y = *(float*)&i;
+	y = y * (1.5f - (halfx * y * y));
+	return y;
+}
+
 //---------------------------------------------------------------------------------------------------
 // AHRS algorithm update
 
-void MadgwickAHRSupdate(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, uint32_t ay, uint32_t az, uint32_t mx, uint32_t my, uint32_t mz) {
-	uint32_t recipNorm;
-	uint32_t s0, s1, s2, s3;
-	uint32_t qDot1, qDot2, qDot3, qDot4;
-	uint32_t hx, hy;
-	uint32_t _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+	float recipNorm;
+	float s0, s1, s2, s3;
+	float qDot1, qDot2, qDot3, qDot4;
+	float hx, hy;
+	float _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
 
 	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
 	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
@@ -106,7 +114,7 @@ void MadgwickAHRSupdate(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, uint
 		// Reference direction of Earth's magnetic field
 		hx = mx * q0q0 - _2q0my * q3 + _2q0mz * q2 + mx * q1q1 + _2q1 * my * q2 + _2q1 * mz * q3 - mx * q2q2 - mx * q3q3;
 		hy = _2q0mx * q3 + my * q0q0 - _2q0mz * q1 + _2q1mx * q2 - my * q1q1 + my * q2q2 + _2q2 * mz * q3 - my * q3q3;
-		_2bx = sqrt(hx * hx + hy * hy);
+		_2bx = sqrtf(hx * hx + hy * hy);
 		_2bz = -_2q0mx * q2 + _2q0my * q1 + mz * q0q0 + _2q1mx * q3 - mz * q1q1 + _2q2 * my * q3 - mz * q2q2 + mz * q3q3;
 		_4bx = 2.0f * _2bx;
 		_4bz = 2.0f * _2bz;
@@ -146,11 +154,11 @@ void MadgwickAHRSupdate(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, uint
 //---------------------------------------------------------------------------------------------------
 // IMU algorithm update
 
-void MadgwickAHRSupdateIMU(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, uint32_t ay, uint32_t az) {
-	uint32_t recipNorm;
-	uint32_t s0, s1, s2, s3;
-	uint32_t qDot1, qDot2, qDot3, qDot4;
-	uint32_t _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) {
+	float recipNorm;
+	float s0, s1, s2, s3;
+	float qDot1, qDot2, qDot3, qDot4;
+	float _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
 
 	// Rate of change of quaternion from gyroscope
 	qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
@@ -214,37 +222,23 @@ void MadgwickAHRSupdateIMU(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, u
 	q3 *= recipNorm;
 }
 
-//---------------------------------------------------------------------------------------------------
-// Fast inverse square-root
-// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
-
-uint32_t invSqrt(uint32_t x) {
-	uint32_t halfx = 0.5f * x;
-	uint32_t y = x;
-	long i = *(long*)&y;
-	i = 0x5f3759df - (i>>1);
-	y = *(uint32_t*)&i;
-	y = y * (1.5f - (halfx * y * y));
-	return y;
-}
-
 void computeAngles()
 {
-	roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2);
-	pitch = asinf(-2.0f * (q1*q3 - q0*q2));
-	yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3);
+	roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2) * 57.29578f;
+	pitch = asinf(-2.0f * (q1*q3 - q0*q2)) * 57.29578f;
+	yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3) * 57.29578f;
 	anglesComputed = 1;
 }
 
-uint32_t getRoll() {
-    if (!anglesComputed) computeAngles();
+float getRoll() {
+    computeAngles();
     return roll * 57.29578f;
 }
-uint32_t getPitch() {
-    if (!anglesComputed) computeAngles();
+float getPitch() {
+    computeAngles();
     return pitch * 57.29578f;
 }
-uint32_t getYaw() {
-    if (!anglesComputed) computeAngles();
+float getYaw() {
+    computeAngles();
     return yaw * 57.29578f + 180.0f;
 }

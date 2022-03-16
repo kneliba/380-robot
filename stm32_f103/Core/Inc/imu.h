@@ -18,7 +18,7 @@ uint16_t corr_gyro_data[3];
 
 #define UART_BUS		    (&huart2)
 
-#define ICM20948_ADDRESS    (0x68)
+#define ICM20948_ADDRESS    (0x69)
 
 #define USER_BANK_SEL   	(0x7F)
 #define USER_BANK_0		    (0x00)

@@ -17,21 +17,18 @@
 //----------------------------------------------------------------------------------------------------
 // Variable declaration
 
-uint32_t beta;				// algorithm gain
-uint32_t q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
-uint32_t roll;
-uint32_t pitch;
-uint32_t yaw;
+float beta;				// algorithm gain
+float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+float roll;
+float pitch;
+float yaw;
 char anglesComputed;
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
-void MadgwickAHRSupdate(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, uint32_t ay, uint32_t az, uint32_t mx, uint32_t my, uint32_t mz);
-void MadgwickAHRSupdateIMU(uint32_t gx, uint32_t gy, uint32_t gz, uint32_t ax, uint32_t ay, uint32_t az);
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
 void computeAngles();
-uint32_t getRoll();
-uint32_t getPitch();
-uint32_t getYaw();
 
 #endif

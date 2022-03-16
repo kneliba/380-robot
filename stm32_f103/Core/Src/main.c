@@ -79,7 +79,7 @@ static void MX_TIM2_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  char uart_buffer[200];
+  char uart_buffer[100];
   // uint8_t MSG[35] = {'\0'};
   /* USER CODE END 1 */
 
@@ -113,7 +113,7 @@ int main(void)
   ICM_PowerOn(&hi2c2);
   HAL_Delay(10);
   ICM20948_Calibrate(&hi2c2);
-  HAL_Delay(10);
+  HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -139,50 +139,44 @@ int main(void)
 	  int16_t mag_data[3];
 	  ICM_ReadMag(&hi2c2, mag_data);
 
-	  // Print raw, but joined, axis data values to screen
-	  sprintf(uart_buffer,
-			"(Ax: %u | Ay: %u | Az: %u) \n"
-			"(Gx: %u | Gy: %u | Gz: %u) \n"
-			"(Mx: %i | My: %i | Mz: %i) \n"
-			" \r\n",
-			accel_data[0], accel_data[1], accel_data[2],
-			gyro_data[0], gyro_data[1], gyro_data[2],
-			mag_data[0], mag_data[1], mag_data[2]);
-	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
-	  HAL_Delay(5);
-
+//	  // Print raw axis data values to screen
+//	  sprintf(uart_buffer,
+//			"(Ax: %u | Ay: %u | Az: %u)\r\n(Gx: %u | Gy: %u | Gz: %u)\r\n(Mx: %i | My: %i | Mz: %i)\r\n",
+//			accel_data[0], accel_data[1], accel_data[2],
+//			gyro_data[0], gyro_data[1], gyro_data[2],
+//			mag_data[0], mag_data[1], mag_data[2]);
+//	  HAL_UART_Transmit(&huart2, (uint8_t *)uart_buffer, strlen(uart_buffer), 1000);
+//	  HAL_Delay(10);
 
 	  // Obtain corrected accelerometer and gyro data
 	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
 
-	  // Print corrected axis data values to screen
-	  sprintf(uart_buffer,
-			"(Ax: %u | Ay: %u | Az: %u) \n"
-			"(Gx: %u | Gy: %u | Gz: %u) \n"
-			"(Mx: %i | My: %i | Mz: %i) \n"
-			" \r\n",
-			corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-			corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-			mag_data[0], mag_data[1], mag_data[2]);
-	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
-	  HAL_Delay(5);
+//	  // Print corrected axis data values to screen
+//	  sprintf(uart_buffer,
+//			  "(Ax: %u | Ay: %u | Az: %u)\r\n(Gx: %u | Gy: %u | Gz: %u)\r\n(Mx: %i | My: %i | Mz: %i)\r\n",
+//			corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+//			corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+//			mag_data[0], mag_data[1], mag_data[2]);
+//	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
+//	  HAL_Delay(5);
 
 	  // Apply Madgwick to get pitch, roll, and yaw
 	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
 			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
 						 mag_data[0], mag_data[1], mag_data[2]);
 
-	  uint32_t roll = getRoll();
-	  uint32_t pitch = getPitch();
-	  uint32_t heading = getYaw();
+	  computeAngles();
+
+	  float roll_main = roll;
+	  float pitch_main = pitch;
+	  float yaw_main = yaw;
 
 	  // Print corrected axis data values to screen
 	  	  sprintf(uart_buffer,
-	  			"roll: %u, pitch: %u, heading: %u \r\n",
-				roll, pitch, heading);
+	  			"roll: %f, pitch: %f, yaw: %f \r\n",
+				roll_main, pitch_main, yaw_main);
 	  	  HAL_UART_Transmit(&huart2, (uint8_t*) uart_buffer, strlen(uart_buffer), 1000);
 	  	  HAL_Delay(5);
-
 
     /* USER CODE END WHILE */
 
@@ -332,7 +326,7 @@ static void MX_I2C2_Init(void)
   hi2c2.Instance = I2C2;
   hi2c2.Init.ClockSpeed = 400000;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c2.Init.OwnAddress1 = 208;
+  hi2c2.Init.OwnAddress1 = 210;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c2.Init.OwnAddress2 = 0;
