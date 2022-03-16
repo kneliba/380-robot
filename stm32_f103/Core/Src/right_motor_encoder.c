@@ -67,7 +67,7 @@ int get_velocity()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
-	return right_motor_encoder->speed; //should be velocuty once wheel is attached
+	return right_motor_encoder->speed; //should be velocity once wheel is attached
 }
 
 int16_t get_encoder_count()
