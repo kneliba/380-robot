@@ -9,12 +9,12 @@
 #define IMU_H
 #include "main.h"
 
-uint16_t accel_data[3];
-uint16_t gyro_data[3];
-int16_t mag_data[3];
+extern uint16_t accel_data[3];
+extern uint16_t gyro_data[3];
+extern int16_t mag_data[3];
 
-uint16_t corr_accel_data[3];
-uint16_t corr_gyro_data[3];
+extern uint16_t corr_accel_data[3];
+extern uint16_t corr_gyro_data[3];
 
 #define UART_BUS		    (&huart2)
 

@@ -30,6 +30,7 @@
 float beta = betaDef;								// 2 * proportional gain (Kp)
 float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
 float roll = 0, pitch = 0, yaw = 0;
+char anglesComputed = 0;
 
 //====================================================================================================
 // Functions

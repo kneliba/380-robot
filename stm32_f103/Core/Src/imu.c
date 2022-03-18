@@ -15,6 +15,13 @@
 #include "main.h"
 #include <string.h>
 
+uint16_t accel_data[3] = {};
+uint16_t gyro_data[3] = {};
+int16_t mag_data[3] = {};
+
+uint16_t corr_accel_data[3] = {};
+uint16_t corr_gyro_data[3] = {};
+
 int16_t gyro_offset[3];
 int16_t accel_offset[3];
 

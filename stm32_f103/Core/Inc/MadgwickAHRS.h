@@ -17,12 +17,12 @@
 //----------------------------------------------------------------------------------------------------
 // Variable declaration
 
-float beta;				// algorithm gain
-float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
-float roll;
-float pitch;
-float yaw;
-char anglesComputed;
+extern float beta;				// algorithm gain
+extern float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+extern float roll;
+extern float pitch;
+extern float yaw;
+extern char anglesComputed;
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations
