@@ -129,6 +129,13 @@ int main(void)
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
   HAL_Delay(5000);
+
+  ICM_SelectBank(&hi2c2, USER_BANK_0);
+  HAL_Delay(10);
+  ICM_PowerOn(&hi2c2);
+  HAL_Delay(10);
+  ICM20948_Calibrate(&hi2c2);
+  HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,6 +159,33 @@ int main(void)
 //	  stop(&htim2);
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	  HAL_Delay(3000);
+
+    // imu testing
+
+	  // Select User Bank 0
+	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+	  HAL_Delay(10);
+
+	  // Obtain raw accelerometer and gyro data
+	  ICM_ReadAccelGyro(&hi2c2);
+
+	  // Obtain raw magnetometer data
+	  int16_t mag_data[3];
+	  ICM_ReadMag(&hi2c2, mag_data);
+
+	  // Obtain corrected accelerometer and gyro data
+	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+
+	  // Apply Madgwick to get pitch, roll, and yaw
+	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+						 mag_data[0], mag_data[1], mag_data[2]);
+
+	  computeAngles();
+
+	  float roll_main = roll;
+	  float pitch_main = pitch;
+	  float yaw_main = yaw;
 
     /* USER CODE END WHILE */
 

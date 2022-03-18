@@ -34,8 +34,11 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 #include <stdio.h>
+#include <string.h>	
 #include "ultrasonic.h"
 #include "ESC.h"
+#include "imu.h"	
+#include "MadgwickAHRS.h"
 
 /* USER CODE END Includes */
 
