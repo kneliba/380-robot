@@ -1,0 +1,15 @@
+MadgwickAHRS.h:33:7:getRoll	8	static
+MadgwickAHRS.h:37:7:getPitch	8	static
+MadgwickAHRS.h:41:7:getYaw	8	static
+stm32f1xx_hal_msp.c:66:6:HAL_MspInit	8	static
+stm32f1xx_hal_msp.c:92:6:HAL_ADC_MspInit	40	static
+stm32f1xx_hal_msp.c:124:6:HAL_ADC_MspDeInit	0	static
+stm32f1xx_hal_msp.c:152:6:HAL_I2C_MspInit	40	static
+stm32f1xx_hal_msp.c:210:6:HAL_I2C_MspDeInit	8	static
+stm32f1xx_hal_msp.c:261:6:HAL_SPI_MspInit	32	static
+stm32f1xx_hal_msp.c:301:6:HAL_SPI_MspDeInit	0	static
+stm32f1xx_hal_msp.c:331:6:HAL_TIM_Base_MspInit	8	static
+stm32f1xx_hal_msp.c:347:6:HAL_TIM_MspPostInit	32	static
+stm32f1xx_hal_msp.c:378:6:HAL_TIM_Base_MspDeInit	0	static
+stm32f1xx_hal_msp.c:400:6:HAL_UART_MspInit	32	static
+stm32f1xx_hal_msp.c:439:6:HAL_UART_MspDeInit	0	static
