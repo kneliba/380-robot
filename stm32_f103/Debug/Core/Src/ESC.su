@@ -1,0 +1,5 @@
+../Core/Src/ESC.c:12:6:drive_forward	48	static
+../Core/Src/ESC.c:21:6:stop	16	static
+../Core/Src/ESC.c:27:6:turn_right	48	static
+../Core/Src/ESC.c:42:6:accelerate	32	static
+../Core/Src/ESC.c:54:6:decelerate	24	static

@@ -1,0 +1,7 @@
+../Core/Src/MadgwickAHRS.c:41:7:invSqrt	32	static
+../Core/Src/MadgwickAHRS.c:54:6:MadgwickAHRSupdate	192	static
+../Core/Src/MadgwickAHRS.c:158:6:MadgwickAHRSupdateIMU	120	static
+../Core/Src/MadgwickAHRS.c:226:6:computeAngles	16	static
+../Core/Src/MadgwickAHRS.c:234:7:getRoll	8	static
+../Core/Src/MadgwickAHRS.c:238:7:getPitch	8	static
+../Core/Src/MadgwickAHRS.c:242:7:getYaw	8	static
