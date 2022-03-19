@@ -92,9 +92,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	uint8_t ROLL_MSG[35] = {'\0'};
-	uint8_t PITCH_MSG[35] = {'\0'};
-	uint8_t YAW_MSG[35] = {'\0'};
+//	uint8_t ROLL_MSG[35] = {'\0'};
+//	uint8_t PITCH_MSG[35] = {'\0'};
+//	uint8_t YAW_MSG[35] = {'\0'};
 
   /* USER CODE END 1 */
 
@@ -125,23 +125,23 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   //Right Motor Encoder
-  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
+//  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
 
   // Initialize Timer3 for delay purposes
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
 
-  HAL_TIM_Base_Start(&htim2);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
-  HAL_Delay(5000);
+//  HAL_TIM_Base_Start(&htim2);
+//  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
+//  HAL_Delay(5000);
 
-  ICM_SelectBank(&hi2c2, USER_BANK_0);
-  HAL_Delay(10);
-  ICM_PowerOn(&hi2c2);
-  HAL_Delay(10);
-  ICM20948_Calibrate(&hi2c2);
-  HAL_Delay(100);
+//  ICM_SelectBank(&hi2c2, USER_BANK_0);
+//  HAL_Delay(10);
+//  ICM_PowerOn(&hi2c2);
+//  HAL_Delay(10);
+//  ICM20948_Calibrate(&hi2c2);
+//  HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -507,7 +507,7 @@ static void MX_TIM3_Init(void)
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();

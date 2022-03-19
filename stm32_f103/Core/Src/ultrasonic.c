@@ -15,6 +15,7 @@ HCSR04_Type Front_US =
 	0,
 	0,
 	0,
+	0,
 	0
 };
 
@@ -24,6 +25,7 @@ HCSR04_Type Side_US =
 	SIDE_TRIG_Pin,
 	TIM3,
 	TIM_CHANNEL_3,
+	0,
 	0,
 	0,
 	0,

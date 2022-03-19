@@ -10,11 +10,12 @@ typedef struct
     uint16_t       TRIG_PIN;
     TIM_TypeDef*   TIM_Instance;
     uint32_t       IC_TIM_CH;
-    float	   	   VAL1;
-    float	   	   VAL2;
-    float	       DIFFERENCE;
+    uint32_t	   VAL1;
+    uint32_t	   VAL2;
+    uint32_t	   DIFFERENCE;
     uint8_t		   FIRST_CAPTURED;
     float	   	   DISTANCE;
+    float		   SENSOR_VAL;
 }HCSR04_Type;
 
 extern HCSR04_Type Front_US;

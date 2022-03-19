@@ -37,14 +37,13 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	else if (htim->Instance == TIM3) //ultrasonic
 	{
 		HCSR04_Type *ultrasonic;
-		float sensor_val;
 
 		if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // Front Trig
 		{
 			ultrasonic = &Front_US;
 		}
 
-		else if (TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) // Side Trig
+		else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) // Side Trig
 		{
 			ultrasonic = &Side_US;
 		}
@@ -52,6 +51,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		if (ultrasonic->FIRST_CAPTURED==0) // if the first value is not captured
 		{
 			ultrasonic->VAL1 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH); // read the first value
+//			ultrasonic->VAL1 = __HAL_TIM_GET_COUNTER(htim);
 			ultrasonic->FIRST_CAPTURED = 1;  // set the first captured as true
 			// Now change the polarity to falling edge
 			__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_FALLING);
@@ -60,6 +60,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		else if (ultrasonic->FIRST_CAPTURED==1)   // if the first is already captured
 		{
 			ultrasonic->VAL2 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH);  // read second value
+//			ultrasonic->VAL2 = __HAL_TIM_GET_COUNTER(htim);
 			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
 
 			if (ultrasonic->VAL2 > ultrasonic->VAL1)
@@ -73,9 +74,9 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 			}
 
 			// Filter sensor data
-			sensor_val = ultrasonic->DIFFERENCE * .034/2;
-//			ultrasonic->DISTANCE = filter(sensor_val, ultrasonic->DISTANCE);
-			ultrasonic->DISTANCE = sensor_val;
+			ultrasonic->SENSOR_VAL = ultrasonic->DIFFERENCE * .034/2;
+//			ultrasonic->DISTANCE = filter(ultrasonic->SENSOR_VAL, ultrasonic->DISTANCE);
+			ultrasonic->DISTANCE = ultrasonic->SENSOR_VAL;
 
 			ultrasonic->FIRST_CAPTURED = 0; // set back to false
 
