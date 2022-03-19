@@ -37,7 +37,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	else if (htim->Instance == TIM3) //ultrasonic
 	{
 		HCSR04_Type *ultrasonic;
-		double sensor_val;
+		float sensor_val;
 
 		if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // Front Trig
 		{
@@ -74,7 +74,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 			// Filter sensor data
 			sensor_val = ultrasonic->DIFFERENCE * .034/2;
-			ultrasonic->DISTANCE = filter(sensor_val, ultrasonic->DISTANCE);
+//			ultrasonic->DISTANCE = filter(sensor_val, ultrasonic->DISTANCE);
+			ultrasonic->DISTANCE = sensor_val;
 
 			ultrasonic->FIRST_CAPTURED = 0; // set back to false
 

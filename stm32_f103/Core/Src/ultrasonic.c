@@ -48,17 +48,17 @@ void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
 	__HAL_TIM_ENABLE_IT(htim, TIM_IT_CC3);
 }
 
-double get_front_distance (void)
+float get_front_distance (void)
 {
 	return Front_US.DISTANCE;
 }
 
-double get_side_distance (void)
+float get_side_distance (void)
 {
 	return Side_US.DISTANCE;
 }
 
-double filter (double Sv, double old_Kv)
+float filter (double Sv, double old_Kv)
 {
 	double Kv = Sv*r + old_Kv*(1-r);
 	return Kv;

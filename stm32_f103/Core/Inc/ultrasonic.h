@@ -10,11 +10,11 @@ typedef struct
     uint16_t       TRIG_PIN;
     TIM_TypeDef*   TIM_Instance;
     uint32_t       IC_TIM_CH;
-    double	   	   VAL1;
-    double	   	   VAL2;
-    double	       DIFFERENCE;
+    float	   	   VAL1;
+    float	   	   VAL2;
+    float	       DIFFERENCE;
     uint8_t		   FIRST_CAPTURED;
-    double	   	   DISTANCE;
+    float	   	   DISTANCE;
 }HCSR04_Type;
 
 extern HCSR04_Type Front_US;
@@ -26,8 +26,8 @@ static const double r = 0.01;
 // Function Prototypes
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim);
-double get_front_distance (void);
-double get_side_distance (void);
-double filter (double sensor_val, double old_Kv);
+float get_front_distance (void);
+float get_side_distance (void);
+float filter (double sensor_val, double old_Kv);
 
 #endif /* ULTRASONIC_H */

@@ -55,6 +55,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 extern HCSR04_Type Front_US;
 extern HCSR04_Type Side_US;
+float dist = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,6 +92,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
+	uint8_t ROLL_MSG[35] = {'\0'};
+	uint8_t PITCH_MSG[35] = {'\0'};
+	uint8_t YAW_MSG[35] = {'\0'};
 
   /* USER CODE END 1 */
 
@@ -144,50 +148,58 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-  // ultrasonic testing
+	  // ultrasonic testing
 	  HCSR04_Read_Front(&htim3);
-	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
+	  dist = get_front_distance();
+	  sprintf(MSG, "Distance: %f\n", dist);
 	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	  HAL_Delay(25);
 
-  // ESC testing
-	  double speed = 50;
-	  accelerate(&htim2, speed);
-//	  drive_forward(&htim2, speed);
-	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(3000);
-	  decelerate(&htim2);
-//	  stop(&htim2);
-	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(3000);
+	  // ESC testing
+//	  double speed = 50;
+//	  accelerate(&htim2, speed);
+////	  drive_forward(&htim2, speed);
+//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(3000);
+//	  decelerate(&htim2);
+////	  stop(&htim2);
+//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(500);
 
     // imu testing
 
 	  // Select User Bank 0
-	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-	  HAL_Delay(10);
-
-	  // Obtain raw accelerometer and gyro data
-	  ICM_ReadAccelGyro(&hi2c2);
-
-	  // Obtain raw magnetometer data
-	  int16_t mag_data[3];
-	  ICM_ReadMag(&hi2c2, mag_data);
-
-	  // Obtain corrected accelerometer and gyro data
-	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-
-	  // Apply Madgwick to get pitch, roll, and yaw
-	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-						 mag_data[0], mag_data[1], mag_data[2]);
-
-	  computeAngles();
-
-	  float roll_main = roll;
-	  float pitch_main = pitch;
-	  float yaw_main = yaw;
+//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+//	  HAL_Delay(10);
+//
+//	  // Obtain raw accelerometer and gyro data
+//	  ICM_ReadAccelGyro(&hi2c2);
+//
+//	  // Obtain raw magnetometer data
+//	  int16_t mag_data[3];
+//	  ICM_ReadMag(&hi2c2, mag_data);
+//
+//	  // Obtain corrected accelerometer and gyro data
+//	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+//
+//	  // Apply Madgwick to get pitch, roll, and yaw
+//	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+//			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+//						 mag_data[0], mag_data[1], mag_data[2]);
+//
+//	  computeAngles();
+//
+//	  float roll_main = roll;
+//	  float pitch_main = pitch;
+//	  float yaw_main = yaw;
+//
+//	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
+//	  HAL_UART_Transmit(&huart2, ROLL_MSG, sizeof(MSG), 100);
+//	  sprintf(PITCH_MSG, "pitch: %f\n", pitch_main);
+//	  HAL_UART_Transmit(&huart2, PITCH_MSG, sizeof(MSG), 100);
+//	  sprintf(YAW_MSG, "yaw: %f\n", yaw_main);
+//	  HAL_UART_Transmit(&huart2, YAW_MSG, sizeof(MSG), 100);
 
     /* USER CODE END WHILE */
 

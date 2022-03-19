@@ -257,7 +257,7 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 		accel_offset[0] += accel_data[0];
 		accel_offset[1] += accel_data[1];
 		accel_offset[2] += accel_data[2];
-		HAL_Delay(10);
+		HAL_Delay(50);
 	}
 
 	accel_offset[0] /= 50;
@@ -271,7 +271,7 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 		gyro_offset[0] += gyro_data[0];
 		gyro_offset[1] += gyro_data[1];
 		gyro_offset[2] += gyro_data[2];
-		HAL_Delay(1);
+		HAL_Delay(50);
 	}
 
 	gyro_offset[0] /= 50;
