@@ -1,0 +1,4 @@
+../Core/Src/right_motor_encoder.c:24:6:reset_distance	16	static
+../Core/Src/right_motor_encoder.c:34:9:get_distance_travelled	16	static
+../Core/Src/right_motor_encoder.c:41:5:get_velocity	16	static
+../Core/Src/right_motor_encoder.c:48:9:get_encoder_count	16	static

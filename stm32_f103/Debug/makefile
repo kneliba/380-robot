@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
+# Toolchain: GNU Tools for STM32 (10.3-2021.10)
 ################################################################################
 
 -include ../makefile.init
@@ -43,14 +43,14 @@ BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ART
 EXECUTABLES += \
 MTE380_robot_project.elf \
 
+MAP_FILES += \
+MTE380_robot_project.map \
+
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
 MTE380_robot_project.list \
-
-OBJCOPY_BIN += \
-MTE380_robot_project.bin \
 
 
 # All Target
@@ -60,8 +60,8 @@ all: main-build
 main-build: MTE380_robot_project.elf secondary-outputs
 
 # Tool invocations
-MTE380_robot_project.elf: $(OBJS) $(USER_OBJS) /Users/junepark/Documents/380-robot/stm32_f103/STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "MTE380_robot_project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/Users/junepark/Documents/380-robot/stm32_f103/STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="MTE380_robot_project.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+MTE380_robot_project.elf MTE380_robot_project.map: $(OBJS) $(USER_OBJS) C:\Users\jcwon\Documents\Projects\380-robot\stm32_f103\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "MTE380_robot_project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\jcwon\Documents\Projects\380-robot\stm32_f103\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="MTE380_robot_project.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -75,17 +75,12 @@ MTE380_robot_project.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_
 	@echo 'Finished building: $@'
 	@echo ' '
 
-MTE380_robot_project.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "MTE380_robot_project.bin"
-	@echo 'Finished building: $@'
-	@echo ' '
-
 # Other Targets
 clean:
-	-$(RM) MTE380_robot_project.bin MTE380_robot_project.elf MTE380_robot_project.list default.size.stdout
+	-$(RM) MTE380_robot_project.elf MTE380_robot_project.list MTE380_robot_project.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
