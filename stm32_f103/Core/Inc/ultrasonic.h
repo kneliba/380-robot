@@ -17,11 +17,13 @@ typedef struct
     double	   	   DISTANCE;
 }HCSR04_Type;
 
+extern HCSR04_Type Front_US;
+extern HCSR04_Type Side_US;
+
 // Variables for filtering
 static const double r = 0.01;
 
 // Function Prototypes
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim);
 double get_front_distance (void);

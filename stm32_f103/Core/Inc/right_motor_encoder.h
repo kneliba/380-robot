@@ -21,9 +21,14 @@ typedef struct
 	double 		wheel_radius;
 }Motor_Encoder;
 
-Motor_Encoder right_encoder;
+extern Motor_Encoder right_encoder;
 
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
+extern uint32_t counter;
+extern int16_t count;
+extern int16_t position;
+extern double speed;
+extern double velocity;
+extern double distance;
 
 void reset_distance();
 int16_t get_distance_travelled();
