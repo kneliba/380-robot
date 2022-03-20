@@ -12,6 +12,9 @@ esp.osdebug(None)
 import gc
 gc.collect()
 
+import webrepl
+webrepl.start()
+
 ssid = "ESP8266-MTE380-Group-4"
 password = "12345678"
 
