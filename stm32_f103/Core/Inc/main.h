@@ -32,8 +32,15 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 #include <stdio.h>
-#include "esp.h"
+#include <string.h>	
+#include "ultrasonic.h"
+#include "ESC.h"
+#include "imu.h"	
+#include "MadgwickAHRS.h"
+#include "right_motor_encoder.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -57,7 +64,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void delay_us (uint32_t us);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -95,8 +102,6 @@ void Error_Handler(void);
 #define LED_G_GPIO_Port GPIOB
 #define LED_B_Pin GPIO_PIN_6
 #define LED_B_GPIO_Port GPIOB
-#define I2C_ESP_SCL_Pin GPIO_PIN_8
-#define I2C_ESP_SCL_GPIO_Port GPIOB
 #define I2C_ESP_SDA_Pin GPIO_PIN_9
 #define I2C_ESP_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

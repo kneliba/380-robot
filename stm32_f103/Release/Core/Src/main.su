@@ -1,0 +1,6 @@
+MadgwickAHRS.h:33:7:getRoll	8	static
+MadgwickAHRS.h:37:7:getPitch	8	static
+MadgwickAHRS.h:41:7:getYaw	8	static
+main.c:182:6:SystemClock_Config	96	static,ignoring_inline_asm
+main.c:79:5:main	280	static,ignoring_inline_asm
+main.c:532:6:Error_Handler	0	static,ignoring_inline_asm
