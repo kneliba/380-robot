@@ -33,6 +33,58 @@ HCSR04_Type Side_US =
 	0
 };
 
+void HCSR04_timer_input_CC (TIM_HandleTypeDef *htim)
+{
+	HCSR04_Type *ultrasonic;
+
+	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // Front Trig
+	{
+		ultrasonic = &Front_US;
+	}
+
+	else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) // Side Trig
+	{
+		ultrasonic = &Side_US;
+	}
+
+	if (ultrasonic->FIRST_CAPTURED==0) // if the first value is not captured
+	{
+		ultrasonic->VAL1 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH); // read the first value
+//			ultrasonic->VAL1 = __HAL_TIM_GET_COUNTER(htim);
+		ultrasonic->FIRST_CAPTURED = 1;  // set the first captured as true
+		// Now change the polarity to falling edge
+		__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_FALLING);
+	}
+
+	else if (ultrasonic->FIRST_CAPTURED==1)   // if the first is already captured
+	{
+		ultrasonic->VAL2 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH);  // read second value
+//			ultrasonic->VAL2 = __HAL_TIM_GET_COUNTER(htim);
+		__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+
+		if (ultrasonic->VAL2 > ultrasonic->VAL1)
+		{
+			ultrasonic->DIFFERENCE = ultrasonic->VAL2-ultrasonic->VAL1;
+		}
+
+		else if (ultrasonic->VAL1 > ultrasonic->VAL2)
+		{
+			ultrasonic->DIFFERENCE = (0xffff - ultrasonic->VAL1) + ultrasonic->VAL2;
+		}
+
+		// Filter sensor data
+		ultrasonic->SENSOR_VAL = ultrasonic->DIFFERENCE * .034/2;
+//			ultrasonic->DISTANCE = filter(ultrasonic->SENSOR_VAL, ultrasonic->DISTANCE);
+		ultrasonic->DISTANCE = ultrasonic->SENSOR_VAL;
+
+		ultrasonic->FIRST_CAPTURED = 0; // set back to false
+
+		// set polarity to rising edge
+		__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_RISING);
+		__HAL_TIM_DISABLE_IT(htim, ultrasonic->IC_TIM_CH);
+	}
+}
+
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim)
 {
 	HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_SET);  // pull the TRIG pin HIGH

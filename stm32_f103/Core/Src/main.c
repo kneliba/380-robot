@@ -56,6 +56,7 @@ UART_HandleTypeDef huart2;
 extern HCSR04_Type Front_US;
 extern HCSR04_Type Side_US;
 float dist = 0;
+uint16_t overflow = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,10 +126,10 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   //Right Motor Encoder
-//  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
 
   // Initialize Timer3 for delay purposes
-  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
 
@@ -658,6 +659,42 @@ void delay_us (uint32_t us)
 	__HAL_TIM_SET_COUNTER(&htim3,0);  // set the counter value a 0
 	while (__HAL_TIM_GET_COUNTER(&htim3) < us);  // wait for the counter to reach the us input in the parameter
 }
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM1) //motor encoder
+	{
+		Motor_Encoder *right_motor_encoder;
+		right_motor_encoder= &right_encoder;
+
+		//CW is positive
+		counter = __HAL_TIM_GET_COUNTER(htim);
+		right_motor_encoder->counter = counter;
+
+		//count becomes negative rather than jumping to 65000
+		count = (int16_t)counter;
+		right_motor_encoder->count = count;
+
+		//a single count normally is counted by 4 points, will have to test the number
+		position = count/4;
+		right_motor_encoder->position = position;
+
+		distance = (2*3.1415*right_motor_encoder->wheel_radius) * position; // might have consider gear ratio in this calculation
+		right_motor_encoder->distance = distance;
+	}
+
+	else if (htim->Instance == TIM3) //ultrasonic
+	{
+		HCSR04_timer_input_CC (htim);
+	}
+
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	overflow++;
+}
+
 /* USER CODE END 4 */
 
 /**

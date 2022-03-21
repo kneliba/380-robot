@@ -25,6 +25,7 @@ extern HCSR04_Type Side_US;
 static const double r = 0.01;
 
 // Function Prototypes
+void HCSR04_timer_input_CC (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim);
 float get_front_distance (void);

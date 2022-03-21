@@ -65,6 +65,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void delay_us (uint32_t us);
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
