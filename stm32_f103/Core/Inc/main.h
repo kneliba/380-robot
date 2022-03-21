@@ -77,6 +77,7 @@ void delay_us (uint32_t us);
 #define BATTERY_GPIO_Port GPIOA
 #define SWITCH_Pin GPIO_PIN_5
 #define SWITCH_GPIO_Port GPIOA
+#define SWITCH_EXTI_IRQn EXTI9_5_IRQn
 #define FRONT_TRIG_Pin GPIO_PIN_6
 #define FRONT_TRIG_GPIO_Port GPIOA
 #define FRONT_ECHO_Pin GPIO_PIN_7

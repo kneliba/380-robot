@@ -22,3 +22,9 @@ float read_batt_voltage(ADC_HandleTypeDef* hadc){
 	return batt_voltage;
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if (GPIO_Pin == SWITCH_Pin){
+		// Custom function here
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	}
+}

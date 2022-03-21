@@ -40,7 +40,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
+ ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c2;
 
@@ -599,7 +599,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : SWITCH_Pin */
   GPIO_InitStruct.Pin = SWITCH_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SWITCH_GPIO_Port, &GPIO_InitStruct);
 
@@ -637,6 +637,10 @@ static void MX_GPIO_Init(void)
 
   /*Configure peripheral I/O remapping */
   __HAL_AFIO_REMAP_I2C1_ENABLE();
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 
