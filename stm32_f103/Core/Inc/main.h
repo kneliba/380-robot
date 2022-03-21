@@ -40,6 +40,7 @@ extern "C" {
 #include "imu.h"	
 #include "MadgwickAHRS.h"
 #include "right_motor_encoder.h"
+#include <aux_functions.h>
 
 /* USER CODE END Includes */
 
