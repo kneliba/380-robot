@@ -74,8 +74,8 @@ void HCSR04_timer_input_CC (TIM_HandleTypeDef *htim)
 
 		// Filter sensor data
 		ultrasonic->SENSOR_VAL = ultrasonic->DIFFERENCE * .034/2;
-//			ultrasonic->DISTANCE = filter(ultrasonic->SENSOR_VAL, ultrasonic->DISTANCE);
-		ultrasonic->DISTANCE = ultrasonic->SENSOR_VAL;
+		ultrasonic->DISTANCE = filter(ultrasonic->SENSOR_VAL, ultrasonic->DISTANCE);
+//		ultrasonic->DISTANCE = ultrasonic->SENSOR_VAL;
 
 		ultrasonic->FIRST_CAPTURED = 0; // set back to false
 

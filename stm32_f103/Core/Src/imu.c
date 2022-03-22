@@ -215,8 +215,8 @@ void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, uint16_t raw_accel_data[3], u
 	corr_accel_data[2] = (raw_accel_data[2] - (accel_offset[2] / (1<<0x04))) * (1<<0x04) / 16384.0;
 
 	corr_gyro_data[0] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
-	corr_gyro_data[1] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
-	corr_gyro_data[2] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+	corr_gyro_data[1] = (raw_gyro_data[1] - (gyro_offset[1] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+	corr_gyro_data[2] = (raw_gyro_data[2] - (gyro_offset[2] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
 }
 
 void ICM_SelectBank(I2C_HandleTypeDef *hi2c, uint8_t bank) {

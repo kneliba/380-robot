@@ -210,8 +210,8 @@ void SysTick_Handler(void)
 		right_encoder.speed = speed;
 
 		//velocity
-		position_m = (2*3.1415*0.07042) * position;
-		oldpos_m = (2*3.1415*0.07042) * oldpos;
+		position_m = (2*3.1415*0.07042) * position /3;
+		oldpos_m = (2*3.1415*0.07042) * oldpos /3;
 		velocity = ((position_m - oldpos_m)*2);
 		right_encoder.velocity = velocity;
 

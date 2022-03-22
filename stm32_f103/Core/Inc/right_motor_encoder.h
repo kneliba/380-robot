@@ -30,7 +30,7 @@ extern double speed;
 extern double velocity;
 extern double distance;
 
-void reset_distance();
+void reset_distance(TIM_HandleTypeDef *htim);
 int16_t get_distance_travelled();
 int get_velocity();
 int16_t get_encoder_count();

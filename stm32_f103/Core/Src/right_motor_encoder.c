@@ -21,8 +21,9 @@ Motor_Encoder right_encoder = {
 		0.07042,
 };
 
-void reset_distance()
+void reset_distance(TIM_HandleTypeDef *htim)
 {
+	__HAL_TIM_SET_COUNTER(htim, 0);
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
 	right_motor_encoder->counter = 0;
@@ -35,14 +36,14 @@ int16_t get_distance_travelled()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
-	return right_motor_encoder->position; // should be distance once wheel attached
+	return right_motor_encoder->distance; // should be distance once wheel attached
 }
 
 int get_velocity()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
-	return right_motor_encoder->speed; //should be velocity once wheel is attached
+	return right_motor_encoder->velocity; //should be velocity once wheel is attached
 }
 
 int16_t get_encoder_count()

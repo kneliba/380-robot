@@ -44,8 +44,6 @@
 
 I2C_HandleTypeDef hi2c2;
 
-SPI_HandleTypeDef hspi2;
-
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
@@ -65,7 +63,6 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM1_Init(void);
@@ -75,14 +72,7 @@ void delay_us (uint32_t us);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int _write(int file, char *ptr, int len)
-{
-  /* Implement your write code here, this is used by puts and printf for example */
-  int i=0;
-  for(i=0 ; i<len ; i++)
-    ITM_SendChar((*ptr++));
-  return len;
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -93,9 +83,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-//	uint8_t ROLL_MSG[35] = {'\0'};
-//	uint8_t PITCH_MSG[35] = {'\0'};
-//	uint8_t YAW_MSG[35] = {'\0'};
+	uint8_t ROLL_MSG[35] = {'\0'};
+	uint8_t PITCH_MSG[35] = {'\0'};
+	uint8_t YAW_MSG[35] = {'\0'};
 
   /* USER CODE END 1 */
 
@@ -120,7 +110,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C2_Init();
   MX_ADC1_Init();
-  MX_SPI2_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM1_Init();
@@ -133,16 +122,16 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
 
-//  HAL_TIM_Base_Start(&htim2);
-//  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
-//  HAL_Delay(5000);
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
+  HAL_Delay(5000);
 
-//  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//  HAL_Delay(10);
-//  ICM_PowerOn(&hi2c2);
-//  HAL_Delay(10);
+  ICM_SelectBank(&hi2c2, USER_BANK_0);
+  HAL_Delay(10);
+  ICM_PowerOn(&hi2c2);
+  HAL_Delay(10);
 //  ICM20948_Calibrate(&hi2c2);
-//  HAL_Delay(100);
+  HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -150,15 +139,20 @@ int main(void)
   while (1)
   {
 	  // ultrasonic testing
-	  HCSR04_Read_Front(&htim3);
-	  dist = get_front_distance();
-	  sprintf(MSG, "Distance: %f\n", dist);
-	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(25);
+//	  HCSR04_Read_Front(&htim3);
+//	  dist = get_front_distance();
+//	  sprintf(MSG, "Distance: %f\n", dist);
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(100);
+
+	  // encoder testing
+//	  int16_t encoder_cnt = get_encoder_count();
+//	  sprintf(MSG, "Encoder Count: %d\n", encoder_cnt);
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 
 	  // ESC testing
-//	  double speed = 50;
+//	  double speed = 20;
 //	  accelerate(&htim2, speed);
 ////	  drive_forward(&htim2, speed);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -166,41 +160,48 @@ int main(void)
 //	  decelerate(&htim2);
 ////	  stop(&htim2);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(500);
+//	  HAL_Delay(1000);
+
+//	  drive_until(10, 20);
+//	  HAL_Delay(10000);
+
+//	  drive_distance(10, 10);
+//	  HAL_Delay(5000);
+
 
     // imu testing
 
-	  // Select User Bank 0
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(10);
-//
-//	  // Obtain raw accelerometer and gyro data
-//	  ICM_ReadAccelGyro(&hi2c2);
-//
-//	  // Obtain raw magnetometer data
+//	   Select User Bank 0
+	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+	  HAL_Delay(10);
+
+	  // Obtain raw accelerometer and gyro data
+	  ICM_ReadAccelGyro(&hi2c2);
+
+	  // Obtain raw magnetometer data
 //	  int16_t mag_data[3];
-//	  ICM_ReadMag(&hi2c2, mag_data);
-//
-//	  // Obtain corrected accelerometer and gyro data
-//	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-//
-//	  // Apply Madgwick to get pitch, roll, and yaw
-//	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-//			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-//						 mag_data[0], mag_data[1], mag_data[2]);
-//
-//	  computeAngles();
-//
-//	  float roll_main = roll;
-//	  float pitch_main = pitch;
-//	  float yaw_main = yaw;
-//
-//	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
-//	  HAL_UART_Transmit(&huart2, ROLL_MSG, sizeof(MSG), 100);
-//	  sprintf(PITCH_MSG, "pitch: %f\n", pitch_main);
-//	  HAL_UART_Transmit(&huart2, PITCH_MSG, sizeof(MSG), 100);
-//	  sprintf(YAW_MSG, "yaw: %f\n", yaw_main);
-//	  HAL_UART_Transmit(&huart2, YAW_MSG, sizeof(MSG), 100);
+	  ICM_ReadMag(&hi2c2, mag_data);
+
+	  // Obtain corrected accelerometer and gyro data
+	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+
+	  // Apply Madgwick to get pitch, roll, and yaw
+	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+						 mag_data[0], mag_data[1], mag_data[2]);
+
+	  computeAngles();
+
+	  float roll_main = roll;
+	  float pitch_main = pitch;
+	  float yaw_main = yaw;
+
+	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
+	  HAL_UART_Transmit(&huart2, ROLL_MSG, sizeof(MSG), 100);
+	  sprintf(PITCH_MSG, "pitch: %f\n", pitch_main);
+	  HAL_UART_Transmit(&huart2, PITCH_MSG, sizeof(MSG), 100);
+	  sprintf(YAW_MSG, "yaw: %f\n", yaw_main);
+	  HAL_UART_Transmit(&huart2, YAW_MSG, sizeof(MSG), 100);
 
     /* USER CODE END WHILE */
 
@@ -334,44 +335,6 @@ static void MX_I2C2_Init(void)
 }
 
 /**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
-
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
-  /* SPI2 parameter configuration*/
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI2_Init 2 */
-
-  /* USER CODE END SPI2_Init 2 */
-
-}
-
-/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -396,12 +359,12 @@ static void MX_TIM1_Init(void)
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
   sConfig.IC1Filter = 0;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
   sConfig.IC2Filter = 0;
@@ -601,7 +564,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_R_Pin|LED_G_Pin|LED_B_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SIDE_TRIG_Pin|LED_R_Pin|LED_G_Pin|LED_B_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -619,21 +582,16 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : FRONT_TRIG_Pin */
   GPIO_InitStruct.Pin = FRONT_TRIG_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(FRONT_TRIG_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SIDE_TRIG_Pin */
   GPIO_InitStruct.Pin = SIDE_TRIG_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SIDE_TRIG_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : RIGHT_ENCODER_B_Pin LEFT_ENCODER_A_Pin LEFT_ENCODER_B_Pin */
-  GPIO_InitStruct.Pin = RIGHT_ENCODER_B_Pin|LEFT_ENCODER_A_Pin|LEFT_ENCODER_B_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_R_Pin LED_G_Pin LED_B_Pin */
   GPIO_InitStruct.Pin = LED_R_Pin|LED_G_Pin|LED_B_Pin;
@@ -641,15 +599,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : I2C_ESP_SDA_Pin */
-  GPIO_InitStruct.Pin = I2C_ESP_SDA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(I2C_ESP_SDA_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure peripheral I/O remapping */
-  __HAL_AFIO_REMAP_I2C1_ENABLE();
 
 }
 
@@ -679,7 +628,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		position = count/4;
 		right_motor_encoder->position = position;
 
-		distance = (2*3.1415*right_motor_encoder->wheel_radius) * position; // might have consider gear ratio in this calculation
+		distance = (2*3.1415*right_motor_encoder->wheel_radius) * position /3; // might have consider gear ratio in this calculation
 		right_motor_encoder->distance = distance;
 	}
 
@@ -690,9 +639,39 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+//{
+//	uint8_t ov_msg[30] = {'\0'};
+//	sprintf(ov_msg, "timer 3 overflow\n");
+//	HAL_UART_Transmit(&huart2, ov_msg, sizeof(ov_msg), 100);
+//}
+
+// drive a set distance (with encoder)
+void drive_distance (double speed, double distance)
 {
-	overflow++;
+	reset_distance(&htim1);
+	int16_t  encoder_dist = get_distance_travelled();
+	drive_forward(&htim2, speed);
+	while (encoder_dist < distance) {
+		encoder_dist = get_distance_travelled();
+	}
+	stop(&htim2);
+}
+//
+// drive until a distance (with ultrasonic)
+void drive_until (double speed, double distance)
+{
+	uint8_t MSG[35] = {'\0'};
+	drive_forward(&htim2, speed);
+	HCSR04_Read_Front(&htim3);
+	double ultrasonic_dist = get_front_distance();
+	while (ultrasonic_dist > distance) {
+		HCSR04_Read_Front(&htim3);
+		ultrasonic_dist = get_front_distance();
+		sprintf(MSG, "Distance: %f\n", ultrasonic_dist);
+		HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	}
+	stop(&htim2);
 }
 
 /* USER CODE END 4 */

@@ -22,7 +22,7 @@ extern HCSR04_Type Front_US;
 extern HCSR04_Type Side_US;
 
 // Variables for filtering
-static const double r = 0.01;
+static const double r = 0.5;
 
 // Function Prototypes
 void HCSR04_timer_input_CC (TIM_HandleTypeDef *htim);
