@@ -31,7 +31,7 @@ Core/Src/tim_capture_callback.o: ../Core/Src/tim_capture_callback.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/ultrasonic.h ../Core/Inc/ESC.h ../Core/Inc/imu.h \
  ../Core/Inc/MadgwickAHRS.h ../Core/Inc/right_motor_encoder.h \
- ../Core/Inc/ultrasonic.h ../Core/Inc/main.h
+ ../Core/Inc/ESP.h ../Core/Inc/ultrasonic.h ../Core/Inc/main.h
 ../Core/Inc/right_motor_encoder.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
@@ -68,5 +68,6 @@ Core/Src/tim_capture_callback.o: ../Core/Src/tim_capture_callback.c \
 ../Core/Inc/imu.h:
 ../Core/Inc/MadgwickAHRS.h:
 ../Core/Inc/right_motor_encoder.h:
+../Core/Inc/ESP.h:
 ../Core/Inc/ultrasonic.h:
 ../Core/Inc/main.h:

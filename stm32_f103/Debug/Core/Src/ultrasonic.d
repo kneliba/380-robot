@@ -30,6 +30,7 @@ Core/Src/ultrasonic.o: ../Core/Src/ultrasonic.c ../Core/Inc/ultrasonic.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/ultrasonic.h ../Core/Inc/ESC.h ../Core/Inc/imu.h \
  ../Core/Inc/MadgwickAHRS.h ../Core/Inc/right_motor_encoder.h \
+ ../Core/Inc/ESP.h \
  ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h \
  ../Core/Inc/main.h
 ../Core/Inc/ultrasonic.h:
@@ -68,5 +69,6 @@ Core/Src/ultrasonic.o: ../Core/Src/ultrasonic.c ../Core/Inc/ultrasonic.h \
 ../Core/Inc/imu.h:
 ../Core/Inc/MadgwickAHRS.h:
 ../Core/Inc/right_motor_encoder.h:
+../Core/Inc/ESP.h:
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h:
 ../Core/Inc/main.h:

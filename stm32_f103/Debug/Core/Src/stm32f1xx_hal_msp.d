@@ -30,7 +30,7 @@ Core/Src/stm32f1xx_hal_msp.o: ../Core/Src/stm32f1xx_hal_msp.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/ultrasonic.h ../Core/Inc/main.h ../Core/Inc/ESC.h \
  ../Core/Inc/imu.h ../Core/Inc/MadgwickAHRS.h \
- ../Core/Inc/right_motor_encoder.h
+ ../Core/Inc/right_motor_encoder.h ../Core/Inc/ESP.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -67,3 +67,4 @@ Core/Src/stm32f1xx_hal_msp.o: ../Core/Src/stm32f1xx_hal_msp.c \
 ../Core/Inc/imu.h:
 ../Core/Inc/MadgwickAHRS.h:
 ../Core/Inc/right_motor_encoder.h:
+../Core/Inc/ESP.h:

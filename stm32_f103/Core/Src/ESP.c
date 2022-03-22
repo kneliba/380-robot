@@ -16,10 +16,11 @@
 uint8_t UART2_rxBuffer[35] = {0};
 
 void ESP_Receive(TIM_HandleTypeDef *htim) {
-	if(!strcmp(UART2_rxBuffer, "drive forward")) {
+	if(strcmp(UART2_rxBuffer, "drive forward") == 0) {
 		drive_forward(htim, speed);
 	}
-	else if(!strcmp(UART2_rxBuffer, "stop")) {
+	else if(strcmp(UART2_rxBuffer, "stop")== 0) {
 		stop(htim);
 	}
 }
+

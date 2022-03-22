@@ -150,8 +150,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  ESP_Receive(&htim2);
-
   // ultrasonic testing
 	  HCSR04_Read_Front(&htim3);
 	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
@@ -673,10 +671,9 @@ void delay_us (uint32_t us)
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    HAL_UART_Transmit(&huart2, UART2_rxBuffer, 12, 100);
     HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 12);
+    ESP_Receive(&htim2);
 }
-
 /* USER CODE END 4 */
 
 /**

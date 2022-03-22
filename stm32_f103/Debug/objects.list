@@ -1,4 +1,5 @@
 "./Core/Src/ESC.o"
+"./Core/Src/ESP.o"
 "./Core/Src/MadgwickAHRS.o"
 "./Core/Src/imu.o"
 "./Core/Src/main.o"
