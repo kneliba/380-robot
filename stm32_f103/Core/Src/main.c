@@ -51,6 +51,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 extern HCSR04_Type Front_US;
@@ -65,8 +66,9 @@ static void MX_I2C2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_TIM3_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 void delay_us (uint32_t us);
 /* USER CODE END PFP */
@@ -81,12 +83,15 @@ int _write(int file, char *ptr, int len)
     ITM_SendChar((*ptr++));
   return len;
 }
+
+uint8_t UART2_rxBuffer[12] = {0};
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -117,8 +122,9 @@ int main(void)
   MX_ADC1_Init();
   MX_SPI2_Init();
   MX_TIM2_Init();
-  MX_TIM3_Init();
+  MX_DMA_Init();
   MX_TIM1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   //Right Motor Encoder
   HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
@@ -138,12 +144,20 @@ int main(void)
   HAL_Delay(10);
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
+
+  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, 12);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if(UART2_rxBuffer == 'drive forward') {
+		  drive_forward(&htim2, speed);
+	  }
+  	  else if(UART2_rxBuffer == 'stop') {
+		  stop(&htim2);
+	  }
   // ultrasonic testing
 	  HCSR04_Read_Front(&htim3);
 	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
@@ -567,6 +581,22 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -641,10 +671,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 void delay_us (uint32_t us)
 {
 	__HAL_TIM_SET_COUNTER(&htim3,0);  // set the counter value a 0
 	while (__HAL_TIM_GET_COUNTER(&htim3) < us);  // wait for the counter to reach the us input in the parameter
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    HAL_UART_Transmit(&huart2, UART2_rxBuffer, 12, 100);
+    HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 12);
 }
 /* USER CODE END 4 */
 
