@@ -83,8 +83,6 @@ int _write(int file, char *ptr, int len)
     ITM_SendChar((*ptr++));
   return len;
 }
-
-uint8_t UART2_rxBuffer[12] = {0};
 /* USER CODE END 0 */
 
 /**
@@ -145,19 +143,15 @@ int main(void)
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
 
-  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, 12);
+  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, sizeof(UART2_rxBuffer));
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(UART2_rxBuffer == 'drive forward') {
-		  drive_forward(&htim2, speed);
-	  }
-  	  else if(UART2_rxBuffer == 'stop') {
-		  stop(&htim2);
-	  }
+	  ESP_Receive(&htim2);
+
   // ultrasonic testing
 	  HCSR04_Read_Front(&htim3);
 	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
@@ -677,12 +671,12 @@ void delay_us (uint32_t us)
 	__HAL_TIM_SET_COUNTER(&htim3,0);  // set the counter value a 0
 	while (__HAL_TIM_GET_COUNTER(&htim3) < us);  // wait for the counter to reach the us input in the parameter
 }
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     HAL_UART_Transmit(&huart2, UART2_rxBuffer, 12, 100);
     HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 12);
 }
+
 /* USER CODE END 4 */
 
 /**
