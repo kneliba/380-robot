@@ -1,1 +1,2 @@
-../Core/Src/ESP.c:18:6:ESP_Receive	16	static
+../Core/Src/ESP.c:26:6:ESP_Receive	24	static
+../Core/Src/ESP.c:58:5:get_integer_from_string	24	static

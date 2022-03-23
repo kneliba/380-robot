@@ -12,5 +12,6 @@
 extern uint8_t UART2_rxBuffer[35];
 
 void ESP_Receive(TIM_HandleTypeDef *htim);
+int get_integer_from_string(char *buffer_msg, char *string_command);
 
 #endif /* INC_ESP_H_ */
