@@ -9,12 +9,12 @@
 #define IMU_H
 #include "main.h"
 
-extern uint16_t accel_data[3];
-extern uint16_t gyro_data[3];
+extern int16_t accel_data[3];
+extern int16_t gyro_data[3];
 extern int16_t mag_data[3];
 
-extern uint16_t corr_accel_data[3];
-extern uint16_t corr_gyro_data[3];
+extern int16_t corr_accel_data[3];
+extern int16_t corr_gyro_data[3];
 
 #define UART_BUS		    (&huart2)
 
@@ -48,7 +48,8 @@ void ICM_AccelGyroOff(I2C_HandleTypeDef *hi2c);
 void ICM_AccelGyroOn(I2C_HandleTypeDef *hi2c);
 void ICM_SetGyroRateLPF(I2C_HandleTypeDef *hi2c, uint8_t rate, uint8_t lpf);
 void ICM_SetGyroLPF(uint8_t lpf);
+void ICM_Set_I2C_Clk(I2C_HandleTypeDef *hi2c);
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c);
-void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, uint16_t raw_accel_data[3], uint16_t raw_gyro_data[3]);
+void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, int16_t raw_accel_data[3], int16_t raw_gyro_data[3]);
 
 #endif /* IMU_H */

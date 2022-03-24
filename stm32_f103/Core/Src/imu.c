@@ -15,12 +15,12 @@
 #include "main.h"
 #include <string.h>
 
-uint16_t accel_data[3] = {};
-uint16_t gyro_data[3] = {};
+int16_t accel_data[3] = {};
+int16_t gyro_data[3] = {};
 int16_t mag_data[3] = {};
 
-uint16_t corr_accel_data[3] = {};
-uint16_t corr_gyro_data[3] = {};
+int16_t corr_accel_data[3] = {};
+int16_t corr_gyro_data[3] = {};
 
 int16_t gyro_offset[3];
 int16_t accel_offset[3];
@@ -146,12 +146,19 @@ void ICM_PowerOn(I2C_HandleTypeDef *hi2c) {
 	HAL_Delay(10);
 	ICM_Enable_I2C(hi2c);
 	HAL_Delay(10);
+
+	ICM_SelectBank(hi2c, USER_BANK_3);
+	ICM_Set_I2C_Clk(hi2c);
+	HAL_Delay(10);
+
+	ICM_SelectBank(hi2c, USER_BANK_0);
+	HAL_Delay(10);
 	ICM_SetClock(hi2c, (uint8_t)CLK_BEST_AVAIL);
 	HAL_Delay(10);
 	ICM_AccelGyroOff(hi2c);
 	HAL_Delay(20);
 	ICM_AccelGyroOn(hi2c);
-	HAL_Delay(10);
+	HAL_Delay(35);
 	ICM_Initialize(hi2c);
 }
 
@@ -176,14 +183,16 @@ uint16_t ICM_Initialize(I2C_HandleTypeDef *hi2c) {
 	ICM_WriteOneByte(hi2c, 0x11, 0x0A);
 	HAL_Delay(10);
 
-	ICM_SelectBank(hi2c, USER_BANK_2);
-	HAL_Delay(20);
+//	ICM_SelectBank(hi2c, USER_BANK_2);
+//	HAL_Delay(20);
 
 	// Configure AUX_I2C Magnetometer (onboard ICM-20948)
 	ICM_WriteOneByte(hi2c, 0x7F, 0x00); // Select user bank 0
+	HAL_Delay(10);
 	ICM_WriteOneByte(hi2c, 0x0F, 0x30); // INT Pin / Bypass Enable Configuration
 	ICM_WriteOneByte(hi2c, 0x03, 0x20); // I2C_MST_EN
 	ICM_WriteOneByte(hi2c, 0x7F, 0x30); // Select user bank 3
+	HAL_Delay(10);
 	ICM_WriteOneByte(hi2c, 0x01, 0x4D); // I2C Master mode and Speed 400 kHz
 	ICM_WriteOneByte(hi2c, 0x02, 0x01); // I2C_SLV0 _DLY_ enable
 	ICM_WriteOneByte(hi2c, 0x05, 0x81); // enable IIC	and EXT_SENS_DATA==1 Byte
@@ -197,46 +206,56 @@ uint16_t ICM_Initialize(I2C_HandleTypeDef *hi2c) {
 }
 
 void ICM_ReadAccelGyro(I2C_HandleTypeDef *hi2c) {
-	uint8_t raw_data[12];
+	static uint8_t raw_data[12];
 	ICM_readBytes(hi2c, 0x2D, raw_data, 12);
 
-	accel_data[0] = (raw_data[0] << 8) | raw_data[1];
-	accel_data[1] = (raw_data[2] << 8) | raw_data[3];
-	accel_data[2] = (raw_data[4] << 8) | raw_data[5];
+	accel_data[0] = (((uint16_t) raw_data[0] << 8) | raw_data[1]);
+	accel_data[1] = (((uint16_t) raw_data[2] << 8) | raw_data[3]);
+	accel_data[2] = (((uint16_t) raw_data[4] << 8) | raw_data[5]);
 
-	gyro_data[0] = (raw_data[6] << 8) | raw_data[7];
-	gyro_data[1] = (raw_data[8] << 8) | raw_data[9];
-	gyro_data[2] = (raw_data[10] << 8) | raw_data[11];
+	gyro_data[0] = (((uint16_t) raw_data[6] << 8) | raw_data[7]);
+	gyro_data[1] = (((uint16_t) raw_data[8] << 8) | raw_data[9]);
+	gyro_data[2] = (((uint16_t) raw_data[10] << 8) | raw_data[11]);
 }
 
-void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, uint16_t raw_accel_data[3], uint16_t raw_gyro_data[3]) {
-	corr_accel_data[0] = (raw_accel_data[0] - (accel_offset[0] / (1<<0x04))) * (1<<0x04) / 16384.0;
-	corr_accel_data[1] = (raw_accel_data[1] - (accel_offset[1] / (1<<0x04))) * (1<<0x04) / 16384.0;
-	corr_accel_data[2] = (raw_accel_data[2] - (accel_offset[2] / (1<<0x04))) * (1<<0x04) / 16384.0;
+void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, int16_t raw_accel_data[3], int16_t raw_gyro_data[3]) {
+//	corr_accel_data[0] = (raw_accel_data[0] - (accel_offset[0] / (1<<0x04))) * (1<<0x04) / 16384.0;
+//	corr_accel_data[1] = (raw_accel_data[1] - (accel_offset[1] / (1<<0x04))) * (1<<0x04) / 16384.0;
+//	corr_accel_data[2] = (raw_accel_data[2] - (accel_offset[2] / (1<<0x04))) * (1<<0x04) / 16384.0;
 
-	corr_gyro_data[0] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
-	corr_gyro_data[1] = (raw_gyro_data[1] - (gyro_offset[1] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
-	corr_gyro_data[2] = (raw_gyro_data[2] - (gyro_offset[2] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+	corr_accel_data[0] = (raw_accel_data[0] - accel_offset[0]) / 16.0;
+	corr_accel_data[1] = (raw_accel_data[1] - accel_offset[1]) / 16.0;
+	corr_accel_data[2] = (raw_accel_data[2] - accel_offset[2]) / 16.0;
+
+//	corr_gyro_data[0] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+//	corr_gyro_data[1] = (raw_gyro_data[1] - (gyro_offset[1] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+//	corr_gyro_data[2] = (raw_gyro_data[2] - (gyro_offset[2] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
+
+
+	corr_gyro_data[0] = (raw_gyro_data[0] - gyro_offset[0]) / 131.0;
+	corr_gyro_data[1] = (raw_gyro_data[1] - gyro_offset[1]) / 131.0;
+	corr_gyro_data[2] = (raw_gyro_data[2] - gyro_offset[2]) / 131.0;
+
 }
 
 void ICM_SelectBank(I2C_HandleTypeDef *hi2c, uint8_t bank) {
 	ICM_WriteOneByte(hi2c, USER_BANK_SEL, bank);
 }
 
-void ICM_Enable_I2C(I2C_HandleTypeDef *hi2c) {
-	ICM_WriteOneByte(hi2c, 0x03, 0x20);
+void ICM_Enable_I2C(I2C_HandleTypeDef *hi2c) { //user bank 0
+	ICM_WriteOneByte(hi2c, 0x03, 0x20); // Enable I2C master
 }
 
 void ICM_SetClock(I2C_HandleTypeDef *hi2c, uint8_t clk) {
 	ICM_WriteOneByte(hi2c, PWR_MGMT_1, clk);
 }
 
-void ICM_AccelGyroOff(I2C_HandleTypeDef *hi2c) {
+void ICM_AccelGyroOff(I2C_HandleTypeDef *hi2c) { //user bank 0
 	ICM_WriteOneByte(hi2c, PWR_MGMT_2, (0x38 | 0x07));
 }
 
-void ICM_AccelGyroOn(I2C_HandleTypeDef *hi2c) {
-	ICM_WriteOneByte(hi2c, 0x07, (0x00 | 0x00));
+void ICM_AccelGyroOn(I2C_HandleTypeDef *hi2c) { //user bank 0
+	ICM_WriteOneByte(hi2c, PWR_MGMT_2, (0x00 | 0x00));
 }
 
 uint8_t ICM_WHOAMI(I2C_HandleTypeDef *hi2c) {
@@ -249,8 +268,14 @@ void ICM_SetGyroRateLPF(I2C_HandleTypeDef *hi2c, uint8_t rate, uint8_t lpf) {
 	ICM_WriteOneByte(hi2c, GYRO_CONFIG_1, (rate|lpf));
 }
 
+void ICM_Set_I2C_Clk(I2C_HandleTypeDef *hi2c) { //user bank 3
+	ICM_WriteOneByte(hi2c, 0x01, 0x07); //set I2C master clock to recommended freq
+}
+
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 {
+	ICM_SelectBank(hi2c, USER_BANK_0);
+	HAL_Delay(10);
 	// Calibrate accelerometer
 	for(int i=0; i<50; i++){
 		ICM_ReadAccelGyro(hi2c);
@@ -263,7 +288,7 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 	accel_offset[0] /= 50;
 	accel_offset[1] /= 50;
 	accel_offset[2] /= 50;
-	accel_offset[2] -= 4096.0; // 4096 LSB/g
+	accel_offset[2] += 4096.0; // 4096 LSB/g
 
 	// Calibrate gyroscope
 	for(int i=0; i<50; i++){

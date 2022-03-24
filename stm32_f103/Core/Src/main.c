@@ -55,6 +55,11 @@ extern HCSR04_Type Front_US;
 extern HCSR04_Type Side_US;
 float dist = 0;
 uint16_t overflow = 0;
+float roll_main = 0;
+float pitch_main = 0;
+float yaw_main = 0;
+uint32_t t1 = 10;
+uint32_t t2 = 10;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,12 +131,11 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
   HAL_Delay(5000);
 
-  ICM_SelectBank(&hi2c2, USER_BANK_0);
-  HAL_Delay(10);
   ICM_PowerOn(&hi2c2);
   HAL_Delay(10);
-//  ICM20948_Calibrate(&hi2c2);
+  ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
+  t1 = HAL_GetTick();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -150,6 +154,8 @@ int main(void)
 //	  int16_t encoder_cnt = get_encoder_count();
 //	  sprintf(MSG, "Encoder Count: %d\n", encoder_cnt);
 //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(100);
 
 	  // ESC testing
 //	  double speed = 20;
@@ -173,7 +179,7 @@ int main(void)
 
 //	   Select User Bank 0
 	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-	  HAL_Delay(10);
+//	  HAL_Delay(10);
 
 	  // Obtain raw accelerometer and gyro data
 	  ICM_ReadAccelGyro(&hi2c2);
@@ -190,18 +196,26 @@ int main(void)
 			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
 						 mag_data[0], mag_data[1], mag_data[2]);
 
+
+//	  // Apply Madgwick to IMU data only
+//	  MadgwickAHRSupdateIMU(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+//	  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2]);
+
 	  computeAngles();
 
-	  float roll_main = roll;
-	  float pitch_main = pitch;
-	  float yaw_main = yaw;
+	  roll_main = roll*57.29578;
+	  pitch_main = pitch*57.29578;
+	  yaw_main = yaw*57.29578;
 
-	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
-	  HAL_UART_Transmit(&huart2, ROLL_MSG, sizeof(MSG), 100);
-	  sprintf(PITCH_MSG, "pitch: %f\n", pitch_main);
-	  HAL_UART_Transmit(&huart2, PITCH_MSG, sizeof(MSG), 100);
-	  sprintf(YAW_MSG, "yaw: %f\n", yaw_main);
-	  HAL_UART_Transmit(&huart2, YAW_MSG, sizeof(MSG), 100);
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	  HAL_Delay(10);
+//
+//	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
+//	  HAL_UART_Transmit(&huart2, ROLL_MSG, sizeof(MSG), 100);
+//	  sprintf(PITCH_MSG, "pitch: %f\n", pitch_main);
+//	  HAL_UART_Transmit(&huart2, PITCH_MSG, sizeof(MSG), 100);
+//	  sprintf(YAW_MSG, "yaw: %f\n", yaw_main);
+//	  HAL_UART_Transmit(&huart2, YAW_MSG, sizeof(MSG), 100);
 
     /* USER CODE END WHILE */
 
