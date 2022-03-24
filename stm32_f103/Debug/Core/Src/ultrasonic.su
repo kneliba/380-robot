@@ -1,5 +1,0 @@
-../Core/Src/ultrasonic.c:34:6:HCSR04_Read_Front	16	static
-../Core/Src/ultrasonic.c:43:6:HCSR04_Read_Side	16	static
-../Core/Src/ultrasonic.c:51:8:get_front_distance	4	static
-../Core/Src/ultrasonic.c:56:8:get_side_distance	4	static
-../Core/Src/ultrasonic.c:61:8:filter	40	static
