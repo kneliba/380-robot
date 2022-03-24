@@ -30,7 +30,7 @@
 float beta = betaDef;								// 2 * proportional gain (Kp)
 float q0 = 0.7071f, q1 = 0.0f, q2 = 0.7071f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
 float roll = 0, pitch = 0, yaw = 0;
-static float roll_dps, yaw_dps, pitch_dps;
+float w_bx = 0, w_by = 0, w_bz = 0;
 
 //====================================================================================================
 // Functions
@@ -53,10 +53,31 @@ float invSqrt(float x) {
 	return y;
 }
 
+static void compensateGyroDrift(
+    float q0, float q1, float q2, float q3,
+    float s0, float s1, float s2, float s3,
+    float dt, float zeta,
+    float w_bx, float w_by, float w_bz,
+    float gx, float gy, float gz)
+{
+  // w_err = 2 q x s
+  float w_err_x = 2.0f * q0 * s1 - 2.0f * q1 * s0 - 2.0f * q2 * s3 + 2.0f * q3 * s2;
+  float w_err_y = 2.0f * q0 * s2 + 2.0f * q1 * s3 - 2.0f * q2 * s0 - 2.0f * q3 * s1;
+  float w_err_z = 2.0f * q0 * s3 - 2.0f * q1 * s2 + 2.0f * q2 * s1 - 2.0f * q3 * s0;
+
+  w_bx += w_err_x * dt * zeta;
+  w_by += w_err_y * dt * zeta;
+  w_bz += w_err_z * dt * zeta;
+
+  gx -= w_bx;
+  gy -= w_by;
+  gz -= w_bz;
+}
+
 //---------------------------------------------------------------------------------------------------
 // AHRS algorithm update
 
-void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, float dt) {
 	float recipNorm;
 	float s0, s1, s2, s3;
 	float qDot1, qDot2, qDot3, qDot4;
@@ -80,9 +101,9 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 	az *= 9.81f;
 
 	// Convert magnetometer measurements uT to mT
-	mx *= 1000.0f;
-	my *= 1000.0f;
-	mz *= 1000.0f;
+	mx /= 1000.0f;
+	my /= 1000.0f;
+	mz /= 1000.0f;
 
 	// Rate of change of quaternion from gyroscope
 	qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
@@ -146,6 +167,8 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 		s2 *= recipNorm;
 		s3 *= recipNorm;
 
+//		compensateGyroDrift(q0, q1, q2, q3, s0, s1, s2, s3, dt, beta, w_bx, w_by, w_bz, gx, gy, gz);
+
 		// Apply feedback step
 		qDot1 -= beta * s0;
 		qDot2 -= beta * s1;
@@ -154,10 +177,10 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 	}
 
 	// Integrate rate of change of quaternion to yield quaternion
-	q0 += qDot1 * (1.0f / sampleFreq);
-	q1 += qDot2 * (1.0f / sampleFreq);
-	q2 += qDot3 * (1.0f / sampleFreq);
-	q3 += qDot4 * (1.0f / sampleFreq);
+	q0 += (qDot1 * dt/1000.0); //(1.0f / sampleFreq)
+	q1 += (qDot2 * dt/1000.0);
+	q2 += (qDot3 * dt/1000.0);
+	q3 += (qDot4 * dt/1000.0);
 
 	// Normalise quaternion
 	recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
@@ -240,29 +263,26 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 
 void computeAngles()
 {
-//	roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2);
-//	pitch = asinf(-2.0f * (q1*q3 - q0*q2));
-//	yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3);
+	roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2);
+	pitch = asinf(-2.0f * (q1*q3 - q0*q2));
+	yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3);
 
 	// angles in rad/s
-	roll  = atan2(2.0 * (q3 * q2 + q0 * q1) , 1.0 - 2.0 * (q1 * q1 + q2 * q2));
-	pitch = asin(2.0 * (q2 * q0 - q3 * q1));
-	yaw   = atan2(2.0 * (q3 * q0 + q1 * q2) , - 1.0 + 2.0 * (q0 * q0 + q1 * q1));
+//	roll  = atan2(2.0 * (q3 * q2 + q0 * q1) , 1.0 - 2.0 * (q1 * q1 + q2 * q2));
+//	pitch = asin(2.0 * (q2 * q0 - q3 * q1));
+//	yaw   = atan2(2.0 * (q3 * q0 + q1 * q2) , - 1.0 + 2.0 * (q0 * q0 + q1 * q1));
 
 }
 
 float getRoll() {
 //    computeAngles();
-    roll_dps = roll * 57.29578;
-    return roll_dps; //
+    return roll * 57.29578; // rad/s to dps
 }
 float getPitch() {
 //    computeAngles();
-	pitch_dps = pitch * 57.29578;
-    return pitch_dps; // rad/s to dps
+	return pitch * 57.29578; // rad/s to dps
 }
 float getYaw() {
 //    computeAngles();
-	yaw_dps = yaw * 57.29578 + 180; //+180
-    return yaw_dps; // rad/s to dps
+	return yaw * 57.29578 + 180; // rad/s to dps
 }

@@ -58,8 +58,7 @@ uint16_t overflow = 0;
 float roll_main = 0;
 float pitch_main = 0;
 float yaw_main = 0;
-uint32_t t1 = 10;
-uint32_t t2 = 10;
+float dt = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,9 +87,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	uint8_t ROLL_MSG[35] = {'\0'};
-	uint8_t PITCH_MSG[35] = {'\0'};
-	uint8_t YAW_MSG[35] = {'\0'};
+//	uint8_t ROLL_MSG[35] = {'\0'};
+//	uint8_t PITCH_MSG[35] = {'\0'};
+//	uint8_t YAW_MSG[35] = {'\0'};
 
   /* USER CODE END 1 */
 
@@ -135,7 +134,8 @@ int main(void)
   HAL_Delay(10);
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
-  t1 = HAL_GetTick();
+  uint16_t tick_rate = HAL_GetTickFreq();
+  uint32_t last_tick = HAL_GetTick();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -192,23 +192,29 @@ int main(void)
 	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
 
 	  // Apply Madgwick to get pitch, roll, and yaw
+	  dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
 	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-						 mag_data[0], mag_data[1], mag_data[2]);
+	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+	  						 mag_data[0], mag_data[1], mag_data[2], dt);
 
 
-//	  // Apply Madgwick to IMU data only
+//	  MadgwickQuaternionUpdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+//			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+//						 mag_data[0], mag_data[1], mag_data[2], (HAL_GetTick() -last_tick)/tick_rate);
+	  last_tick = HAL_GetTick();
+
+	  // Apply Madgwick to IMU data only
 //	  MadgwickAHRSupdateIMU(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
 //	  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2]);
 
 	  computeAngles();
 
-	  roll_main = roll*57.29578;
-	  pitch_main = pitch*57.29578;
-	  yaw_main = yaw*57.29578;
+	  roll_main = getRoll();
+	  pitch_main = getPitch();
+	  yaw_main = getYaw();
 
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(10);
+//	  HAL_Delay(10);
 //
 //	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
 //	  HAL_UART_Transmit(&huart2, ROLL_MSG, sizeof(MSG), 100);
