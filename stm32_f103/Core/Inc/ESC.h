@@ -38,6 +38,6 @@ void decelerate (TIM_HandleTypeDef *htim);
 //void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance);
 
 // drive until a distance (with ultrasonic)
-//void drive_until (TIM_HandleTypeDef *htim, double speed, double distance);
+void drive_until (TIM_HandleTypeDef *htim, double speed, double distance);
 
 #endif /* ESC_H_ */

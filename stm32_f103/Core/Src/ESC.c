@@ -74,6 +74,7 @@ void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance)
 	while (encoder_dist < distance) {}
 	stop(htim);
 }
+*/
 
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim, double speed, double distance)
@@ -83,4 +84,4 @@ void drive_until (TIM_HandleTypeDef *htim, double speed, double distance)
 	while (ultrasonic_dist < distance) {}
 	stop(htim);
 }
-*/
+
