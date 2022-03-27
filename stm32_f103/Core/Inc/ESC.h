@@ -35,7 +35,7 @@ void accelerate (TIM_HandleTypeDef *htim, double speed);
 void decelerate (TIM_HandleTypeDef *htim);
 
 // drive a set distance (with encoder)
-//void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance);
+void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance);
 
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim, double speed, double distance);
