@@ -14,8 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-uint8_t UART2_rxBuffer[35] = {0};
 
+uint8_t UART2_rxBuffer[RX_BUFF_SIZE] = {0};
 char drive_forward_com[] = "drive_forward";
 char stop_com[] = "stop";
 char turn_right_com[] = "turn_right";
@@ -23,8 +23,9 @@ char accelerate_com[] = "accelerate";
 char decelerate_com[] = "decelerate";
 
 
-void ESP_Receive(TIM_HandleTypeDef *htim) {
+void ESP_Receive(TIM_HandleTypeDef *htim, uint8_t *UART2_rxBuffer) {
 	//esp command: "drive_forward_030 " where 030 is the speed percentage
+//	char *received_buff = (char*)UART2_rxBuffer;
 	if(strncmp((char *)UART2_rxBuffer, drive_forward_com, strlen(drive_forward_com)) == 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_forward_com);
 

@@ -44,14 +44,11 @@
 
 I2C_HandleTypeDef hi2c2;
 
-SPI_HandleTypeDef hspi2;
-
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
-DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 extern HCSR04_Type Front_US;
@@ -64,9 +61,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_DMA_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
@@ -83,18 +78,85 @@ int _write(int file, char *ptr, int len)
     ITM_SendChar((*ptr++));
   return len;
 }
-void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
-{
-	int test=5;
-}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
-//	HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 32);
-	 ESP_Receive(&htim2);
-	 UART2_rxBuffer[0] = '\0';
+    HAL_UART_Transmit(&huart2, UART2_rxBuffer, RX_BUFF_SIZE, 100);
+    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+//    HAL_UART_Transmit(&huart2, UART2_rxBuffer, RX_BUFF_SIZE, 100);
+//    HAL_Delay(100);
+//    ESP_Receive(&htim2, &UART2_rxBuffer);
+//    HAL_Delay(100);
+    memcpy(UART2_rxBuffer, 0, RX_BUFF_SIZE);
+    UART2_rxBuffer[0] = '\0';
 }
+
+//void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	int test=5;
+//}
+//
+////void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+////{
+//////	HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
+////	HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, sizeof(UART2_rxBuffer));
+////	ESP_Receive(&htim2);
+////	UART2_rxBuffer[0] = '\0';
+////}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+//	// UART Rx Complete Callback;
+//	// Rx Complete is called by: DMA (automatically), if it rolls over
+//	// and when an IDLE Interrupt occurs
+//	// DMA Interrupt allays occurs BEFORE the idle interrupt can be fired because
+//	// idle detection needs at least one UART clock to detect the bus is idle. So
+//	// in the case, that the transmission length is one full buffer length
+//	// and the start buffer pointer is at 0, it will be also 0 at the end of the
+//	// transmission. In this case the DMA rollover will increment the RxRollover
+//	// variable first and len will not be zero.
+//	if(__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE)) {									// Check if it is an "Idle Interrupt"
+//		__HAL_UART_CLEAR_IDLEFLAG(&huart2);												// clear the interrupt
+//		RxCounter++;																	// increment the Rx Counter
+//
+//		uint8_t TxSize = 0;
+//		uint16_t start = RxBfrPos;														// Rx bytes start position (=last buffer position)
+//		RxBfrPos = RX_BUFF_SIZE - (uint16_t)huart->hdmarx->Instance->CNDTR;				// determine actual buffer position
+//		uint16_t len = RX_BUFF_SIZE;														// init len with max. size
+//
+//		if(RxRollover < 2)  {
+//			if(RxRollover) {															// rolled over once
+//				if(RxBfrPos <= start) len = RxBfrPos + RX_BUFF_SIZE - start;				// no bytes overwritten
+//				else len = sizeof(UART2_rxBuffer) + 1;												// bytes overwritten error
+//			} else {
+//				len = RxBfrPos - start;													// no bytes overwritten
+//			}
+//		} else {
+//			len = RX_BUFF_SIZE + 2;														// dual rollover error
+//		}
+//
+//		if(len && (len <= RX_BUFF_SIZE)) {
+//			// create response message
+////			sprintf(UART2_TxBuffer, "ACK RxC:%d S:%d L:%d RO:%d RXp:%d >>", RxCounter, start, len, RxRollover, RxBfrPos);
+//			sprintf(UART2_TxBuffer, "%s >>", (char *)UART2_rxBuffer);
+//			TxSize = strlen(UART2_TxBuffer);
+//			// add received bytes to UART2_TxBuffer
+//			uint8_t i;
+//			for(i = 0; i < len; i++) *(UART2_TxBuffer + TxSize + i) = *(UART2_rxBuffer + ((start + i) % RX_BUFF_SIZE));
+//			TxSize += i;
+//		} else {
+//			// buffer overflow error:
+//			sprintf(UART2_TxBuffer, "NAK RX BUFFER OVERFLOW ERROR %d\r\n", (len - RX_BUFF_SIZE));
+//			TxSize = strlen(UART2_TxBuffer);
+//		}
+//
+//		HAL_UART_Transmit(&huart2, (uint8_t*)UART2_TxBuffer, TxSize, 100);						// send a response
+//
+//		RxRollover = 0;																	// reset the Rollover variable
+//	} else {
+//		// no idle flag? --> DMA rollover occurred
+//		RxRollover++;		// increment Rollover Counter
+//	}
+//	ESP_Receive(&htim2, UART2_rxBuffer);
+//}
 /* USER CODE END 0 */
 
 /**
@@ -129,9 +191,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C2_Init();
   MX_ADC1_Init();
-  MX_SPI2_Init();
   MX_TIM2_Init();
-  MX_DMA_Init();
   MX_TIM3_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
@@ -157,8 +217,10 @@ int main(void)
 //  sprintf(UART2_rxBuffer, "testing hahhaha\n");
 //  HAL_UART_Transmit(&huart2, UART2_rxBuffer, sizeof(UART2_rxBuffer), 100);
 
-//  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, 32);
-  HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
+  HAL_UART_Receive_IT (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+//  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+//  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+//  HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -179,12 +241,12 @@ int main(void)
 //	  double speed = 50;
 //	  accelerate(&htim2, speed);
 ////	  drive_forward(&htim2, speed);
-      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(3000);
+//      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(3000);
 //	  decelerate(&htim2);
 ////	  stop(&htim2);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(3000);
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	  HAL_Delay(3000);
 //
 //    // imu testing
 //
@@ -256,7 +318,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -345,44 +407,6 @@ static void MX_I2C2_Init(void)
 }
 
 /**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
-
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
-  /* SPI2 parameter configuration*/
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI2_Init 2 */
-
-  /* USER CODE END SPI2_Init 2 */
-
-}
-
-/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -407,12 +431,12 @@ static void MX_TIM1_Init(void)
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
   sConfig.IC1Filter = 0;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
   sConfig.IC2Filter = 0;
@@ -519,7 +543,7 @@ static void MX_TIM3_Init(void)
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
@@ -591,22 +615,6 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA1_Channel6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -628,7 +636,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_R_Pin|LED_G_Pin|LED_B_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SIDE_TRIG_Pin|LED_R_Pin|LED_G_Pin|LED_B_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -646,21 +654,16 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : FRONT_TRIG_Pin */
   GPIO_InitStruct.Pin = FRONT_TRIG_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(FRONT_TRIG_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SIDE_TRIG_Pin */
   GPIO_InitStruct.Pin = SIDE_TRIG_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SIDE_TRIG_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : RIGHT_ENCODER_B_Pin LEFT_ENCODER_A_Pin LEFT_ENCODER_B_Pin */
-  GPIO_InitStruct.Pin = RIGHT_ENCODER_B_Pin|LEFT_ENCODER_A_Pin|LEFT_ENCODER_B_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_R_Pin LED_G_Pin LED_B_Pin */
   GPIO_InitStruct.Pin = LED_R_Pin|LED_G_Pin|LED_B_Pin;
@@ -668,15 +671,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : I2C_ESP_SDA_Pin */
-  GPIO_InitStruct.Pin = I2C_ESP_SDA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(I2C_ESP_SDA_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure peripheral I/O remapping */
-  __HAL_AFIO_REMAP_I2C1_ENABLE();
 
 }
 
