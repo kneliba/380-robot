@@ -1,145 +1,140 @@
+#include <String.h>
+
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <Wire.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <WebSerial.h>
+
+#define MESSAGE_SIZE 35
 
 /* Put your SSID & Password */
 const char* ssid = "ESP8266 D1 Mini Network";  // Enter SSID here
 const char* password = "12345678";  //Enter Password here
+//const char* ssid = "Mechatronics";  // Enter SSID here
+//const char* password = "6476775503";  //Enter Password here
+
+// WASD Socket Connection
+const char* host = "192.168.4.2";
+const uint16_t port = 8090;
+
+String message;
+char c;
+int ind = 0;
 
 /* Put IP Address details */
-//IPAddress local_ip(192,168,1,1);
-//IPAddress gateway(192,168,1,1);
-//IPAddress subnet(255,255,255,0);
+//ESP8266WebServer server(80);
 
-ESP8266WebServer server(80);
+AsyncWebServer server(80);
 
-//uint8_t LED1pin = D7;
-bool LED1status = LOW;
-//
-//uint8_t LED2pin = D6;
-bool LED2status = LOW;
+void recvMsg(uint8_t *data, size_t len) {
+  WebSerial.println("Received Data...");
+  String d = "";
+  for (int i = 0; i < len; i++) {
+    d += char(data[i]);
+  }
+  WebSerial.println(d);
+  if (d == "ON") {
+    digitalWrite(LED_BUILTIN, LOW);
+  } else if (d == "OFF") {
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
 
-char message[100]; 
+  if (len == 1) {
+    /* Switch for wasd movement (but s is stop not backwards) */
+    switch (d[0]) {
+      case 'w':
+        Serial.write("forward");
+        WebSerial.println("forward");
+        break;
+      case 'a':
+        Serial.write("left");
+        WebSerial.println("left");
+        break;
+      case 'd':
+        Serial.write("right");
+        WebSerial.println("right");
+        break;
+      case 's':
+        Serial.write("stop");
+        WebSerial.println("stop");
+        break;
+    }
+  }
+}
 
 void setup() {
   Serial.begin(115200);
-//  pinMode(LED1pin, OUTPUT);
-//  pinMode(LED2pin, OUTPUT);
-
-  WiFi.softAP(ssid, password);
-//  WiFi.softAPConfig(local_ip, gateway, subnet);
-  delay(100);
-  
-  server.on("/", handle_OnConnect);
-  server.on("/led1on", handle_led1on);
-  server.on("/led1off", handle_led1off);
-  server.on("/led2on", handle_led2on);
-  server.on("/led2off", handle_led2off);
-  server.onNotFound(handle_NotFound);
-  
-  server.begin();
-  Serial.println("HTTP server started");
-  Serial.print("IP address:\t");
-  Serial.println(WiFi.softAPIP()); 
-  Wire.begin(D1, D2);          
-  Wire.onRequest(requestEvent);
-  Wire.onReceive(receiveEvent);
-}
-void loop() {
-  server.handleClient();
-//  if(LED1status)
-//    Serial.println("LED1: ON");
-//  {digitalWrite(LED1pin, HIGH);}
-//  else
-//    Serial.println("LED1: OFF");
-//  {digitalWrite(LED1pin, LOW);}
-//  
-//  if(LED2status)
-//    Serial.println("LED2: ON");
-//  {digitalWrite(LED2pin, HIGH);}
-//  else
-//    Serial.println("LED2: OFF");
-//  {digitalWrite(LED2pin, LOW);}
-//  delay(1000);
-}
-
-void requestEvent() {
-  Wire.write("Here is a message from the ESP!");
-}
-
-void requestEvent() {
-  while(Wire.available()){
-    char c = Wire.read();
-    Serial.print(c);
-  }
-  Serial.println();
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
   delay(1000);
-}
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
 
-void handle_OnConnect() {
-  LED1status = LOW;
-  LED2status = LOW;
-  Serial.println("GPIO7 Status: OFF | GPIO6 Status: OFF");
-  server.send(200, "text/html", SendHTML(LED1status,LED2status)); 
-}
-
-void handle_led1on() {
-  LED1status = HIGH;
-  Serial.println("GPIO7 Status: ON");
-  server.send(200, "text/html", SendHTML(true,LED2status)); 
-}
-
-void handle_led1off() {
-  LED1status = LOW;
-  Serial.println("GPIO7 Status: OFF");
-  server.send(200, "text/html", SendHTML(false,LED2status)); 
-}
-
-void handle_led2on() {
-  LED2status = HIGH;
-  Serial.println("GPIO6 Status: ON");
-  server.send(200, "text/html", SendHTML(LED1status,true)); 
-}
-
-void handle_led2off() {
-  LED2status = LOW;
-  Serial.println("GPIO6 Status: OFF");
-  server.send(200, "text/html", SendHTML(LED1status,false)); 
-}
-
-void handle_NotFound(){
-  server.send(404, "text/plain", "Not found");
-}
-
-String SendHTML(uint8_t led1stat,uint8_t led2stat){
-  String ptr = "<!DOCTYPE html> <html>\n";
-  ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  ptr +="<title>LED Control</title>\n";
-  ptr +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
-  ptr +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
-  ptr +=".button {display: block;width: 80px;background-color: #1abc9c;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n";
-  ptr +=".button-on {background-color: #1abc9c;}\n";
-  ptr +=".button-on:active {background-color: #16a085;}\n";
-  ptr +=".button-off {background-color: #34495e;}\n";
-  ptr +=".button-off:active {background-color: #2c3e50;}\n";
-  ptr +="p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
-  ptr +="</style>\n";
-  ptr +="</head>\n";
-  ptr +="<body>\n";
-  ptr +="<h1>ESP8266 Web Server</h1>\n";
-  ptr +="<h3>Using Access Point(AP) Mode</h3>\n";
+  /* for Access Point (ESP hosted network) */
+    WiFi.softAP(ssid, password);
   
-   if(led1stat)
-  {ptr +="<p>LED1 Status: ON</p><a class=\"button button-off\" href=\"/led1off\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED1 Status: OFF</p><a class=\"button button-on\" href=\"/led1on\">ON</a>\n";}
+  /* for Station (ESP joins network) */
+//  WiFi.mode(WIFI_STA);
+//  WiFi.begin(ssid, password);
+//  delay(1000);
+//  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+//    Serial.printf("WiFi Failed!\n");
+//    return;
+//  }
+  
+//  Serial.println("IP Address: ");
+//  Serial.println(WiFi.localIP());
+  
+  // WebSerial is accessible at "<IP Address>/webserial" in browser
+  WebSerial.begin(&server);
+  WebSerial.msgCallback(recvMsg);
+  server.begin();
+}
 
-  if(led2stat)
-  {ptr +="<p>LED2 Status: ON</p><a class=\"button button-off\" href=\"/led2off\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED2 Status: OFF</p><a class=\"button button-on\" href=\"/led2on\">ON</a>\n";}
+void loop() {
+  WiFiClient client;
 
-  ptr +="</body>\n";
-  ptr +="</html>\n";
-  return ptr;
+  if (Serial.available() > 0) {
+    message = Serial.readStringUntil('\n');
+    WebSerial.println(message);
+    //    if (message == "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0Encoder Count: 0"){
+    //      digitalWrite(LED_BUILTIN, LOW);
+    //      delay(1000);
+    //      digitalWrite(LED_BUILTIN, HIGH);
+    //      delay(100);
+    //    }
+    //    c = Serial.read();
+    //    if(ind > (MESSAGE_SIZE - 1)){
+    //      WebSerial.println("Serial input message too large...");
+    //    }
+    //    message[ind] = c;
+    //    ind++;
+    //    if (c == '\n')
+    //    {
+    //      WebSerial.println(message);
+    //      delay(100);
+    //      memset(message, 0, sizeof(message));
+    //      ind = 0;
+    //    }
+  }
+  if (!client.connect(host, port)) {
+      Serial.println("Connection to WASD host failed");
+      delay(1000);
+      return;
+  } else {
+    Serial.println("Connected to WASD server successful!");
+    client.print("Hello from ESP8266!");
+    while (client.connected()){
+      if (client.available()) {
+        char c = client.read();
+//        rec_data += c;
+        Serial.print(c);
+        Serial.println();
+      }
+    }
+    Serial.println("Disconnecting...");
+    client.stop();
+  }
+//  WebSerial.println("Heartbeat <3");
+  delay(100);
 }

@@ -1,4 +1,4 @@
-from machine import Pin, I2C
+from machine import Pin, I2C, UART
 import sys
 import time
 import os
@@ -6,40 +6,51 @@ import webrepl_setup
 # ------------SETUP--------------
 # CONSTANTS
 DEBUG = True
+STM_ADDRESS = 16
 
 # construct an I2C bus
-i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
+# i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
 
-# set led pin on ESP
+# # set led pin on ESP
 led = Pin(2, Pin.OUT)
 # -------------------------------
+# use UART0 b/c UART1 is TX only
+uart = UART(0, baudrate=115200)
+
+# uart.write("Hello arduino")
+# while True:
+#     # check if any data available
+#     if uart.any() != 0:
+#         buff = uart.read() # read
+#         print(buff.decode("utf-8"))
+#         uart.write("Hello arduino")
+# # ----------UART CODE------------
+
+# -------------------------------
+
+#------------I2C CODE------------
+# def i2c_read(address, buffer):
+#     i2c.readfrom_into(address, buffer)
+#     size = sys.getsizeof(buffer)
+#     if DEBUG:
+#         # print can't use f-strings for some reason
+#         print("{size} bytes read from address '{address}', payload is: {buffer}\n".format(size, address, buffer))
+#     return buffer
 
 
-def i2c_read(address, buffer):
-    i2c.readfrom_into(address, buffer)
-    size = sys.getsizeof(buffer)
-    if DEBUG:
-        # print can't use f-strings for some reason
-        print("{size} bytes read from address '{address}', payload is: {buffer}\n".format(size, address, buffer))
-    return buffer
+# def i2c_write(address, buffer):
+#     if DEBUG:
+#         print("Buffer to send to address '{address}': {buffer}\n".format(address, buffer))
+#     i2c.writeto(address, buffer)
 
 
-def i2c_write(address, buffer):
-    if DEBUG:
-        print("Buffer to send to address '{address}': {buffer}\n".format(address, buffer))
-    i2c.writeto(address, buffer)
-
-f = open('data.txt', 'w')
-f.write('some data')
-f.close()
-
-while True:
-    led.value(not led.value())
-    time.sleep(0.5)
-    f = open('data.txt')
-    print(f.read())
-    f.close()
-
+# while True:
+#     buffer = []
+#     i2c_write(STM_ADDRESS, [10])
+#     i2c_read(STM_ADDRESS, bytes(buffer))
+#     led.value(not led.value())
+#     time.sleep(0.5)
+    
 # def main():
 # for arg in sys.argv:
 #     print(arg)
