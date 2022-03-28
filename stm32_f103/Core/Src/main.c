@@ -78,7 +78,6 @@ int _write(int file, char *ptr, int len)
     ITM_SendChar((*ptr++));
   return len;
 }
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     HAL_UART_Transmit(&huart2, UART2_rxBuffer, RX_BUFF_SIZE, 100);
@@ -89,6 +88,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 //    HAL_Delay(100);
     memcpy(UART2_rxBuffer, 0, RX_BUFF_SIZE);
     UART2_rxBuffer[0] = '\0';
+
 }
 
 //void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
@@ -166,7 +166,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t MSG[35] = {'\0'};
+//	uint8_t MSG[35] = {'\0'};
 
   /* USER CODE END 1 */
 
@@ -188,6 +188,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C2_Init();
   MX_ADC1_Init();
@@ -221,15 +222,13 @@ int main(void)
 //  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
 //  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
 //  HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  sprintf(MSG, "msg test\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  //ESP_Receive(&htim2);
 //  // ultrasonic testing
 //	  HCSR04_Read_Front(&htim3);
 //	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
