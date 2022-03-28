@@ -35,6 +35,9 @@ extern float corr_gyro_data[3];
 #define GYRO_RATE_250	    (0x00)
 #define GYRO_LPF_17HZ   	(0x29)
 
+void ICM_WriteOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *pData);
+void ICM_readBytes(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *pData, uint16_t Size);
+void ICM_ReadOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t* pData);
 void ICM_PowerOn(I2C_HandleTypeDef *hi2c);
 uint8_t ICM_WHOAMI(I2C_HandleTypeDef *hi2c);
 void ICM_SelectBank(I2C_HandleTypeDef *hi2c, uint8_t bank);

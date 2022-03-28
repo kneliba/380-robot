@@ -22,6 +22,8 @@
 // drive forward
 void drive_forward (TIM_HandleTypeDef *htim, double speed);
 
+void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle);
+
 // stop
 void stop (TIM_HandleTypeDef *htim);
 
