@@ -64,8 +64,9 @@ void decelerate (TIM_HandleTypeDef *htim)
 }
 
 // increases one side of the motor to drive faster to offset a leer
-// can reduce or increase the tolerance from the ideal path and correction speed
-// can also reduce the speed of the other motor to stay on path
+// we can reduce or increase the tolerance from the ideal path and correction speed upon testing
+// we can also reduce the speed of the other motor to reduce the leer faster, could over shoot easier though
+// assuming the side ultrasonic is facing the closest wall
 void drive_straight_ultrasonic (TIM_HandleTypeDef *htim, double speed, double ideal_block_distance)
 {
 
@@ -89,7 +90,7 @@ void drive_straight_ultrasonic (TIM_HandleTypeDef *htim, double speed, double id
 	// to the left of the ideal path
 	else if(distance_from_wall < ideal_block_distance - tolerance) {
 		// Correct by driving to the right
-		TIM2->CCR1 = increased_command; // right
+		TIM2->CCR1 = increased_command; // left
 		TIM2->CCR2 = command; // right
 	}
 	// on ideal path
