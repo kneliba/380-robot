@@ -23,6 +23,12 @@ extern HCSR04_Type Side_US;
 // Variables for filtering
 static const double r = 0.01;
 
+// distances for ideal robot distance from side of the walls
+static const double ideal_1st_block_distance = 10;
+static const  double ideal_2nd_block_distance = 40.5;
+static const double ideal_3rd_block_distance = 70.5;
+
+
 // Function Prototypes
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim);

@@ -34,6 +34,9 @@ void accelerate (TIM_HandleTypeDef *htim, double speed);
 // decelerate
 void decelerate (TIM_HandleTypeDef *htim);
 
+//drive straight with ultrasonic error correction
+void drive_straight_ultrasonic (TIM_HandleTypeDef *htim, double speed, double ideal_block_distance);
+
 // drive a set distance (with encoder)
 //void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance);
 

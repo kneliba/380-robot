@@ -3,3 +3,5 @@
 ../Core/Src/ESC.c:27:6:turn_right	48	static
 ../Core/Src/ESC.c:42:6:accelerate	32	static
 ../Core/Src/ESC.c:54:6:decelerate	24	static
+../Core/Src/ESC.c:69:6:drive_straight_ultrasonic	88	static
+../Core/Src/ESC.c:103:6:drive_straight_distance_ultrasonic	40	static
