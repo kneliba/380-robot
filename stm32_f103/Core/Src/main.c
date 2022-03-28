@@ -83,17 +83,17 @@ int _write(int file, char *ptr, int len)
     ITM_SendChar((*ptr++));
   return len;
 }
+
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
-	int test=5;
+//	int test=5;
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
-//	HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 32);
-	 ESP_Receive(&htim2);
-	 UART2_rxBuffer[0] = '\0';
+	ESP_Receive(&htim2);
+	UART2_rxBuffer[0] = '\0';
 }
 /* USER CODE END 0 */
 
@@ -104,7 +104,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t MSG[35] = {'\0'};
+//	uint8_t MSG[35] = {'\0'};
 
   /* USER CODE END 1 */
 
@@ -126,12 +126,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C2_Init();
   MX_ADC1_Init();
   MX_SPI2_Init();
   MX_TIM2_Init();
-  MX_DMA_Init();
   MX_TIM3_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
@@ -154,10 +154,6 @@ int main(void)
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
 
-//  sprintf(UART2_rxBuffer, "testing hahhaha\n");
-//  HAL_UART_Transmit(&huart2, UART2_rxBuffer, sizeof(UART2_rxBuffer), 100);
-
-//  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, 32);
   HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
   /* USER CODE END 2 */
 
@@ -165,9 +161,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  sprintf(MSG, "msg test\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  //ESP_Receive(&htim2);
 //  // ultrasonic testing
 //	  HCSR04_Read_Front(&htim3);
 //	  sprintf(MSG, "Distance: %d\n", Front_US.DISTANCE);
@@ -179,8 +172,8 @@ int main(void)
 //	  double speed = 50;
 //	  accelerate(&htim2, speed);
 ////	  drive_forward(&htim2, speed);
-      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(3000);
+//    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(3000);
 //	  decelerate(&htim2);
 ////	  stop(&htim2);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
