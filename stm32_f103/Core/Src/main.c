@@ -80,15 +80,9 @@ int _write(int file, char *ptr, int len)
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    HAL_UART_Transmit(&huart2, UART2_rxBuffer, RX_BUFF_SIZE, 100);
     HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-//    HAL_UART_Transmit(&huart2, UART2_rxBuffer, RX_BUFF_SIZE, 100);
-//    HAL_Delay(100);
-//    ESP_Receive(&htim2, &UART2_rxBuffer);
-//    HAL_Delay(100);
-    memcpy(UART2_rxBuffer, 0, RX_BUFF_SIZE);
-    UART2_rxBuffer[0] = '\0';
-
+    ESP_Receive(&htim2, &UART2_rxBuffer);
+    memset(UART2_rxBuffer, 0, RX_BUFF_SIZE);
 }
 
 //void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
@@ -188,7 +182,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C2_Init();
   MX_ADC1_Init();
@@ -215,13 +208,7 @@ int main(void)
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
 
-//  sprintf(UART2_rxBuffer, "testing hahhaha\n");
-//  HAL_UART_Transmit(&huart2, UART2_rxBuffer, sizeof(UART2_rxBuffer), 100);
-
   HAL_UART_Receive_IT (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-//  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
-//  HAL_UART_Receive_DMA (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-//  HAL_UART_Receive_DMA(&huart2, UART2_rxBuffer, 4);
 
   /* USER CODE END 2 */
 

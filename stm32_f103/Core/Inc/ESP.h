@@ -9,10 +9,10 @@
 #define INC_ESP_H_
 #include "main.h"
 
-#define RX_BUFF_SIZE 35
+#define RX_BUFF_SIZE 8
 #define TX_BUFF_SIZE 64
 
-extern uint8_t UART2_rxBuffer[35];
+extern uint8_t UART2_rxBuffer[8];
 
 
 void ESP_Receive(TIM_HandleTypeDef *htim, uint8_t *UART2_rxBuffer);
