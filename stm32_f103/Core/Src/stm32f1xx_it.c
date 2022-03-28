@@ -53,7 +53,7 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern int16_t position;
+extern uint32_t position;
 int16_t oldpos = 0;
 extern double speed;
 int indx = 0;

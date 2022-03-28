@@ -69,6 +69,7 @@ void delay_us (uint32_t us);
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 void drive_distance (double speed, double distance);
 void drive_until (double speed, double distance);
+void turn_angle (double angle);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

@@ -19,8 +19,8 @@ int16_t accel_data[3] = {};
 int16_t gyro_data[3] = {};
 int16_t mag_data[3] = {};
 
-int16_t corr_accel_data[3] = {};
-int16_t corr_gyro_data[3] = {};
+float corr_accel_data[3] = {};
+float corr_gyro_data[3] = {};
 
 int16_t gyro_offset[3];
 int16_t accel_offset[3];
@@ -66,20 +66,19 @@ void ICM_WriteOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t Data) // ***
 void i2c_Mag_write(I2C_HandleTypeDef *hi2c, uint8_t reg,uint8_t value)
   {
   	ICM_WriteOneByte(hi2c, 0x7F, 0x30);
-
   	HAL_Delay(1);
+
   	ICM_WriteOneByte(hi2c, 0x03 ,0x0C);//mode: write
-
   	HAL_Delay(1);
+
   	ICM_WriteOneByte(hi2c, 0x04 ,reg);//set reg addr
-
   	HAL_Delay(1);
-  	ICM_WriteOneByte(hi2c, 0x06 ,value);//send value
 
+  	ICM_WriteOneByte(hi2c, 0x06 ,value);//send value
   	HAL_Delay(1);
   }
 
-  static uint8_t ICM_Mag_Read(I2C_HandleTypeDef *hi2c, uint8_t reg)
+static uint8_t ICM_Mag_Read(I2C_HandleTypeDef *hi2c, uint8_t reg)
   {
   	uint8_t  Data;
   	ICM_WriteOneByte(hi2c, 0x7F, 0x30);
@@ -94,25 +93,25 @@ void i2c_Mag_write(I2C_HandleTypeDef *hi2c, uint8_t reg,uint8_t value)
   	ICM_ReadOneByte(hi2c, 0x3B,&Data);
     HAL_Delay(1);
   	return Data;
-  }
+}
 
-  void ICM20948_READ_MAG(I2C_HandleTypeDef *hi2c, int16_t magn[3])
-  {
-    uint8_t mag_buffer[10];
-
-      mag_buffer[0] =ICM_Mag_Read(hi2c, 0x01);
-      mag_buffer[1] =ICM_Mag_Read(hi2c, 0x11);
-  	  mag_buffer[2] =ICM_Mag_Read(hi2c, 0x12);
-  	  magn[0]=mag_buffer[1]|mag_buffer[2]<<8;
-      mag_buffer[3] =ICM_Mag_Read(hi2c, 0x13);
-      mag_buffer[4] =ICM_Mag_Read(hi2c, 0x14);
-      magn[1]=mag_buffer[3]|mag_buffer[4]<<8;
-  	  mag_buffer[5] =ICM_Mag_Read(hi2c, 0x15);
-      mag_buffer[6] =ICM_Mag_Read(hi2c, 0x16);
-      magn[2]=mag_buffer[5]|mag_buffer[6]<<8;
-
-      i2c_Mag_write(hi2c, 0x31,0x01);
-  }
+//void ICM20948_READ_MAG(I2C_HandleTypeDef *hi2c, int16_t magn[3])
+//{
+//uint8_t mag_buffer[10];
+//
+//  mag_buffer[0] =ICM_Mag_Read(hi2c, 0x01);
+//  mag_buffer[1] =ICM_Mag_Read(hi2c, 0x11);
+//  mag_buffer[2] =ICM_Mag_Read(hi2c, 0x12);
+//  magn[0]=mag_buffer[1]|mag_buffer[2]<<8;
+//  mag_buffer[3] =ICM_Mag_Read(hi2c, 0x13);
+//  mag_buffer[4] =ICM_Mag_Read(hi2c, 0x14);
+//  magn[1]=mag_buffer[3]|mag_buffer[4]<<8;
+//  mag_buffer[5] =ICM_Mag_Read(hi2c, 0x15);
+//  mag_buffer[6] =ICM_Mag_Read(hi2c, 0x16);
+//  magn[2]=mag_buffer[5]|mag_buffer[6]<<8;
+//
+//  i2c_Mag_write(hi2c, 0x31,0x01);
+//}
 
 /*
  *
@@ -141,20 +140,20 @@ void ICM_ReadMag(I2C_HandleTypeDef *hi2c, int16_t magn[3]) {
  *
  */
 void ICM_PowerOn(I2C_HandleTypeDef *hi2c) {
-	HAL_Delay(10);
 	ICM_SelectBank(hi2c, USER_BANK_0);
-	HAL_Delay(10);
-	ICM_Enable_I2C(hi2c);
-	HAL_Delay(10);
+	HAL_Delay(5);
+//	ICM_Enable_I2C(hi2c); // enable i2c master for mag
+//	HAL_Delay(5);
 
-	ICM_SelectBank(hi2c, USER_BANK_3);
-	ICM_Set_I2C_Clk(hi2c);
-	HAL_Delay(10);
-
-	ICM_SelectBank(hi2c, USER_BANK_0);
-	HAL_Delay(10);
+//	ICM_SelectBank(hi2c, USER_BANK_3);
+//	HAL_Delay(5);
+//	ICM_Set_I2C_Clk(hi2c);
+//	HAL_Delay(5);
+//
+//	ICM_SelectBank(hi2c, USER_BANK_0);
+//	HAL_Delay(5);
 	ICM_SetClock(hi2c, (uint8_t)CLK_BEST_AVAIL);
-	HAL_Delay(10);
+	HAL_Delay(5);
 	ICM_AccelGyroOff(hi2c);
 	HAL_Delay(20);
 	ICM_AccelGyroOn(hi2c);
@@ -164,36 +163,38 @@ void ICM_PowerOn(I2C_HandleTypeDef *hi2c) {
 
 uint16_t ICM_Initialize(I2C_HandleTypeDef *hi2c) {
 	ICM_SelectBank(hi2c, USER_BANK_2);
-	HAL_Delay(20);
+	HAL_Delay(5);
 	ICM_SetGyroRateLPF(hi2c, GYRO_RATE_250, GYRO_LPF_17HZ);
 	HAL_Delay(10);
 
 	// Set gyroscope sample rate to 100hz (0x0A) in GYRO_SMPLRT_DIV register (0x00)
 	ICM_WriteOneByte(hi2c, 0x00, 0x0A);
-	HAL_Delay(10);
+	HAL_Delay(5);
 
 	// Set accelerometer low pass filter to 136hz (0x11) and the rate to 8G (0x04) in register ACCEL_CONFIG (0x14)
 	ICM_WriteOneByte(hi2c, 0x14, (0x04 | 0x11));
+	HAL_Delay(5);
 
 	// Set accelerometer sample rate to 225hz (0x00) in ACCEL_SMPLRT_DIV_1 register (0x10)
 	ICM_WriteOneByte(hi2c, 0x10, 0x00);
-	HAL_Delay(10);
+	HAL_Delay(5);
 
 	// Set accelerometer sample rate to 100 hz (0x0A) in ACCEL_SMPLRT_DIV_2 register (0x11)
 	ICM_WriteOneByte(hi2c, 0x11, 0x0A);
-	HAL_Delay(10);
+	HAL_Delay(5);
 
 //	ICM_SelectBank(hi2c, USER_BANK_2);
 //	HAL_Delay(20);
 
 	// Configure AUX_I2C Magnetometer (onboard ICM-20948)
 	ICM_WriteOneByte(hi2c, 0x7F, 0x00); // Select user bank 0
-	HAL_Delay(10);
+	HAL_Delay(5);
 	ICM_WriteOneByte(hi2c, 0x0F, 0x30); // INT Pin / Bypass Enable Configuration
 	ICM_WriteOneByte(hi2c, 0x03, 0x20); // I2C_MST_EN
 	ICM_WriteOneByte(hi2c, 0x7F, 0x30); // Select user bank 3
-	HAL_Delay(10);
+	HAL_Delay(5);
 	ICM_WriteOneByte(hi2c, 0x01, 0x4D); // I2C Master mode and Speed 400 kHz
+	ICM_Set_I2C_Clk(hi2c);
 	ICM_WriteOneByte(hi2c, 0x02, 0x01); // I2C_SLV0 _DLY_ enable
 	ICM_WriteOneByte(hi2c, 0x05, 0x81); // enable IIC	and EXT_SENS_DATA==1 Byte
 
@@ -223,18 +224,18 @@ void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, int16_t raw_accel_data[3], in
 //	corr_accel_data[1] = (raw_accel_data[1] - (accel_offset[1] / (1<<0x04))) * (1<<0x04) / 16384.0;
 //	corr_accel_data[2] = (raw_accel_data[2] - (accel_offset[2] / (1<<0x04))) * (1<<0x04) / 16384.0;
 
-	corr_accel_data[0] = (raw_accel_data[0] - accel_offset[0]) / 16.0;
-	corr_accel_data[1] = (raw_accel_data[1] - accel_offset[1]) / 16.0;
-	corr_accel_data[2] = (raw_accel_data[2] - accel_offset[2]) / 16.0;
+	corr_accel_data[0] = (raw_accel_data[0] - accel_offset[0]) / 4096.0f;
+	corr_accel_data[1] = (raw_accel_data[1] - accel_offset[1]) / 4096.0f;
+	corr_accel_data[2] = (raw_accel_data[2] - accel_offset[2]) / 4096.0f;
 
 //	corr_gyro_data[0] = (raw_gyro_data[0] - (gyro_offset[0] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
 //	corr_gyro_data[1] = (raw_gyro_data[1] - (gyro_offset[1] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
 //	corr_gyro_data[2] = (raw_gyro_data[2] - (gyro_offset[2] / (1<<GYRO_RATE_250))) * (1<<GYRO_RATE_250) * 250.0 / 131000.0;
 
 
-	corr_gyro_data[0] = (raw_gyro_data[0] - gyro_offset[0]) / 131.0;
-	corr_gyro_data[1] = (raw_gyro_data[1] - gyro_offset[1]) / 131.0;
-	corr_gyro_data[2] = (raw_gyro_data[2] - gyro_offset[2]) / 131.0;
+	corr_gyro_data[0] = (raw_gyro_data[0] - gyro_offset[0]) / 131.0f;
+	corr_gyro_data[1] = (raw_gyro_data[1] - gyro_offset[1]) / 131.0f;
+	corr_gyro_data[2] = (raw_gyro_data[2] - gyro_offset[2]) / 131.0f;
 
 }
 
@@ -272,35 +273,52 @@ void ICM_Set_I2C_Clk(I2C_HandleTypeDef *hi2c) { //user bank 3
 	ICM_WriteOneByte(hi2c, 0x01, 0x07); //set I2C master clock to recommended freq
 }
 
+void ICM_Check_Mag_Overflow(I2C_HandleTypeDef *hi2c)
+{
+	uint8_t i2cData = 0x08;
+	ICM_ReadOneByte(hi2c, 0x18, &i2cData);
+	return i2cData;
+}
+
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 {
 	ICM_SelectBank(hi2c, USER_BANK_0);
 	HAL_Delay(10);
+
 	// Calibrate accelerometer
 	for(int i=0; i<50; i++){
 		ICM_ReadAccelGyro(hi2c);
 		accel_offset[0] += accel_data[0];
 		accel_offset[1] += accel_data[1];
 		accel_offset[2] += accel_data[2];
-		HAL_Delay(50);
+
+		gyro_offset[0] += gyro_data[0];
+		gyro_offset[1] += gyro_data[1];
+		gyro_offset[2] += gyro_data[2];
+
+		HAL_Delay(12);
 	}
 
 	accel_offset[0] /= 50;
 	accel_offset[1] /= 50;
 	accel_offset[2] /= 50;
-	accel_offset[2] += 4096.0; // 4096 LSB/g
+//	accel_offset[2] += 4096.0; // 4096 LSB/g
 
 	// Calibrate gyroscope
-	for(int i=0; i<50; i++){
-		ICM_ReadAccelGyro(hi2c);
-		gyro_offset[0] += gyro_data[0];
-		gyro_offset[1] += gyro_data[1];
-		gyro_offset[2] += gyro_data[2];
-		HAL_Delay(50);
-	}
-
+//	for(int i=0; i<50; i++){
+//		ICM_ReadAccelGyro(hi2c);
+//
+//		HAL_Delay(15);
+//	}
+//
 	gyro_offset[0] /= 50;
 	gyro_offset[1] /= 50;
 	gyro_offset[2] /= 50;
+}
+
+// Calculate yaw by integrating gyro data
+float gyro_yaw(I2C_HandleTypeDef *hi2c, float dt)
+{
+	return (corr_gyro_data[2]*dt/1000);
 }
 

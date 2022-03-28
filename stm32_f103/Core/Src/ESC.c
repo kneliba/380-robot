@@ -11,11 +11,14 @@ static double ARR = 40000.0;
 // drive forward - speed %
 void drive_forward (TIM_HandleTypeDef *htim, double speed)
 {
-	double pulse_width = 1.0 + (speed/100.0);
-	double command = (pulse_width/20.0)*ARR;
+	double pulse_widthL = 1.0 + (speed*1.25/100.0);
+	double commandL = (pulse_widthL/20.0)*ARR;
 
-	TIM2->CCR1 = command; // left
-	TIM2->CCR2 = command; // right
+	double pulse_widthR = 1.0 + (speed/100.0);
+	double commandR = (pulse_widthR/20.0)*ARR;
+
+	TIM2->CCR1 = commandL; // left
+	TIM2->CCR2 = commandR; // right
 }
 
 void stop (TIM_HandleTypeDef *htim)
@@ -45,8 +48,8 @@ void accelerate (TIM_HandleTypeDef *htim, double final_speed)
 	while (speed < final_speed)
 	{
 		drive_forward(htim, speed);
-		speed += 2;
-		HAL_Delay(10);
+		speed += 1;
+		HAL_Delay(50);
 	}
 }
 
@@ -58,8 +61,8 @@ void decelerate (TIM_HandleTypeDef *htim)
 	while (speed > 0)
 	{
 		drive_forward(htim, speed);
-		speed -= 2;
-		HAL_Delay(10);
+		speed -= 1;
+		HAL_Delay(50);
 	}
 }
 

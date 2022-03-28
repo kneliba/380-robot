@@ -90,6 +90,8 @@ int main(void)
 //	uint8_t ROLL_MSG[35] = {'\0'};
 //	uint8_t PITCH_MSG[35] = {'\0'};
 //	uint8_t YAW_MSG[35] = {'\0'};
+	double speed = 20;
+	int16_t encoder_cnt = 0;
 
   /* USER CODE END 1 */
 
@@ -128,7 +130,15 @@ int main(void)
 
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+
+//  // ESC Calibration Procedure
+//  drive_forward(&htim2, 100);
   HAL_Delay(5000);
+//  stop(&htim2);
+//
+//  // Delay for ESCs to detect PWM Signal
+//  HAL_Delay(10000);
 
   ICM_PowerOn(&hi2c2);
   HAL_Delay(10);
@@ -136,6 +146,7 @@ int main(void)
   HAL_Delay(100);
   uint16_t tick_rate = HAL_GetTickFreq();
   uint32_t last_tick = HAL_GetTick();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,68 +163,79 @@ int main(void)
 
 	  // encoder testing
 //	  int16_t encoder_cnt = get_encoder_count();
-//	  sprintf(MSG, "Encoder Count: %d\n", encoder_cnt);
+//	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
 //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 //	  HAL_Delay(100);
 
-	  // ESC testing
-//	  double speed = 20;
-//	  accelerate(&htim2, speed);
-////	  drive_forward(&htim2, speed);
+//	  // ESC testing
+	  encoder_cnt = get_encoder_count();
+	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
+	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+
+	  accelerate(&htim2, speed);
+//	  sprintf(MSG, "speed = %f\r\n", speed);
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  drive_forward(&htim2, speed);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(3000);
-//	  decelerate(&htim2);
-////	  stop(&htim2);
+	  for (int i = 0; i<5; i++)
+	  {
+		  encoder_cnt = get_encoder_count();
+		  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
+		  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		  HAL_Delay(1000);
+	  }
+	  decelerate(&htim2);
+//	  sprintf(MSG, "stop\r\n");
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+//	  stop(&htim2);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(1000);
 
-//	  drive_until(10, 20);
-//	  HAL_Delay(10000);
-
-//	  drive_distance(10, 10);
-//	  HAL_Delay(5000);
-
+//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  HAL_Delay(2000);
+//
+//	  sprintf(MSG, "Reset distance\n");
+//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	  reset_distance(&htim1);
 
     // imu testing
 
-//	   Select User Bank 0
-	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(10);
+	  //	   Select User Bank 0
+//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+//	  HAL_Delay(5);
 
 	  // Obtain raw accelerometer and gyro data
-	  ICM_ReadAccelGyro(&hi2c2);
+//	  ICM_ReadAccelGyro(&hi2c2);
 
 	  // Obtain raw magnetometer data
 //	  int16_t mag_data[3];
-	  ICM_ReadMag(&hi2c2, mag_data);
+//	  ICM_ReadMag(&hi2c2, mag_data);
 
 	  // Obtain corrected accelerometer and gyro data
-	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+//	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
 
 	  // Apply Madgwick to get pitch, roll, and yaw
-	  dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
-	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-	  						 mag_data[0], mag_data[1], mag_data[2], dt);
+//	  dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
+//	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+//	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+//	  						 mag_data[0], mag_data[1], mag_data[2], dt);
 
-
-//	  MadgwickQuaternionUpdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-//			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-//						 mag_data[0], mag_data[1], mag_data[2], (HAL_GetTick() -last_tick)/tick_rate);
-	  last_tick = HAL_GetTick();
+//	  yaw_main += gyro_yaw(&hi2c2, dt);
 
 	  // Apply Madgwick to IMU data only
 //	  MadgwickAHRSupdateIMU(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-//	  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2]);
+//				 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2], dt);
 
-	  computeAngles();
+//	  last_tick = HAL_GetTick();
 
-	  roll_main = getRoll();
-	  pitch_main = getPitch();
-	  yaw_main = getYaw();
+//	  computeAngles();
 
-	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+//	  roll_main = getRoll();
+//	  pitch_main = getPitch();
+//	  yaw_main = getYaw();
+
+//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 //	  HAL_Delay(10);
 //
 //	  sprintf(ROLL_MSG, "roll: %f\n", roll_main);
@@ -266,7 +288,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -633,23 +655,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM1) //motor encoder
 	{
-		Motor_Encoder *right_motor_encoder;
-		right_motor_encoder= &right_encoder;
-
-		//CW is positive
-		counter = __HAL_TIM_GET_COUNTER(htim);
-		right_motor_encoder->counter = counter;
-
-		//count becomes negative rather than jumping to 65000
-		count = (int16_t)counter;
-		right_motor_encoder->count = count;
-
-		//a single count normally is counted by 4 points, will have to test the number
-		position = count/4;
-		right_motor_encoder->position = position;
-
-		distance = (2*3.1415*right_motor_encoder->wheel_radius) * position /3; // might have consider gear ratio in this calculation
-		right_motor_encoder->distance = distance;
+		encoder_timer_input_CC (htim);
 	}
 
 	else if (htim->Instance == TIM3) //ultrasonic
@@ -659,12 +665,13 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 }
 
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-//{
-//	uint8_t ov_msg[30] = {'\0'};
-//	sprintf(ov_msg, "timer 3 overflow\n");
-//	HAL_UART_Transmit(&huart2, ov_msg, sizeof(ov_msg), 100);
-//}
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim == &htim1) //encoder count overflow
+	{
+		encoder_overflow();
+	}
+}
 
 // drive a set distance (with encoder)
 void drive_distance (double speed, double distance)
@@ -677,7 +684,7 @@ void drive_distance (double speed, double distance)
 	}
 	stop(&htim2);
 }
-//
+
 // drive until a distance (with ultrasonic)
 void drive_until (double speed, double distance)
 {
@@ -690,6 +697,44 @@ void drive_until (double speed, double distance)
 		ultrasonic_dist = get_front_distance();
 		sprintf(MSG, "Distance: %f\n", ultrasonic_dist);
 		HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+	}
+	stop(&htim2);
+}
+
+// turn right a certain angle
+void turn_angle (double angle)
+{
+	uint16_t tick_rate = HAL_GetTickFreq();
+	uint32_t last_tick = HAL_GetTick();
+	float curr_angle = getYaw();
+	float final_angle = curr_angle + angle;
+	turn_right(&htim2);
+	while (curr_angle < final_angle) {
+		//	   Select User Bank 0
+		ICM_SelectBank(&hi2c2, USER_BANK_0);
+		HAL_Delay(5);
+
+		// Obtain raw accelerometer and gyro data
+		ICM_ReadAccelGyro(&hi2c2);
+
+		// Obtain raw magnetometer data
+		//	  int16_t mag_data[3];
+		ICM_ReadMag(&hi2c2, mag_data);
+
+		// Obtain corrected accelerometer and gyro data
+		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+
+		// Apply Madgwick to get pitch, roll, and yaw
+		dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
+		MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+						 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+						 mag_data[0], mag_data[1], mag_data[2], dt);
+
+		last_tick = HAL_GetTick();
+
+		computeAngles();
+
+		curr_angle = getYaw();
 	}
 	stop(&htim2);
 }

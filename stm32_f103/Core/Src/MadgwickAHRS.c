@@ -22,7 +22,7 @@
 // Definitions
 
 #define sampleFreq	100.0f		// sample frequency in Hz
-#define betaDef		0.041f		// 2 * proportional gain
+#define betaDef		0.041f		// 2 * proportional gain 0.041
 
 //---------------------------------------------------------------------------------------------------
 // Variable definitions
@@ -53,26 +53,6 @@ float invSqrt(float x) {
 	return y;
 }
 
-static void compensateGyroDrift(
-    float q0, float q1, float q2, float q3,
-    float s0, float s1, float s2, float s3,
-    float dt, float zeta,
-    float w_bx, float w_by, float w_bz,
-    float gx, float gy, float gz)
-{
-  // w_err = 2 q x s
-  float w_err_x = 2.0f * q0 * s1 - 2.0f * q1 * s0 - 2.0f * q2 * s3 + 2.0f * q3 * s2;
-  float w_err_y = 2.0f * q0 * s2 + 2.0f * q1 * s3 - 2.0f * q2 * s0 - 2.0f * q3 * s1;
-  float w_err_z = 2.0f * q0 * s3 - 2.0f * q1 * s2 + 2.0f * q2 * s1 - 2.0f * q3 * s0;
-
-  w_bx += w_err_x * dt * zeta;
-  w_by += w_err_y * dt * zeta;
-  w_bz += w_err_z * dt * zeta;
-
-  gx -= w_bx;
-  gy -= w_by;
-  gz -= w_bz;
-}
 
 //---------------------------------------------------------------------------------------------------
 // AHRS algorithm update
@@ -83,12 +63,6 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 	float qDot1, qDot2, qDot3, qDot4;
 	float hx, hy;
 	float _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
-
-	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
-	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
-		MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az);
-		return;
-	}
 
 	// Convert gyroscope degrees/sec to radians/sec
 	gx *= 0.0174533f;
@@ -101,9 +75,18 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 	az *= 9.81f;
 
 	// Convert magnetometer measurements uT to mT
+	mx *= 0.15f;
+	my *= 0.15f;
+	mz *= 0.15f;
 	mx /= 1000.0f;
 	my /= 1000.0f;
 	mz /= 1000.0f;
+
+	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
+	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
+		MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, dt);
+		return;
+	}
 
 	// Rate of change of quaternion from gyroscope
 	qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
@@ -167,8 +150,6 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 		s2 *= recipNorm;
 		s3 *= recipNorm;
 
-//		compensateGyroDrift(q0, q1, q2, q3, s0, s1, s2, s3, dt, beta, w_bx, w_by, w_bz, gx, gy, gz);
-
 		// Apply feedback step
 		qDot1 -= beta * s0;
 		qDot2 -= beta * s1;
@@ -193,7 +174,7 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 //---------------------------------------------------------------------------------------------------
 // IMU algorithm update
 
-void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) {
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az, float dt) {
 	float recipNorm;
 	float s0, s1, s2, s3;
 	float qDot1, qDot2, qDot3, qDot4;
@@ -248,10 +229,10 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 	}
 
 	// Integrate rate of change of quaternion to yield quaternion
-	q0 += qDot1 * (1.0f / sampleFreq);
-	q1 += qDot2 * (1.0f / sampleFreq);
-	q2 += qDot3 * (1.0f / sampleFreq);
-	q3 += qDot4 * (1.0f / sampleFreq);
+	q0 += (qDot1 * dt/1000.0); //(1.0f / sampleFreq)
+	q1 += (qDot2 * dt/1000.0);
+	q2 += (qDot3 * dt/1000.0);
+	q3 += (qDot4 * dt/1000.0);
 
 	// Normalise quaternion
 	recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
@@ -284,5 +265,5 @@ float getPitch() {
 }
 float getYaw() {
 //    computeAngles();
-	return yaw * 57.29578 + 180; // rad/s to dps
+	return (yaw * 57.29578); // rad/s to dps
 }
