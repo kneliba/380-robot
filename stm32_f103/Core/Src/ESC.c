@@ -204,39 +204,51 @@ void decelerate(TIM_HandleTypeDef *htim)
 }
 
 // increases one side of the motor to drive faster to offset a leer
-// can reduce or increase the tolerance from the ideal path and correction speed
 // can also reduce the speed of the other motor to stay on path
-void drive_straight_ultrasonic(TIM_HandleTypeDef *htim, double speed, double ideal_block_distance)
+void drive_straight_ultrasonic(TIM_HandleTypeDef *htim, double speed, double ideal_block_distance, int tolerance)
 {
-
-	double pulse_widthL = 1.0 + (speed * 1.25 / 100.0);
-	double commandL = (pulse_widthL / 20.0) * ARR;
-
+	uint8_t kp = 8;
+	double pulse_widthL = 1.0 + (speed * L_offset / 100.0);
 	double pulse_widthR = 1.0 + (speed / 100.0);
-	double commandR = (pulse_widthR / 20.0) * ARR;
+
+	uint16_t commandL = (pulse_widthL / 20.0) * ARR;
+	uint16_t commandR = (pulse_widthR / 20.0) * ARR;
 
 	double distance_from_wall = get_side_distance();
-	int tolerance = 3;
 
-	// float error = distance_from_wall - ideal_block_distance;
+	float error = distance_from_wall - ideal_block_distance;
 
-	uint8_t correction_speed = 15;
-	double pulse_width_correction = 1.0 + ((correction_speed) / 100.0);
-	double increased_command = (pulse_width_correction / 20.0) * ARR;
-
-	// to the right of the ideal path
-	if (distance_from_wall > ideal_block_distance + tolerance)
-	{
-		// Correct by driving to the left
-		TIM2->CCR1 = commandL;					   // left
-		TIM2->CCR2 = commandR + increased_command; // right
-	}
 	// to the left of the ideal path
-	else if (distance_from_wall < ideal_block_distance - tolerance)
+	if (error < 0)
+	{
+		// Correct by driving to the right (negative error)
+		double new_command = commandL + error * kp;
+		if (new_command < 2000)
+		{
+			TIM2->CCR1 = commandL;
+			TIM2->CCR2 = 2000;
+		}
+		else
+		{
+			TIM2->CCR1 = commandR;
+			TIM2->CCR2 = new_command;
+		}
+	}
+	// to the right of the ideal path
+	else if (error > 0)
 	{
 		// Correct by driving to the right
-		TIM2->CCR1 = commandL + increased_command; // right
-		TIM2->CCR2 = commandR;					   // right
+		double new_command = commandL + error * kp;
+		if (new_command < 2000)
+		{
+			TIM2->CCR1 = commandL;
+			TIM2->CCR2 = 2000;
+		}
+		else
+		{
+			TIM2->CCR1 = commandR;
+			TIM2->CCR2 = new_command;
+		}
 	}
 	// on ideal path
 	else
