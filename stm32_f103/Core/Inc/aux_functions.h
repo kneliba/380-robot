@@ -8,9 +8,9 @@
 #include "main.h"
 
 #define voltage_divder_factor 0.25
-#define voltage_offset_volts -0.2
+#define voltage_offset_volts 0.8
 
-#define VREF 3.25
+#define VREF 3.32
 
 float read_batt_voltage(ADC_HandleTypeDef* hadc);
 

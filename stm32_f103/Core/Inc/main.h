@@ -77,7 +77,6 @@ void delay_us (uint32_t us);
 #define BATTERY_GPIO_Port GPIOA
 #define SWITCH_Pin GPIO_PIN_5
 #define SWITCH_GPIO_Port GPIOA
-#define SWITCH_EXTI_IRQn EXTI9_5_IRQn
 #define FRONT_TRIG_Pin GPIO_PIN_6
 #define FRONT_TRIG_GPIO_Port GPIOA
 #define FRONT_ECHO_Pin GPIO_PIN_7
@@ -90,22 +89,12 @@ void delay_us (uint32_t us);
 #define I2C_IMU_SCL_GPIO_Port GPIOB
 #define I2C_IMU_SDA_Pin GPIO_PIN_11
 #define I2C_IMU_SDA_GPIO_Port GPIOB
-#define RIGHT_ENCODER_A_Pin GPIO_PIN_9
-#define RIGHT_ENCODER_A_GPIO_Port GPIOA
-#define RIGHT_ENCODER_B_Pin GPIO_PIN_10
-#define RIGHT_ENCODER_B_GPIO_Port GPIOA
-#define LEFT_ENCODER_A_Pin GPIO_PIN_11
-#define LEFT_ENCODER_A_GPIO_Port GPIOA
-#define LEFT_ENCODER_B_Pin GPIO_PIN_12
-#define LEFT_ENCODER_B_GPIO_Port GPIOA
 #define LED_R_Pin GPIO_PIN_3
 #define LED_R_GPIO_Port GPIOB
 #define LED_G_Pin GPIO_PIN_4
 #define LED_G_GPIO_Port GPIOB
 #define LED_B_Pin GPIO_PIN_6
 #define LED_B_GPIO_Port GPIOB
-#define I2C_ESP_SDA_Pin GPIO_PIN_9
-#define I2C_ESP_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

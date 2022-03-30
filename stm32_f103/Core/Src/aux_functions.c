@@ -17,7 +17,7 @@ float read_batt_voltage(ADC_HandleTypeDef* hadc){
 
 	float voltage_raw = (raw_val/4095.0/voltage_divder_factor)*VREF;
 
-	float batt_voltage = voltage_raw - voltage_offset_volts;
+	float batt_voltage = voltage_raw + voltage_offset_volts;
 
 	return batt_voltage;
 }
