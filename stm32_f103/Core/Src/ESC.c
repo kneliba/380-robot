@@ -104,10 +104,9 @@ void drive_straight_distance_ultrasonic (TIM_HandleTypeDef *htim, double speed, 
 {
 	reset_distance();
 	int16_t  encoder_dist = get_distance_travelled();
-	drive_straight_ultrasonic(htim, speed, ideal_block_distance);
 	while (encoder_dist < distance) {
-//		if(encoder_dist > )encoder_dists
 		drive_straight_ultrasonic(htim, speed, ideal_block_distance);
+		encoder_dist = get_distance_travelled();
 	}
 	stop(htim);
 }

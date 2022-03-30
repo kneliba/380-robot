@@ -40,4 +40,7 @@ void drive_distance (TIM_HandleTypeDef *htim, double speed, double distance);
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim, double speed, double distance);
 
+void drive_straight_distance_ultrasonic (TIM_HandleTypeDef *htim, double speed, double distance, double ideal_block_distance);
+
+void drive_straight_ultrasonic (TIM_HandleTypeDef *htim, double speed, double ideal_block_distance);
 #endif /* ESC_H_ */

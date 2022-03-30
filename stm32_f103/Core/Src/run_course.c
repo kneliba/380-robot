@@ -33,20 +33,32 @@ int8_t course[6][6] = {{0, 0, 0, 0, 0, 0},
 					   {0, 0, 0, 0, 1, 0}
 					   };
 int8_t current_pos[2] = {5,4};
-int8_t full_path[2] = {{5,4}, {5,3}, {5,2}}; // finish this
+int8_t tiles_travelled_total = 0;
+int8_t full_path[35][2] = {{5,4}, {5,3}, {5,2}, {5,1}, {5,0},
+					   {4,0}, {3,0}, {2,0}, {1,0}, {0,0},
+					   {0,1}, {0,2}, {0,3}, {0,4}, {0,5},
+					   {1,5}, {2,5}, {3,5}, {4,5},
+					   {4,4}, {4,3}, {4,2}, {4,1},
+					   {3,1}, {2,1}, {1,1},
+					   {1,2}, {1,3}, {1,4},
+					   {2,4}, {3,4},
+					   {3,3}, {3,2},
+					   {2,2},
+					   {2,3}
+					  }; // finish this
 
-int8_t pits[3][2] = {{2, 5,},
-					 {3, 5,},
-					 {4, 4,}
+int8_t pits[3][2] = {{2, 5},
+					 {3, 5},
+					 {4, 4}
 					};
-int8_t gravel[3][2] = {{1, 2,},
-					   {1, 3,},
-					   {2, 1,}
+int8_t gravel[3][2] = {{1, 2},
+					   {1, 3},
+					   {2, 1}
 					  };
-int8_t sand[4][2] = {{1, 2,},
-					 {1, 3,},
-					 {2, 4,},
-					 {2, 3,}
+int8_t sand[4][2] = {{1, 2},
+					 {1, 3},
+					 {2, 4},
+					 {2, 3}
 					};
 
 // run full course by distance using ultrasonic only
@@ -93,6 +105,8 @@ void run_course_encoders (TIM_HandleTypeDef *htim, double speed)
 // run full course by distance using motor encoders and ultrasonic
 void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double speed)
 {
+	int8_t tiles_travelled_segment = 0;
+
 	// calculate distance to travel in cm
 	for(int8_t i = 0; i < 11; i++)
 	{
@@ -105,8 +119,26 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double speed)
 
 	while(current < 11)
 	{
+		reset_distance();
+		int16_t  encoder_dist = get_distance_travelled();
+		int16_t  dist_of_tile_travelled = get_distance_travelled();
 
-		drive_straight_distance_ultrasonic(htim, speed, distances_to_travel[current], distances_to_side[current]);
+		while (encoder_dist < distances_to_travel[current]) {
+			if(dist_of_tile_travelled > dist_of_tile) {
+				current_pos[0] = full_path[tiles_travelled_total][0];
+				current_pos[1] = full_path[tiles_travelled_total][1];
+				tiles_travelled_segment++;
+				tiles_travelled_total++;
+				dist_of_tile_travelled = encoder_dist - dist_of_tile*tiles_travelled_segment;
+			}
+
+			drive_straight_ultrasonic(htim, speed, dist_of_tile);
+			encoder_dist = get_distance_travelled();
+		}
+
+		tiles_travelled_segment = 0;
+
+		stop(htim);
 		turn_right(htim);
 		current++;
 	}
