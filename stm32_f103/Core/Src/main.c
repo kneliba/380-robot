@@ -88,7 +88,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	double speed = 25;
+	double speed = 15;
 
   /* USER CODE END 1 */
 
@@ -203,8 +203,8 @@ int main(void)
 	  ICM_SelectBank(&hi2c2, USER_BANK_0);
 	  HAL_Delay(1);
 	  yaw_main = 0;
-//	  accelerate(&htim2, speed);
-      for (int i = 0; i<100; i++)
+	  accelerate(&htim2, speed);
+      for (int i = 0; i<50; i++)
       {
           ICM_ReadAccelGyro(&hi2c2);
           ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
@@ -212,7 +212,7 @@ int main(void)
           yaw_main += gyro_yaw(&hi2c2, dt);
           last_tick = HAL_GetTick();
           drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
-          HAL_Delay(10);
+          HAL_Delay(5);
       }
       decelerate(&htim2);
       reset_PID_controller();

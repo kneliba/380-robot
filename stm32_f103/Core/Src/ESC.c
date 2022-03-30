@@ -83,9 +83,9 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
 
 void drive_straight_PID (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt)
 {
-    static const uint8_t Kp = 8;
-    static const uint8_t Ki = 0.0;
-    static const uint8_t Kd = 0.0;
+    static const float Kp = 10;
+    static const float Ki = 0.0;
+    static const float Kd = 2.5;
 
 //    current_angle = (int)current_angle%360;
 
@@ -102,7 +102,7 @@ void drive_straight_PID (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDe
 
     // This is the PID controller calcs
     integration_sum += (current_error * (dt/1000.0));
-    float correction = Kp * current_error + Ki * integration_sum + Kd * 1000 * (current_error - prev_error)/(dt/1000.0);
+    float correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(dt/1000.0);
     prev_error = current_error;
 
     if (current_error < 0){
@@ -157,7 +157,7 @@ void accelerate (TIM_HandleTypeDef *htim, double final_speed)
 	{
 		drive_forward(htim, speed);
 		speed += 1;
-		HAL_Delay(15);
+		HAL_Delay(20);
 	}
 }
 
@@ -170,7 +170,7 @@ void decelerate (TIM_HandleTypeDef *htim)
 	{
 		drive_forward(htim, speed);
 		speed -= 1;
-		HAL_Delay(15);
+		HAL_Delay(20);
 	}
 }
 
