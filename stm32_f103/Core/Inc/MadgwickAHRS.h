@@ -12,23 +12,27 @@
 //=====================================================================================================
 #ifndef MadgwickAHRS_h
 #define MadgwickAHRS_h
-#include "main.h"
 
 //----------------------------------------------------------------------------------------------------
 // Variable declaration
 
 extern float beta;				// algorithm gain
 extern float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
-extern float roll;
-extern float pitch;
-extern float yaw;
-extern char anglesComputed;
+extern float roll, pitch, yaw;
+extern float w_bx, w_by, w_bz;
+
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
-void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
-void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, double dt);
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az, double dt);
 void computeAngles();
+float getRoll();
+float getPitch();
+float getYaw();
 
 #endif
+//=====================================================================================================
+// End of file
+//=====================================================================================================

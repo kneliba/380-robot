@@ -53,7 +53,7 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern int16_t position;
+extern uint32_t position;
 int16_t oldpos = 0;
 extern double speed;
 int indx = 0;
@@ -72,8 +72,10 @@ extern Motor_Encoder right_encoder;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern I2C_HandleTypeDef hi2c2;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
+extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -202,22 +204,22 @@ void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
-	indx++;
-	if ( indx == 500) //calculated every half second
-	{
-		//speed in clicks per second
-		speed = ((position - oldpos)*2);
-		right_encoder.speed = speed;
-
-		//velocity
-		position_m = (2*3.1415*0.07042) * position;
-		oldpos_m = (2*3.1415*0.07042) * oldpos;
-		velocity = ((position_m - oldpos_m)*2);
-		right_encoder.velocity = velocity;
-
-		oldpos = position;
-		indx = 0;
-	}
+//	indx++;
+//	if ( indx == 500) //calculated every half second
+//	{
+//		//speed in clicks per second
+//		speed = ((position - oldpos)*2);
+//		right_encoder.speed = speed;
+//
+//		//velocity
+//		position_m = (2*3.1415*0.07042) * position /3;
+//		oldpos_m = (2*3.1415*0.07042) * oldpos /3;
+//		velocity = ((position_m - oldpos_m)*2);
+//		right_encoder.velocity = velocity;
+//
+//		oldpos = position;
+//		indx = 0;
+//	}
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
@@ -300,6 +302,34 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 1 */
 
   /* USER CODE END TIM3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C2 error interrupt.
+  */
+void I2C2_ER_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C2_ER_IRQn 0 */
+
+  /* USER CODE END I2C2_ER_IRQn 0 */
+  HAL_I2C_ER_IRQHandler(&hi2c2);
+  /* USER CODE BEGIN I2C2_ER_IRQn 1 */
+
+  /* USER CODE END I2C2_ER_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART2 global interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

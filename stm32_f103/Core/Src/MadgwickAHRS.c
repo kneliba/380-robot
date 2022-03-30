@@ -21,16 +21,16 @@
 
 // Definitions
 
-#define sampleFreq	512.0f		// sample frequency in Hz
-#define betaDef		0.1f		// 2 * proportional gain
+#define sampleFreq	100.0f		// sample frequency in Hz
+#define betaDef		0.041f		// 2 * proportional gain 0.041
 
 //---------------------------------------------------------------------------------------------------
 // Variable definitions
 
 float beta = betaDef;								// 2 * proportional gain (Kp)
-float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
+float q0 = 0.7071f, q1 = 0.0f, q2 = 0.7071f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
 float roll = 0, pitch = 0, yaw = 0;
-char anglesComputed = 0;
+float w_bx = 0, w_by = 0, w_bz = 0;
 
 //====================================================================================================
 // Functions
@@ -39,35 +39,54 @@ char anglesComputed = 0;
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
 float invSqrt(float x) {
-	float halfx = 0.5f * x;
-	float y = x;
-	long i = *(long*)&y;
-	i = 0x5f3759df - (i>>1);
-	y = *(float*)&i;
-	y = y * (1.5f - (halfx * y * y));
+//	float halfx = 0.5f * x;
+//	float y = x;
+//	long i = *(long*)&y;
+//	i = 0x5f3759df - (i>>1);
+//	y = *(float*)&i;
+//	y = y * (1.5f - (halfx * y * y));
+//	return y;
+
+	unsigned int i = 0x5F1F1412 - (*(unsigned int*)&x >> 1);
+	float tmp = *(float*)&i;
+	float y = tmp * (1.69000231f - 0.714158168f * x * tmp * tmp);
 	return y;
 }
+
 
 //---------------------------------------------------------------------------------------------------
 // AHRS algorithm update
 
-void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz, double dt) {
 	float recipNorm;
 	float s0, s1, s2, s3;
 	float qDot1, qDot2, qDot3, qDot4;
 	float hx, hy;
 	float _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
 
-	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
-	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
-		MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az);
-		return;
-	}
-
 	// Convert gyroscope degrees/sec to radians/sec
 	gx *= 0.0174533f;
 	gy *= 0.0174533f;
 	gz *= 0.0174533f;
+
+	// Convert accelerometer g to m/sec^2
+	ax *= 9.81f;
+	ay *= 9.81f;
+	az *= 9.81f;
+
+	// Convert magnetometer measurements uT to mT
+	mx *= 0.15f;
+	my *= 0.15f;
+	mz *= 0.15f;
+	mx /= 1000.0f;
+	my /= 1000.0f;
+	mz /= 1000.0f;
+
+	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
+	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
+		MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, dt);
+		return;
+	}
 
 	// Rate of change of quaternion from gyroscope
 	qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
@@ -139,10 +158,10 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 	}
 
 	// Integrate rate of change of quaternion to yield quaternion
-	q0 += qDot1 * (1.0f / sampleFreq);
-	q1 += qDot2 * (1.0f / sampleFreq);
-	q2 += qDot3 * (1.0f / sampleFreq);
-	q3 += qDot4 * (1.0f / sampleFreq);
+	q0 += (qDot1 * dt/1000.0); //(1.0f / sampleFreq)
+	q1 += (qDot2 * dt/1000.0);
+	q2 += (qDot3 * dt/1000.0);
+	q3 += (qDot4 * dt/1000.0);
 
 	// Normalise quaternion
 	recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
@@ -155,7 +174,7 @@ void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float 
 //---------------------------------------------------------------------------------------------------
 // IMU algorithm update
 
-void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) {
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az, double dt) {
 	float recipNorm;
 	float s0, s1, s2, s3;
 	float qDot1, qDot2, qDot3, qDot4;
@@ -210,10 +229,10 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 	}
 
 	// Integrate rate of change of quaternion to yield quaternion
-	q0 += qDot1 * (1.0f / sampleFreq);
-	q1 += qDot2 * (1.0f / sampleFreq);
-	q2 += qDot3 * (1.0f / sampleFreq);
-	q3 += qDot4 * (1.0f / sampleFreq);
+	q0 += (qDot1 * dt/1000.0); //(1.0f / sampleFreq)
+	q1 += (qDot2 * dt/1000.0);
+	q2 += (qDot3 * dt/1000.0);
+	q3 += (qDot4 * dt/1000.0);
 
 	// Normalise quaternion
 	recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
@@ -225,21 +244,26 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 
 void computeAngles()
 {
-	roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2) * 57.29578f;
-	pitch = asinf(-2.0f * (q1*q3 - q0*q2)) * 57.29578f;
-	yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3) * 57.29578f;
-	anglesComputed = 1;
+	roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2);
+	pitch = asinf(-2.0f * (q1*q3 - q0*q2));
+	yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3);
+
+	// angles in rad/s
+//	roll  = atan2(2.0 * (q3 * q2 + q0 * q1) , 1.0 - 2.0 * (q1 * q1 + q2 * q2));
+//	pitch = asin(2.0 * (q2 * q0 - q3 * q1));
+//	yaw   = atan2(2.0 * (q3 * q0 + q1 * q2) , - 1.0 + 2.0 * (q0 * q0 + q1 * q1));
+
 }
 
 float getRoll() {
-    computeAngles();
-    return roll * 57.29578f;
+//    computeAngles();
+    return roll * 57.29578; // rad/s to dps
 }
 float getPitch() {
-    computeAngles();
-    return pitch * 57.29578f;
+//    computeAngles();
+	return pitch * 57.29578; // rad/s to dps
 }
 float getYaw() {
-    computeAngles();
-    return yaw * 57.29578f + 180.0f;
+//    computeAngles();
+	return (yaw * 57.29578); // rad/s to dps
 }

@@ -65,6 +65,10 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void delay_us (uint32_t us);
+//void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+void drive_distance (double speed, double distance);
+void drive_until (double speed, double distance);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -88,22 +92,12 @@ void delay_us (uint32_t us);
 #define I2C_IMU_SCL_GPIO_Port GPIOB
 #define I2C_IMU_SDA_Pin GPIO_PIN_11
 #define I2C_IMU_SDA_GPIO_Port GPIOB
-#define RIGHT_ENCODER_A_Pin GPIO_PIN_9
-#define RIGHT_ENCODER_A_GPIO_Port GPIOA
-#define RIGHT_ENCODER_B_Pin GPIO_PIN_10
-#define RIGHT_ENCODER_B_GPIO_Port GPIOA
-#define LEFT_ENCODER_A_Pin GPIO_PIN_11
-#define LEFT_ENCODER_A_GPIO_Port GPIOA
-#define LEFT_ENCODER_B_Pin GPIO_PIN_12
-#define LEFT_ENCODER_B_GPIO_Port GPIOA
 #define LED_R_Pin GPIO_PIN_3
 #define LED_R_GPIO_Port GPIOB
 #define LED_G_Pin GPIO_PIN_4
 #define LED_G_GPIO_Port GPIOB
 #define LED_B_Pin GPIO_PIN_6
 #define LED_B_GPIO_Port GPIOB
-#define I2C_ESP_SDA_Pin GPIO_PIN_9
-#define I2C_ESP_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

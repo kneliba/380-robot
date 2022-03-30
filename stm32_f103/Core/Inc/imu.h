@@ -9,16 +9,17 @@
 #define IMU_H
 #include "main.h"
 
-extern uint16_t accel_data[3];
-extern uint16_t gyro_data[3];
+extern int16_t accel_data[3];
+extern int16_t gyro_data[3];
 extern int16_t mag_data[3];
 
-extern uint16_t corr_accel_data[3];
-extern uint16_t corr_gyro_data[3];
+extern float corr_accel_data[3];
+extern float corr_gyro_data[3];
 
 #define UART_BUS		    (&huart2)
 
 #define ICM20948_ADDRESS    (0x69)
+#define AK09916_ADDRESS		(0X0C)
 
 #define USER_BANK_SEL   	(0x7F)
 #define USER_BANK_0		    (0x00)
@@ -35,6 +36,9 @@ extern uint16_t corr_gyro_data[3];
 #define GYRO_RATE_250	    (0x00)
 #define GYRO_LPF_17HZ   	(0x29)
 
+void ICM_WriteOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *pData);
+void ICM_readBytes(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *pData, uint16_t Size);
+void ICM_ReadOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t* pData);
 void ICM_PowerOn(I2C_HandleTypeDef *hi2c);
 uint8_t ICM_WHOAMI(I2C_HandleTypeDef *hi2c);
 void ICM_SelectBank(I2C_HandleTypeDef *hi2c, uint8_t bank);
@@ -48,7 +52,9 @@ void ICM_AccelGyroOff(I2C_HandleTypeDef *hi2c);
 void ICM_AccelGyroOn(I2C_HandleTypeDef *hi2c);
 void ICM_SetGyroRateLPF(I2C_HandleTypeDef *hi2c, uint8_t rate, uint8_t lpf);
 void ICM_SetGyroLPF(uint8_t lpf);
+void ICM_Set_I2C_Clk(I2C_HandleTypeDef *hi2c);
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c);
-void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, uint16_t raw_accel_data[3], uint16_t raw_gyro_data[3]);
+void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, int16_t raw_accel_data[3], int16_t raw_gyro_data[3]);
+float gyro_yaw(I2C_HandleTypeDef *hi2c, float dt);
 
 #endif /* IMU_H */
