@@ -88,7 +88,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	double speed = 20;
+	double speed = 15;
 
   /* USER CODE END 1 */
 
@@ -200,22 +200,23 @@ int main(void)
 //	  reset_distance(&htim1);
 
 	  // DRIVE STRAIGHT TEST --------------------------------
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(1);
-//	  yaw_main = 0;
-////	  accelerate(&htim2, speed);
-//      for (int i = 0; i<100; i++)
-//      {
-//          ICM_ReadAccelGyro(&hi2c2);
-//          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-//          dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-//          yaw_main += gyro_yaw(&hi2c2, dt);
-//          last_tick = HAL_GetTick();
-//          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
-//          HAL_Delay(10);
-//      }
-//      decelerate(&htim2);
-//      HAL_Delay(3000);
+	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+	  HAL_Delay(1);
+	  yaw_main = 0;
+	  accelerate(&htim2, speed);
+      for (int i = 0; i<50; i++)
+      {
+          ICM_ReadAccelGyro(&hi2c2);
+          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+          dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+          yaw_main += gyro_yaw(&hi2c2, dt);
+          last_tick = HAL_GetTick();
+          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
+          HAL_Delay(5);
+      }
+      decelerate(&htim2);
+      reset_PID_controller();
+      HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ULTRASONIC ----------------------
 //      drive_until(speed, 50); // distance in cm

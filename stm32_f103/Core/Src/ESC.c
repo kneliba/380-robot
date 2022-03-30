@@ -9,6 +9,15 @@
 static double ARR = 40000.0;
 static double L_offset = 1.0;
 
+static float integration_sum = 0;
+static float prev_error = 0;
+
+uint16_t constrain_value(uint16_t input, uint16_t min_val, uint16_t max_val){
+	if (input < min_val) return min_val;
+	else if (input > max_val) return max_val;
+	else return input;
+}
+
 // drive forward - speed %
 void drive_forward (TIM_HandleTypeDef *htim, double speed)
 {
@@ -72,6 +81,54 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
     }
 }
 
+void drive_straight_PID (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt)
+{
+    static const float Kp = 10;
+    static const float Ki = 0.0;
+    static const float Kd = 2.5;
+
+//    current_angle = (int)current_angle%360;
+
+    // Offset for each side due to drivetrain differences
+
+    // TODO: Look into removing this float logic and change to integer logic with larger scale
+    double pulse_widthL = 1.0 + (speed*L_offset/100.0);
+    double pulse_widthR = 1.0 + (speed/100.0);
+
+    uint16_t commandL = (pulse_widthL/20.0)*ARR;
+    uint16_t commandR = (pulse_widthR/20.0)*ARR;
+
+    float current_error = current_angle - desired_angle;
+
+    // This is the PID controller calcs
+    integration_sum += (current_error * (dt/1000.0));
+    float correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(dt/1000.0);
+    prev_error = current_error;
+
+    if (current_error < 0){
+        // Correct by turning left
+        double new_command = commandL + correction; //results in decrease bc negative error
+        TIM2->CCR1 = constrain_value(new_command, 2000, 4000);
+		TIM2->CCR2 = commandR;
+    }
+    else if (current_error > 0){
+        // Correct by turning right
+        double new_command = commandR - correction;
+        TIM2->CCR1 = commandL;
+		TIM2->CCR2 = constrain_value(new_command, 2000, 4000);;
+    }
+    else
+    {
+    	TIM2->CCR1 = commandL;
+    	TIM2->CCR2 = commandR;
+    }
+}
+
+void reset_PID_controller(){
+	integration_sum = 0;
+	prev_error = 0;
+}
+
 void stop (TIM_HandleTypeDef *htim)
 {
 	drive_forward (htim, 0);
@@ -119,7 +176,7 @@ void accelerate (TIM_HandleTypeDef *htim, double final_speed)
 	{
 		drive_forward(htim, speed);
 		speed += 1;
-		HAL_Delay(15);
+		HAL_Delay(20);
 	}
 }
 
@@ -132,7 +189,7 @@ void decelerate (TIM_HandleTypeDef *htim)
 	{
 		drive_forward(htim, speed);
 		speed -= 1;
-		HAL_Delay(15);
+		HAL_Delay(20);
 	}
 }
 
