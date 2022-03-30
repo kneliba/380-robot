@@ -268,7 +268,7 @@ void drive_straight_ultrasonic_IMU(TIM_HandleTypeDef *htim, I2C_HandleTypeDef *h
 	double distance_from_wall = get_side_distance();
 
 	float distance_error = distance_from_wall - ideal_block_distance;
-	float desired_angle = distance_error*kp;
+	float desired_angle = distance_error*kp*(-1)+current_angle;
 
 	drive_straight(htim , speed, hi2c2, desired_angle, current_angle);
 }

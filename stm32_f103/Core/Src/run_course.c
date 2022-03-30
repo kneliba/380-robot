@@ -118,7 +118,7 @@ void run_course_encoders (TIM_HandleTypeDef *htim, double drive_speed, double tu
 }
 
 // run full course by distance using motor encoders and ultrasonic
-void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed, double turn_speed)
+void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed, double turn_speed )
 {
 	int8_t tiles_travelled_segment = 0;
 
@@ -126,6 +126,9 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 	for(int8_t i = 0; i < 11; i++)
 	{
 		distances_to_travel[i] *= dist_of_tile;
+		distances_to_travel[i] -= dist_to_turn;
+		distances_to_wall[i] *= dist_of_tile;
+		distances_to_wall[i] += dist_to_turn;
 		distances_to_side[i] *= dist_of_tile;
 		distances_to_side[i] += dist_beside_wall;
 	}
@@ -142,8 +145,7 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 
 		while (encoder_dist > distances_to_travel[current]) {
 			is_in_pit = check_if_in_pit();
-
-			if(!is_in_pit && ultrasonic_dist < dist_to_turn)
+			if(!is_in_pit && ultrasonic_dist < distances_to_wall[current])
 			{
 				break;
 			}
