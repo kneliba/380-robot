@@ -7,6 +7,7 @@
 
 #include "run_course.h"
 #include "main.h"
+#include <stdbool.h>
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f103xb.h"
@@ -61,6 +62,19 @@ int8_t sand[4][2] = {{1, 2},
 					 {2, 4},
 					 {3, 3}
 					};
+
+bool check_if_in_pit()
+{
+	for(int i=0; i < 3; i++)
+	{
+		if(current_pos == pits[i])
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 // run full course by distance using ultrasonic only
 void run_course_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed, double turn_speed)
@@ -124,8 +138,15 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 		int16_t  encoder_dist = get_distance_travelled();
 		int16_t  ultrasonic_dist = get_front_distance();
 		int16_t  dist_of_tile_travelled = get_distance_travelled();
+		bool is_in_pit = false;
 
-		while (encoder_dist < distances_to_travel[current] && ultrasonic_dist > dist_to_turn) {
+		while (encoder_dist > distances_to_travel[current]) {
+			is_in_pit = check_if_in_pit();
+			if(!is_in_pit && ultrasonic_dist < dist_to_turn)
+			{
+				break;
+			}
+
 			if(dist_of_tile_travelled > dist_of_tile) {
 				current_pos[0] = full_path[tiles_travelled_total][0];
 				current_pos[1] = full_path[tiles_travelled_total][1];
@@ -134,7 +155,7 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 				dist_of_tile_travelled = encoder_dist - dist_of_tile*tiles_travelled_segment;
 			}
 
-			if(current_pos == pits[0] || current_pos == pits[1] || current_pos == pits[3]) { // also in sand || gravel
+			if(is_in_pit) { // also in sand || gravel
 				drive_distance(drive_speed, distances_to_travel[current]);
 			}
 			else {
@@ -151,5 +172,3 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 		current++;
 	}
 }
-
-
