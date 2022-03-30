@@ -125,43 +125,33 @@ static uint8_t ICM_Mag_Read(I2C_HandleTypeDef *hi2c, uint8_t reg)
   	return Data;
 }
 
-//void ICM20948_READ_MAG(I2C_HandleTypeDef *hi2c, int16_t magn[3])
-//{
-//uint8_t mag_buffer[10];
-//
-//  mag_buffer[0] =ICM_Mag_Read(hi2c, 0x01);
-//  mag_buffer[1] =ICM_Mag_Read(hi2c, 0x11);
-//  mag_buffer[2] =ICM_Mag_Read(hi2c, 0x12);
-//  magn[0]=mag_buffer[1]|mag_buffer[2]<<8;
-//  mag_buffer[3] =ICM_Mag_Read(hi2c, 0x13);
-//  mag_buffer[4] =ICM_Mag_Read(hi2c, 0x14);
-//  magn[1]=mag_buffer[3]|mag_buffer[4]<<8;
-//  mag_buffer[5] =ICM_Mag_Read(hi2c, 0x15);
-//  mag_buffer[6] =ICM_Mag_Read(hi2c, 0x16);
-//  magn[2]=mag_buffer[5]|mag_buffer[6]<<8;
-//
-//  i2c_Mag_write(hi2c, 0x31,0x01);
-//}
-
 /*
  *
  * Read magnetometer
  *
  */
 void ICM_ReadMag(I2C_HandleTypeDef *hi2c, int16_t magn[3]) {
-	uint8_t mag_buffer[10];
-    mag_buffer[0] =ICM_Mag_Read(hi2c, 0x01);
-    mag_buffer[1] =ICM_Mag_Read(hi2c, 0x11);
-    mag_buffer[2] =ICM_Mag_Read(hi2c, 0x12);
-    magn[0]=mag_buffer[1]|mag_buffer[2]<<8;
-	mag_buffer[3] =ICM_Mag_Read(hi2c, 0x13);
-    mag_buffer[4] =ICM_Mag_Read(hi2c, 0x14);
-	magn[1]=mag_buffer[3]|mag_buffer[4]<<8;
-	mag_buffer[5] =ICM_Mag_Read(hi2c, 0x15);
-    mag_buffer[6] =ICM_Mag_Read(hi2c, 0x16);
-	magn[2]=mag_buffer[5]|mag_buffer[6]<<8;
+//	uint8_t mag_buffer[10];
+//    mag_buffer[0] =ICM_Mag_Read(hi2c, 0x01);
+//    mag_buffer[1] =ICM_Mag_Read(hi2c, 0x11);
+//    mag_buffer[2] =ICM_Mag_Read(hi2c, 0x12);
+//    magn[0]=mag_buffer[1]|mag_buffer[2]<<8;
+//	mag_buffer[3] =ICM_Mag_Read(hi2c, 0x13);
+//    mag_buffer[4] =ICM_Mag_Read(hi2c, 0x14);
+//	magn[1]=mag_buffer[3]|mag_buffer[4]<<8;
+//	mag_buffer[5] =ICM_Mag_Read(hi2c, 0x15);
+//    mag_buffer[6] =ICM_Mag_Read(hi2c, 0x16);
+//	magn[2]=mag_buffer[5]|mag_buffer[6]<<8;
 
-	i2c_Mag_write(hi2c, 0x31,0x01);
+//	i2c_Mag_write(hi2c, 0x31,0x01); why is it in single measurement mode
+
+	uint8_t mag_buffer[12];
+	HAL_I2C_Mem_Read(hi2c, AK09916_ADDRESS << 1, 0x11, I2C_MEMADD_SIZE_8BIT, mag_buffer, 12, 1000);
+
+	magn[0] = (int16_t)(mag_buffer[0] | mag_buffer[1] << 8);
+	magn[1] = (int16_t)(mag_buffer[2] | mag_buffer[3] << 8);
+	magn[2] = (int16_t)(mag_buffer[4] | mag_buffer[5] << 8);
+
 }
 
 /*

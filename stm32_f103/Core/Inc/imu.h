@@ -19,6 +19,7 @@ extern float corr_gyro_data[3];
 #define UART_BUS		    (&huart2)
 
 #define ICM20948_ADDRESS    (0x69)
+#define AK09916_ADDRESS		(0X0C)
 
 #define USER_BANK_SEL   	(0x7F)
 #define USER_BANK_0		    (0x00)

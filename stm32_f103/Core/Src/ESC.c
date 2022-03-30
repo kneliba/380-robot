@@ -7,11 +7,12 @@
 //#include "right_motor_encoder.h"
 
 static double ARR = 40000.0;
+static double L_offset = 1.15;
 
 // drive forward - speed %
 void drive_forward (TIM_HandleTypeDef *htim, double speed)
 {
-	double pulse_widthL = 1.0 + (speed*1.15/100.0);
+	double pulse_widthL = 1.0 + (speed*L_offset/100.0);
 	double commandL = (pulse_widthL/20.0)*ARR;
 
 	double pulse_widthR = 1.0 + (speed/100.0);
@@ -23,12 +24,11 @@ void drive_forward (TIM_HandleTypeDef *htim, double speed)
 
 void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle)
 {
-    uint8_t kp = 5;
-    uint8_t MSG[35] = {'\0'};
+    uint8_t kp = 8;
 
-//    current_angle = current_angle%360.0;
+//    current_angle = (int)current_angle%360;
 
-    double pulse_widthL = 1.0 + (speed*1.25/100.0);
+    double pulse_widthL = 1.0 + (speed*L_offset/100.0);
     double commandL = (pulse_widthL/20.0)*ARR;
 
     double pulse_widthR = 1.0 + (speed/100.0);
@@ -37,9 +37,9 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
 
     float error = current_angle - desired_angle;
 
-    if (error < -2.0){
+    if (error < 0){
         // Correct by turning left
-        double new_command = commandL += error*kp; //results in decrease bc negative error
+        double new_command = commandL + error*kp; //results in decrease bc negative error
         if (new_command < 2000)
         {
             TIM2->CCR1 = 2000;
@@ -47,14 +47,13 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
         }
         else
         {
-            TIM2->CCR1 = commandL += error*kp;
+            TIM2->CCR1 = new_command;
             TIM2->CCR2 = commandR;
-        }// left
-//        TIM2->CCR2 = commandR -= error*kp; // right
+        }
     }
-    else if (error > 2.0){
+    else if (error > 0){
         // Correct by turning right
-        double new_command = commandR -= error*kp;
+        double new_command = commandR - error*kp;
         if (new_command < 2000)
         {
             TIM2->CCR2 = 2000;
@@ -62,10 +61,14 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
         }
         else
         {
-            TIM2->CCR2 = commandR -= error*kp;
+            TIM2->CCR2 = new_command;
             TIM2->CCR1 = commandL;
         }
-//        TIM2->CCR1 = commandL += error*kp; // left
+    }
+    else
+    {
+    	TIM2->CCR1 = commandL;
+    	TIM2->CCR2 = commandR;
     }
 }
 
@@ -97,7 +100,7 @@ void accelerate (TIM_HandleTypeDef *htim, double final_speed)
 	{
 		drive_forward(htim, speed);
 		speed += 1;
-		HAL_Delay(25);
+		HAL_Delay(15);
 	}
 }
 
@@ -110,7 +113,7 @@ void decelerate (TIM_HandleTypeDef *htim)
 	{
 		drive_forward(htim, speed);
 		speed -= 1;
-		HAL_Delay(25);
+		HAL_Delay(15);
 	}
 }
 

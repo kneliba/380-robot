@@ -53,12 +53,13 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 extern HCSR04_Type Front_US;
 extern HCSR04_Type Side_US;
-float dist = 0;
 uint16_t overflow = 0;
 float roll_main = 0;
 float pitch_main = 0;
 float yaw_main = 0;
 float dt = 0;
+double front_dist = 0;
+double side_dist = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -87,12 +88,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-//	uint8_t ROLL_MSG[35] = {'\0'};
-//	uint8_t PITCH_MSG[35] = {'\0'};
-//	uint8_t YAW_MSG[35] = {'\0'};
-	double speed = 10;
-	int16_t encoder_cnt = 0;
-	float error = 0;
+	double speed = 25;
 
   /* USER CODE END 1 */
 
@@ -147,7 +143,7 @@ int main(void)
   HAL_Delay(100);
   uint16_t tick_rate = HAL_GetTickFreq();
   uint32_t last_tick = HAL_GetTick();
-
+  reset_distance(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,14 +152,18 @@ int main(void)
   {
 	  // ultrasonic testing
 //	  HCSR04_Read_Front(&htim3);
-//	  dist = get_front_distance();
+//	  front_dist = get_front_distance();
+//	  HAL_Delay(20);
+//	  HCSR04_Read_Side(&htim3);
+//	  side_dist = get_side_distance();
 //	  sprintf(MSG, "Distance: %f\n", dist);
 //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(100);
+//	  HAL_Delay(20);
 
 	  // encoder testing
-//	  int16_t encoder_cnt = get_encoder_count();
+//	  encoder_cnt = get_encoder_count();
+//	  dist = get_distance_travelled();
 //	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
 //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -193,7 +193,6 @@ int main(void)
 //	  stop(&htim2);
 //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 //	  HAL_Delay(2000);
 //
 //	  sprintf(MSG, "Reset distance\n");
@@ -201,21 +200,22 @@ int main(void)
 //	  reset_distance(&htim1);
 
 	  // DRIVE STRAIGHT TEST --------------------------------
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(1);
-//	  yaw_main = 0;
-//      for (int i = 0; i<300; i++)
-//      {
-//          ICM_ReadAccelGyro(&hi2c2);
-//          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-//          dt = (float)(HAL_GetTick() - last_tick)/tick_rate;
-//          yaw_main += gyro_yaw(&hi2c2, dt);
-//          last_tick = HAL_GetTick();
-//          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
-//          HAL_Delay(10);
-//      }
-//      stop(&htim2);
-//      HAL_Delay(3000);
+	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+	  HAL_Delay(1);
+	  yaw_main = 0;
+//	  accelerate(&htim2, speed);
+      for (int i = 0; i<100; i++)
+      {
+          ICM_ReadAccelGyro(&hi2c2);
+          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+          dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+          yaw_main += gyro_yaw(&hi2c2, dt);
+          last_tick = HAL_GetTick();
+          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
+          HAL_Delay(10);
+      }
+      decelerate(&htim2);
+      HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ULTRASONIC ----------------------
 //      drive_until(speed, 30);
@@ -229,39 +229,34 @@ int main(void)
 //      HAL_Delay(5000);
 
 // 	  IMU testing -------------------------------------------
-//	  	   Select User Bank 0
-	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-	  HAL_Delay(1);
+//	  Select User Bank 0
+//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+//	  HAL_Delay(1);
 
 	  // Obtain raw accelerometer and gyro data
-	  ICM_ReadAccelGyro(&hi2c2);
+//	  ICM_ReadAccelGyro(&hi2c2);
 
 	  // Obtain raw magnetometer data
-//	  int16_t mag_data[3];
 //	  ICM_ReadMag(&hi2c2, mag_data);
 
 	  // Obtain corrected accelerometer and gyro data
-	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+//	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
 
 	  // Apply Madgwick to get pitch, roll, and yaw
-	  dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
+//	  dt = (double)(HAL_GetTick() -last_tick)/tick_rate;
+
 //	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
 //	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
 //	  						 mag_data[0], mag_data[1], mag_data[2], dt);
 
-	  yaw_main += gyro_yaw(&hi2c2, dt);
-//
-	  last_tick = HAL_GetTick();
-//	  HAL_Delay(20);
+//	  yaw_main += gyro_yaw(&hi2c2, dt);
+
+//	  last_tick = HAL_GetTick();
 
 //	  computeAngles();
-//
 //	  roll_main = getRoll();
 //	  pitch_main = getPitch();
 //	  yaw_main = getYaw();
-
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(10);
 
     /* USER CODE END WHILE */
 
@@ -306,7 +301,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -376,7 +371,7 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.ClockSpeed = 5000;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c2.Init.OwnAddress1 = 210;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -423,11 +418,11 @@ static void MX_TIM1_Init(void)
   sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 0;
+  sConfig.IC1Filter = 15;
   sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0;
+  sConfig.IC2Filter = 15;
   if (HAL_TIM_Encoder_Init(&htim1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -681,14 +676,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		HCSR04_timer_input_CC (htim);
 	}
 
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	if (htim == &htim1) //encoder count overflow
-	{
-		encoder_overflow();
-	}
 }
 
 // drive a set distance (with encoder)

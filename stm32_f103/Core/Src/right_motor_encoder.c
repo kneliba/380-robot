@@ -18,7 +18,7 @@ Motor_Encoder right_encoder = {
 		0,
 		0,
 		0,
-		0.07042,
+		0.07042/2.0,
 		0
 };
 
@@ -31,6 +31,11 @@ void encoder_timer_input_CC (TIM_HandleTypeDef *htim)
 	counter = __HAL_TIM_GET_COUNTER(htim);
 	right_motor_encoder->counter = counter;
 
+	// overflow update
+	if (counter == 65535){
+		right_motor_encoder->overflow++;
+	}
+
 	//count becomes negative rather than jumping to 65000
 //	count = (int16_t)counter;
 	count = counter + (right_motor_encoder->overflow*65535);
@@ -40,7 +45,7 @@ void encoder_timer_input_CC (TIM_HandleTypeDef *htim)
 	position = count/4;
 	right_motor_encoder->position = position;
 
-	distance = (2*3.1415*right_motor_encoder->wheel_radius) * position /3; // might have consider gear ratio in this calculation
+	distance = (2*3.1415*right_motor_encoder->wheel_radius) * position/24.0 /3.0; // might have consider gear ratio in this calculation
 	right_motor_encoder->distance = distance;
 }
 
@@ -56,7 +61,7 @@ void reset_distance(TIM_HandleTypeDef *htim)
 	right_motor_encoder->overflow = 0;
 }
 
-int16_t get_distance_travelled()
+double get_distance_travelled()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
@@ -70,16 +75,9 @@ int get_velocity()
 	return right_motor_encoder->velocity; //should be velocity once wheel is attached
 }
 
-int16_t get_encoder_count()
+uint32_t get_encoder_count()
 {
 	Motor_Encoder *right_motor_encoder;
 	right_motor_encoder= &right_encoder;
 	return right_motor_encoder->count;
-}
-
-void encoder_overflow()
-{
-	Motor_Encoder *right_motor_encoder;
-	right_motor_encoder= &right_encoder;
-	right_motor_encoder->overflow += 1;
 }

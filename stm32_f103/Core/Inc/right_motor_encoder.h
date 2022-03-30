@@ -33,9 +33,8 @@ extern double distance;
 
 void encoder_timer_input_CC (TIM_HandleTypeDef *htim);
 void reset_distance(TIM_HandleTypeDef *htim);
-int16_t get_distance_travelled();
+double get_distance_travelled();
 int get_velocity();
-int16_t get_encoder_count();
-void encoder_overflow();
+uint32_t get_encoder_count();
 
 #endif /* INC_RIGHT_MOTOR_ENCODER_H_ */

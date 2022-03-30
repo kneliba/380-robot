@@ -14,8 +14,8 @@ typedef struct
     uint32_t	   VAL2;
     uint32_t	   DIFFERENCE;
     uint8_t		   FIRST_CAPTURED;
-    float	   	   DISTANCE;
-    float		   SENSOR_VAL;
+    double	   	   DISTANCE;
+    double		   SENSOR_VAL;
 }HCSR04_Type;
 
 extern HCSR04_Type Front_US;
@@ -28,8 +28,8 @@ static const double r = 0.5;
 void HCSR04_timer_input_CC (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim);
 void HCSR04_Read_Side (TIM_HandleTypeDef *htim);
-float get_front_distance (void);
-float get_side_distance (void);
-float filter (double sensor_val, double old_Kv);
+double get_front_distance (void);
+double get_side_distance (void);
+double filter (double sensor_val, double old_Kv);
 
 #endif /* ULTRASONIC_H */

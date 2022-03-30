@@ -35,54 +35,57 @@ HCSR04_Type Side_US =
 
 void HCSR04_timer_input_CC (TIM_HandleTypeDef *htim)
 {
-	HCSR04_Type *ultrasonic;
-
 	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // Front Trig
 	{
-		ultrasonic = &Front_US;
+		if (Front_US.FIRST_CAPTURED==0) // if the first value is not captured
+		{
+			Front_US.VAL1 = HAL_TIM_ReadCapturedValue(htim, Front_US.IC_TIM_CH); // read the first value
+	//			Front_US.VAL1 = __HAL_TIM_GET_COUNTER(htim);
+			Front_US.FIRST_CAPTURED = 1;  // set the first captured as true
+			// Now change the polarity to falling edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(htim, Front_US.IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_FALLING);
+		}
+
+		else if (Front_US.FIRST_CAPTURED==1)   // if the first is already captured
+		{
+			Front_US.VAL2 = HAL_TIM_ReadCapturedValue(htim, Front_US.IC_TIM_CH);  // read second value
+	//			Front_US.VAL2 = __HAL_TIM_GET_COUNTER(htim);
+			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+
+			Front_US.FIRST_CAPTURED = 0; // set back to false
+
+			// set polarity to rising edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(htim, Front_US.IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_RISING);
+			__HAL_TIM_DISABLE_IT(htim, Front_US.IC_TIM_CH);
+		}
 	}
 
 	else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) // Side Trig
 	{
-		ultrasonic = &Side_US;
-	}
-
-	if (ultrasonic->FIRST_CAPTURED==0) // if the first value is not captured
-	{
-		ultrasonic->VAL1 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH); // read the first value
-//			ultrasonic->VAL1 = __HAL_TIM_GET_COUNTER(htim);
-		ultrasonic->FIRST_CAPTURED = 1;  // set the first captured as true
-		// Now change the polarity to falling edge
-		__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_FALLING);
-	}
-
-	else if (ultrasonic->FIRST_CAPTURED==1)   // if the first is already captured
-	{
-		ultrasonic->VAL2 = HAL_TIM_ReadCapturedValue(htim, ultrasonic->IC_TIM_CH);  // read second value
-//			ultrasonic->VAL2 = __HAL_TIM_GET_COUNTER(htim);
-		__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
-
-		if (ultrasonic->VAL2 > ultrasonic->VAL1)
+		if (Side_US.FIRST_CAPTURED==0) // if the first value is not captured
 		{
-			ultrasonic->DIFFERENCE = ultrasonic->VAL2-ultrasonic->VAL1;
+			Side_US.VAL1 = HAL_TIM_ReadCapturedValue(htim, Side_US.IC_TIM_CH); // read the first value
+	//			Side_US.VAL1 = __HAL_TIM_GET_COUNTER(htim);
+			Side_US.FIRST_CAPTURED = 1;  // set the first captured as true
+			// Now change the polarity to falling edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(htim, Side_US.IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_FALLING);
 		}
 
-		else if (ultrasonic->VAL1 > ultrasonic->VAL2)
+		else if (Side_US.FIRST_CAPTURED==1)   // if the first is already captured
 		{
-			ultrasonic->DIFFERENCE = (0xffff - ultrasonic->VAL1) + ultrasonic->VAL2;
+			Side_US.VAL2 = HAL_TIM_ReadCapturedValue(htim, Side_US.IC_TIM_CH);  // read second value
+	//			Side_US.VAL2 = __HAL_TIM_GET_COUNTER(htim);
+			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+
+			Side_US.FIRST_CAPTURED = 0; // set back to false
+
+			// set polarity to rising edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(htim, Side_US.IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_RISING);
+			__HAL_TIM_DISABLE_IT(htim, Side_US.IC_TIM_CH);
 		}
-
-		// Filter sensor data
-		ultrasonic->SENSOR_VAL = ultrasonic->DIFFERENCE * .034/2;
-		ultrasonic->DISTANCE = filter(ultrasonic->SENSOR_VAL, ultrasonic->DISTANCE);
-//		ultrasonic->DISTANCE = ultrasonic->SENSOR_VAL;
-
-		ultrasonic->FIRST_CAPTURED = 0; // set back to false
-
-		// set polarity to rising edge
-		__HAL_TIM_SET_CAPTUREPOLARITY(htim, ultrasonic->IC_TIM_CH, TIM_INPUTCHANNELPOLARITY_RISING);
-		__HAL_TIM_DISABLE_IT(htim, ultrasonic->IC_TIM_CH);
 	}
+
+
 }
 
 void HCSR04_Read_Front (TIM_HandleTypeDef *htim)
@@ -102,17 +105,48 @@ void HCSR04_Read_Side (TIM_HandleTypeDef *htim)
 	__HAL_TIM_ENABLE_IT(htim, TIM_IT_CC3);
 }
 
-float get_front_distance (void)
+double get_front_distance (void)
 {
+	while (Front_US.FIRST_CAPTURED != 0) {} // wait until full pulse is recieved
+
+	if (Front_US.VAL2 > Front_US.VAL1)
+	{
+		Front_US.DIFFERENCE = Front_US.VAL2-Front_US.VAL1;
+	}
+
+	else if (Front_US.VAL1 > Front_US.VAL2)
+	{
+		Front_US.DIFFERENCE = (0xffff - Front_US.VAL1) + Front_US.VAL2;
+	}
+
+	// Filter sensor data
+	Front_US.SENSOR_VAL = Front_US.DIFFERENCE * .034/2;
+	Front_US.DISTANCE = filter(Front_US.SENSOR_VAL, Front_US.DISTANCE);
 	return Front_US.DISTANCE;
+
 }
 
-float get_side_distance (void)
+double get_side_distance (void)
 {
+	while (Side_US.FIRST_CAPTURED != 0) {}
+
+	if (Side_US.VAL2 > Side_US.VAL1)
+	{
+		Side_US.DIFFERENCE = Side_US.VAL2-Side_US.VAL1;
+	}
+
+	else if (Side_US.VAL1 > Side_US.VAL2)
+	{
+		Side_US.DIFFERENCE = (0xffff - Side_US.VAL1) + Side_US.VAL2;
+	}
+
+	// Filter sensor data
+	Side_US.SENSOR_VAL = Side_US.DIFFERENCE * .034/2;
+	Side_US.DISTANCE = filter(Side_US.SENSOR_VAL, Side_US.DISTANCE);
 	return Side_US.DISTANCE;
 }
 
-float filter (double Sv, double old_Kv)
+double filter (double Sv, double old_Kv)
 {
 	double Kv = Sv*r + old_Kv*(1-r);
 	return Kv;
