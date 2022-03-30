@@ -88,7 +88,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	double speed = 25;
+	double speed = 20;
 
   /* USER CODE END 1 */
 
@@ -131,7 +131,7 @@ int main(void)
 
 //  // ESC Calibration Procedure
 //  drive_forward(&htim2, 100);
-  HAL_Delay(3000);
+  HAL_Delay(5000);
 //  stop(&htim2);
 //
 //  // Delay for ESCs to detect PWM Signal
@@ -200,27 +200,30 @@ int main(void)
 //	  reset_distance(&htim1);
 
 	  // DRIVE STRAIGHT TEST --------------------------------
-	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-	  HAL_Delay(1);
-	  yaw_main = 0;
-//	  accelerate(&htim2, speed);
-      for (int i = 0; i<100; i++)
-      {
-          ICM_ReadAccelGyro(&hi2c2);
-          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-          dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-          yaw_main += gyro_yaw(&hi2c2, dt);
-          last_tick = HAL_GetTick();
-          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
-          HAL_Delay(10);
-      }
-      decelerate(&htim2);
-      HAL_Delay(3000);
-
-//    DRIVE DISTANCE WITH ULTRASONIC ----------------------
-//      drive_until(speed, 30);
+//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+//	  HAL_Delay(1);
+//	  yaw_main = 0;
+////	  accelerate(&htim2, speed);
+//      for (int i = 0; i<100; i++)
+//      {
+//          ICM_ReadAccelGyro(&hi2c2);
+//          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+//          dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+//          yaw_main += gyro_yaw(&hi2c2, dt);
+//          last_tick = HAL_GetTick();
+//          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
+//          HAL_Delay(10);
+//      }
+//      decelerate(&htim2);
 //      HAL_Delay(3000);
 
+//    DRIVE DISTANCE WITH ULTRASONIC ----------------------
+//      drive_until(speed, 50); // distance in cm
+//      HAL_Delay(3000);
+
+//    DRIVE DISTANCE WITH ENCODER ----------------------
+	  	drive_distance(speed, 1.0);  // distance in m
+		HAL_Delay(3000);
 
 //	 DRIVE OVER STEP ----------------------------------------
 //      accelerate(&htim2, 25);
@@ -418,11 +421,11 @@ static void MX_TIM1_Init(void)
   sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 15;
+  sConfig.IC1Filter = 6;
   sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 15;
+  sConfig.IC2Filter = 8;
   if (HAL_TIM_Encoder_Init(&htim1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -681,39 +684,45 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 // drive a set distance (with encoder)
 void drive_distance (double speed, double distance)
 {
+	uint16_t tick_rate = HAL_GetTickFreq();
+	uint32_t last_tick = HAL_GetTick();
+	double dt = 0;
 	reset_distance(&htim1);
-	int16_t  encoder_dist = get_distance_travelled();
-	drive_forward(&htim2, speed);
+	double encoder_dist = get_distance_travelled();
 	while (encoder_dist < distance) {
+		ICM_ReadAccelGyro(&hi2c2);
+		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+		dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+		yaw_main += gyro_yaw(&hi2c2, dt);
+		last_tick = HAL_GetTick();
+		drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
 		encoder_dist = get_distance_travelled();
 	}
 	stop(&htim2);
 }
 
-// drive a distance (with ultrasonic)
+// drive until a distance (with ultrasonic)
 void drive_until (double speed, double distance)
 {
-//	uint8_t MSG[35] = {'\0'};
-	//using side us as front for now
 	uint16_t tick_rate = HAL_GetTickFreq();
 	uint32_t last_tick = HAL_GetTick();
-	float dt = 0;
-	HCSR04_Read_Side(&htim3);
-	double start = get_side_distance();
+	double dt = 0;
+	HCSR04_Read_Front(&htim3);
+	double start = get_front_distance();
 	double ultrasonic_dist = start;
+
 	drive_forward(&htim2, speed);
-	while ((start-ultrasonic_dist) < distance) {
-//		ICM_ReadAccelGyro(&hi2c2);
-//		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-//		dt = (float)(HAL_GetTick() - last_tick)/tick_rate;
-//		yaw_main += gyro_yaw(&hi2c2, dt);
-//		last_tick = HAL_GetTick();
-//		drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
+
+	while (ultrasonic_dist > distance) {
+		ICM_ReadAccelGyro(&hi2c2);
+		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+		dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+		yaw_main += gyro_yaw(&hi2c2, dt);
+		last_tick = HAL_GetTick();
+		drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
 //		HAL_Delay(10);
-//		sprintf(MSG, "Distance: %f\n", ultrasonic_dist);
-//		HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-		HCSR04_Read_Side(&htim3);
-		ultrasonic_dist = get_side_distance();
+		HCSR04_Read_Front(&htim3);
+		ultrasonic_dist = get_front_distance();
 	}
 	stop(&htim2);
 }

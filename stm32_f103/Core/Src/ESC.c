@@ -7,7 +7,7 @@
 //#include "right_motor_encoder.h"
 
 static double ARR = 40000.0;
-static double L_offset = 1.15;
+static double L_offset = 1.0;
 
 // drive forward - speed %
 void drive_forward (TIM_HandleTypeDef *htim, double speed)
