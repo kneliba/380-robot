@@ -141,14 +141,15 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 		int16_t  encoder_dist = get_distance_travelled();
 		int16_t  ultrasonic_dist = get_front_distance();
 		int16_t  dist_of_tile_travelled = get_distance_travelled();
-		bool is_in_pit = false;
 
-		while (encoder_dist > distances_to_travel[current]) {
+		bool is_in_pit = false;
+		bool moved_full_distance = false;
+		bool at_turning_point = false;
+
+		while (!moved_full_distance && !at_turning_point) {
 			is_in_pit = check_if_in_pit();
-			if(!is_in_pit && ultrasonic_dist < distances_to_wall[current])
-			{
-				break;
-			}
+			if(!is_in_pit && ultrasonic_dist < distances_to_wall[current]) at_turning_point = true;
+			if(encoder_dist > distances_to_travel[current]) moved_full_distance = true;
 
 			if(dist_of_tile_travelled > dist_of_tile)
 			{
