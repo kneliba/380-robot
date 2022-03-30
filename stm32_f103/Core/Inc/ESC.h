@@ -28,7 +28,8 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
 void stop (TIM_HandleTypeDef *htim);
 
 // turn right
-void turn_right (TIM_HandleTypeDef *htim);
+void turn_right (TIM_HandleTypeDef *htim, double speed);
+void turn_degree (TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double angle);
 
 // accelerate
 void accelerate (TIM_HandleTypeDef *htim, double speed);

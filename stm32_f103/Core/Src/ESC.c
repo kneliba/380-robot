@@ -78,10 +78,8 @@ void stop (TIM_HandleTypeDef *htim)
 }
 
 // turn right
-void turn_right (TIM_HandleTypeDef *htim)
+void turn_right (TIM_HandleTypeDef *htim, double speed)
 {
-	// spin left motor
-	double speed = 10;
 	double pulse_width = 1.0 + (speed/100.0);
 	double command = (pulse_width/20.0)*ARR;
 	TIM2->CCR1 = command;
@@ -90,6 +88,27 @@ void turn_right (TIM_HandleTypeDef *htim)
 	pulse_width = 1.0;
 	command = (pulse_width/20.0)*ARR;
 	TIM2->CCR2 = command;
+}
+
+void turn_degree (TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double angle)
+{
+	uint16_t tick_rate = HAL_GetTickFreq();
+	uint32_t last_tick = HAL_GetTick();
+	double speed = 15;
+	double curr_angle = 0;
+	float dt = 0;
+	ICM_SelectBank(hi2c2, USER_BANK_0);
+	HAL_Delay(1);
+	double error = curr_angle - (-angle);
+	while (error > 5) {
+		turn_right(htim, speed);
+		ICM_ReadAccelGyro(hi2c2);
+		ICM_CorrectAccelGyro(hi2c2, accel_data, gyro_data);
+		dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
+		curr_angle += gyro_yaw(hi2c2, dt);
+		last_tick = HAL_GetTick();
+	}
+	stop(htim);
 }
 
 // accelerate to desired speed

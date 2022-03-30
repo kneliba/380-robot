@@ -222,8 +222,8 @@ int main(void)
 //      HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ENCODER ----------------------
-	  	drive_distance(speed, 1.0);  // distance in m
-		HAL_Delay(3000);
+//	  	drive_distance(speed, 1.0);  // distance in m
+//		HAL_Delay(3000);
 
 //	 DRIVE OVER STEP ----------------------------------------
 //      accelerate(&htim2, 25);
@@ -260,6 +260,10 @@ int main(void)
 //	  roll_main = getRoll();
 //	  pitch_main = getPitch();
 //	  yaw_main = getYaw();
+
+//	  TURN 90------------------------
+	  turn_degree(&htim2, &hi2c2, 90);
+	  HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
@@ -723,44 +727,6 @@ void drive_until (double speed, double distance)
 //		HAL_Delay(10);
 		HCSR04_Read_Front(&htim3);
 		ultrasonic_dist = get_front_distance();
-	}
-	stop(&htim2);
-}
-
-// turn right a certain angle
-void turn_angle (double angle)
-{
-	uint16_t tick_rate = HAL_GetTickFreq();
-	uint32_t last_tick = HAL_GetTick();
-	float curr_angle = getYaw();
-	float final_angle = curr_angle + angle;
-	turn_right(&htim2);
-	while (curr_angle < final_angle) {
-		//	   Select User Bank 0
-		ICM_SelectBank(&hi2c2, USER_BANK_0);
-		HAL_Delay(5);
-
-		// Obtain raw accelerometer and gyro data
-		ICM_ReadAccelGyro(&hi2c2);
-
-		// Obtain raw magnetometer data
-		//	  int16_t mag_data[3];
-		ICM_ReadMag(&hi2c2, mag_data);
-
-		// Obtain corrected accelerometer and gyro data
-		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-
-		// Apply Madgwick to get pitch, roll, and yaw
-		dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
-		MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-						 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-						 mag_data[0], mag_data[1], mag_data[2], dt);
-
-		last_tick = HAL_GetTick();
-
-		computeAngles();
-
-		curr_angle = getYaw();
 	}
 	stop(&htim2);
 }
