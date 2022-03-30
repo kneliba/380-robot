@@ -142,25 +142,31 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed
 
 		while (encoder_dist > distances_to_travel[current]) {
 			is_in_pit = check_if_in_pit();
+
 			if(!is_in_pit && ultrasonic_dist < dist_to_turn)
 			{
 				break;
 			}
 
-			if(dist_of_tile_travelled > dist_of_tile) {
+			if(dist_of_tile_travelled > dist_of_tile)
+			{
 				current_pos[0] = full_path[tiles_travelled_total][0];
 				current_pos[1] = full_path[tiles_travelled_total][1];
+
 				tiles_travelled_segment++;
 				tiles_travelled_total++;
+
 				dist_of_tile_travelled = encoder_dist - dist_of_tile*tiles_travelled_segment;
 			}
-
-			if(is_in_pit) { // also in sand || gravel
+			if(is_in_pit)
+			{ // also in sand || gravel
 				drive_distance(drive_speed, distances_to_travel[current]);
 			}
-			else {
+			else
+			{
 				drive_straight_ultrasonic(htim, drive_speed, dist_of_tile);
 			}
+
 			encoder_dist = get_distance_travelled();
 			ultrasonic_dist = get_front_distance();
 		}

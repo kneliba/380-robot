@@ -264,11 +264,6 @@ void drive_straight_ultrasonic_P(TIM_HandleTypeDef *htim, double speed, double i
 void drive_straight_ultrasonic_IMU(TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance, double current_angle)
 {
 	uint8_t kp = 0.8;
-	double pulse_widthL = 1.0 + (speed * L_offset / 100.0);
-	double pulse_widthR = 1.0 + (speed / 100.0);
-
-	uint16_t commandL = (pulse_widthL / 20.0) * ARR;
-	uint16_t commandR = (pulse_widthR / 20.0) * ARR;
 
 	double distance_from_wall = get_side_distance();
 
