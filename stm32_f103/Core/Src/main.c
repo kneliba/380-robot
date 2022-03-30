@@ -77,7 +77,12 @@ void delay_us (uint32_t us);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+    ESP_Receive(&htim2, UART2_rxBuffer, &huart2);
+    memset(UART2_rxBuffer, '\0', RX_BUFF_SIZE);
+}
 /* USER CODE END 0 */
 
 /**
@@ -131,19 +136,21 @@ int main(void)
 
 //  // ESC Calibration Procedure
 //  drive_forward(&htim2, 100);
-  HAL_Delay(5000);
+//  HAL_Delay(5000);
 //  stop(&htim2);
 //
 //  // Delay for ESCs to detect PWM Signal
 //  HAL_Delay(10000);
 
-  ICM_PowerOn(&hi2c2);
-  HAL_Delay(10);
-  ICM20948_Calibrate(&hi2c2);
-  HAL_Delay(100);
-  uint16_t tick_rate = HAL_GetTickFreq();
-  uint32_t last_tick = HAL_GetTick();
-  reset_distance(&htim1);
+//  ICM_PowerOn(&hi2c2);
+//  HAL_Delay(10);
+//  ICM20948_Calibrate(&hi2c2);
+//  HAL_Delay(100);
+//  uint16_t tick_rate = HAL_GetTickFreq();
+//  uint32_t last_tick = HAL_GetTick();
+//  reset_distance(&htim1);
+
+  HAL_UART_Receive_IT (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,10 +163,10 @@ int main(void)
 //	  HAL_Delay(20);
 //	  HCSR04_Read_Side(&htim3);
 //	  side_dist = get_side_distance();
-//	  sprintf(MSG, "Distance: %f\n", dist);
+//	  sprintf(MSG, "Distance: %d\n", 100);
 //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(20);
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	  HAL_Delay(100);
 
 	  // encoder testing
 //	  encoder_cnt = get_encoder_count();
@@ -222,8 +229,8 @@ int main(void)
 //      HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ENCODER ----------------------
-	  	drive_distance(speed, 1.0);  // distance in m
-		HAL_Delay(3000);
+//	  	drive_distance(speed, 1.0);  // distance in m
+//		HAL_Delay(3000);
 
 //	 DRIVE OVER STEP ----------------------------------------
 //      accelerate(&htim2, 25);
