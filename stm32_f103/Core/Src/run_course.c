@@ -5,6 +5,7 @@
  *      Author: junepark
  */
 
+#include "run_course.h"
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
@@ -51,18 +52,18 @@ int8_t pits[3][2] = {{2, 5},
 					 {3, 5},
 					 {4, 4}
 					};
-int8_t gravel[3][2] = {{1, 2},
-					   {1, 3},
-					   {2, 1}
+int8_t gravel[3][2] = {{2, 1},
+					   {3, 1},
+					   {4, 2}
 					  };
 int8_t sand[4][2] = {{1, 2},
 					 {1, 3},
 					 {2, 4},
-					 {2, 3}
+					 {3, 3}
 					};
 
 // run full course by distance using ultrasonic only
-void run_course_ultrasonic (TIM_HandleTypeDef *htim, double speed)
+void run_course_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed, double turn_speed)
 {
 	// calculate distances to wall in cm
 	for(int8_t i = 0; i < 11; i++)
@@ -76,14 +77,14 @@ void run_course_ultrasonic (TIM_HandleTypeDef *htim, double speed)
 	while(current < 11)
 	{
 		// error correction, use angle or side ultrasonic to fix angle
-		drive_until(htim, speed, distances_to_wall[current]);
-		turn_right(htim);
+		drive_until(drive_speed, distances_to_wall[current]);
+		turn_right(htim, turn_speed);
 		current++;
 	}
 }
 
 // run full course by distance using motor encoders only
-void run_course_encoders (TIM_HandleTypeDef *htim, double speed)
+void run_course_encoders (TIM_HandleTypeDef *htim, double drive_speed, double turn_speed)
 {
 	// calculate distance to travel in cm
 	for(int8_t i = 0; i < 11; i++)
@@ -96,14 +97,14 @@ void run_course_encoders (TIM_HandleTypeDef *htim, double speed)
 	while(current < 11)
 	{
 		// error correction, use angle or side ultrasonic to fix angle
-		drive_distance(htim, speed, distances_to_travel[current]);
-		turn_right(htim);
+		drive_distance(drive_speed, distances_to_travel[current]);
+		turn_right(htim, turn_speed);
 		current++;
 	}
 }
 
 // run full course by distance using motor encoders and ultrasonic
-void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double speed)
+void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double drive_speed, double turn_speed)
 {
 	int8_t tiles_travelled_segment = 0;
 
@@ -119,7 +120,7 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double speed)
 
 	while(current < 11)
 	{
-		reset_distance();
+		reset_distance(htim);
 		int16_t  encoder_dist = get_distance_travelled();
 		int16_t  ultrasonic_dist = get_front_distance();
 		int16_t  dist_of_tile_travelled = get_distance_travelled();
@@ -134,10 +135,10 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double speed)
 			}
 
 			if(current_pos == pits[0] || current_pos == pits[1] || current_pos == pits[3]) { // also in sand || gravel
-				drive_distance(htim, speed, distances_to_travel[current]);
+				drive_distance(drive_speed, distances_to_travel[current]);
 			}
 			else {
-				drive_straight_ultrasonic(htim, speed, dist_of_tile);
+				drive_straight_ultrasonic(htim, drive_speed, dist_of_tile);
 			}
 			encoder_dist = get_distance_travelled();
 			ultrasonic_dist = get_front_distance();
@@ -146,7 +147,7 @@ void run_course_encoders_ultrasonic (TIM_HandleTypeDef *htim, double speed)
 		tiles_travelled_segment = 0;
 
 		stop(htim);
-		turn_right(htim);
+		turn_right(htim, turn_speed);
 		current++;
 	}
 }
