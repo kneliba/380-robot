@@ -211,10 +211,11 @@ int main(void)
           dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
           yaw_main += gyro_yaw(&hi2c2, dt);
           last_tick = HAL_GetTick();
-          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
+          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
           HAL_Delay(10);
       }
       decelerate(&htim2);
+      reset_PID_controller();
       HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ULTRASONIC ----------------------

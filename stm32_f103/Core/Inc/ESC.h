@@ -24,6 +24,13 @@ void drive_forward (TIM_HandleTypeDef *htim, double speed);
 
 void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle);
 
+void drive_straight_PID (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt);
+
+void reset_PID_controller();
+
+// Helper Constrain function
+uint16_t constrain_value(uint16_t input, uint16_t min_val, uint16_t max_val);
+
 // stop
 void stop (TIM_HandleTypeDef *htim);
 
