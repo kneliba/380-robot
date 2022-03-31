@@ -55,6 +55,7 @@ void ICM_SetGyroLPF(uint8_t lpf);
 void ICM_Set_I2C_Clk(I2C_HandleTypeDef *hi2c);
 void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c);
 void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, int16_t raw_accel_data[3], int16_t raw_gyro_data[3]);
-float gyro_yaw(I2C_HandleTypeDef *hi2c, float dt);
+double gyro_yaw(I2C_HandleTypeDef *hi2c, float dt);
+double get_imu_data(I2C_HandleTypeDef *hi2c);
 
 #endif /* IMU_H */
