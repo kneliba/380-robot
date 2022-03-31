@@ -77,7 +77,16 @@ void delay_us(uint32_t us);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+    ESP_Receive(&htim2, UART2_rxBuffer, &huart2);
+    memset(UART2_rxBuffer, 0, RX_BUFF_SIZE);
+}
 
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+}
 /* USER CODE END 0 */
 
 /**
