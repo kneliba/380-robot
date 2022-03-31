@@ -1,0 +1,17 @@
+/*  AUXILIARY FUNCTIONS
+ *  - Read Battery Voltage
+ *  - Button Input
+ */
+
+#ifndef AUX_FUNCTIONS_H
+#define AUX_FUNCTIONS_H
+#include "main.h"
+
+#define voltage_divder_factor 0.25
+#define voltage_offset_volts 0.8
+
+#define VREF 3.32
+
+float read_batt_voltage(ADC_HandleTypeDef* hadc);
+
+#endif
