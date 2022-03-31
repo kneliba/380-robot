@@ -44,7 +44,6 @@
 
 I2C_HandleTypeDef hi2c2;
 
-TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
@@ -70,7 +69,6 @@ static void MX_I2C2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 void delay_us (uint32_t us);
 /* USER CODE END PFP */
@@ -115,19 +113,17 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
-  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  //Right Motor Encoder
-  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
 
-  // Initialize Timer3 for delay purposes
+  // Start Timer 2 for ESC signal
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1); // start PWM signal at 1ms (0 speed)
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
+
+  // Initialize Timer 3 for Ultrasonic sensors
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2); // enable interrupt on TIM3 CH2
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
-
-  HAL_TIM_Base_Start(&htim2);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
 //  // ESC Calibration Procedure
 //  drive_forward(&htim2, 100);
@@ -143,7 +139,7 @@ int main(void)
   HAL_Delay(100);
   uint16_t tick_rate = HAL_GetTickFreq();
   uint32_t last_tick = HAL_GetTick();
-  reset_distance(&htim1);
+//  reset_distance(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,15 +147,13 @@ int main(void)
   while (1)
   {
 	  // ultrasonic testing
-//	  HCSR04_Read_Front(&htim3);
-//	  front_dist = get_front_distance();
-//	  HAL_Delay(20);
-//	  HCSR04_Read_Side(&htim3);
-//	  side_dist = get_side_distance();
-//	  sprintf(MSG, "Distance: %f\n", dist);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(20);
+	  IMU_Init();
+	  HCSR04_Read_Front(&htim3);
+	  front_dist = get_front_distance();
+	  dt = get_imu_data(&hi2c2);
+	  HCSR04_Read_Side(&htim3);
+	  side_dist = get_side_distance();
+	  HAL_Delay(10);
 
 	  // encoder testing
 //	  encoder_cnt = get_encoder_count();
@@ -204,13 +198,13 @@ int main(void)
 	  HAL_Delay(1);
 	  yaw_main = 0;
 	  IMU_Init();
-	  accelerate(&htim2, speed);
+	  accelerate(speed);
       for (int i = 0; i<30; i++)
       {
           yaw_main += get_imu_data(&hi2c2);
 		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
 		  last_tick = HAL_GetTick();
-          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
+          drive_straight_PID(speed, &hi2c2, 0, yaw_main, dt);
 //          HAL_Delay(5);
       }
       decelerate(&htim2);
@@ -395,56 +389,6 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
-
-}
-
-/**
-  * @brief TIM1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM1_Init(void)
-{
-
-  /* USER CODE BEGIN TIM1_Init 0 */
-
-  /* USER CODE END TIM1_Init 0 */
-
-  TIM_Encoder_InitTypeDef sConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM1_Init 1 */
-
-  /* USER CODE END TIM1_Init 1 */
-  htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
-  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 6;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
-  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 8;
-  if (HAL_TIM_Encoder_Init(&htim1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM1_Init 2 */
-
-  /* USER CODE END TIM1_Init 2 */
 
 }
 
