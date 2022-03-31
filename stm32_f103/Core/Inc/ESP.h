@@ -10,10 +10,10 @@
 
 #include "main.h"
 
-#define RX_BUFF_SIZE 15
+#define RX_BUFF_SIZE 12
 #define TX_BUFF_SIZE 64
 
-extern uint8_t UART2_rxBuffer[15];
+extern uint8_t UART2_rxBuffer[RX_BUFF_SIZE];
 
 
 void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UART2_rxBuffer, UART_HandleTypeDef *huart2);
