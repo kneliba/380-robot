@@ -38,7 +38,7 @@ void drive_course(TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_Handle
 	turn_degree(htim2, hi2c2, 90);
 
 	//segment 5 (2 single gravel)
-	// driving slower
+	// driving slower for a shorter distance
 	drive_until(htim2,htim3, hi2c2, speed*0.8, dist_to_turn+dist_of_tile);
 	turn_degree(htim2, hi2c2, 90);
 
@@ -93,11 +93,11 @@ void drive_pit (TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_HandleTy
 			pitched_up = true;
 		}
 	}
-	//still on an angle
+	//still on an angle, finish climbing
 	while(curr_pitch > 1){
 		get_imu_data(hi2c2);
 		curr_pitch += curr_pose.pitch;
 
-		drive_until(htim2,htim3, hi2c2, speed, dist_to_turn);
+		drive_until(htim2,htim3, hi2c2, speed*1.2, dist_to_turn);
 	}
 }
