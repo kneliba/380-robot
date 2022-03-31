@@ -19,13 +19,13 @@ uint8_t UART2_rxBuffer[RX_BUFF_SIZE] = {0};
 uint8_t MSG[35] = {'\0'};
 char drive_forward_com[] = "df";
 char stop_com[] = "stop";
-char turn_right_com[] = "turn_r";
+char turn_right_com[] = "tr";
 char accelerate_com[] = "acc";
 char decelerate_com[] = "decel";
 
 
 void ESP_Receive(TIM_HandleTypeDef *htim, uint8_t *UART2_rxBuffer, UART_HandleTypeDef *huart2) {
-	//esp command: "df_030 " where 030 is the speed percentage
+	//esp command: "df_030" where 030 is the speed percentage
 //	char *received_buff = (char*)UART2_rxBuffer;
 	if(strncmp((char *)UART2_rxBuffer, drive_forward_com, strlen(drive_forward_com)) == 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_forward_com);
@@ -41,14 +41,15 @@ void ESP_Receive(TIM_HandleTypeDef *htim, uint8_t *UART2_rxBuffer, UART_HandleTy
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
-	//esp command: "turn_r"
+	//esp command: "tr_030"
 	else if(strncmp((char *)UART2_rxBuffer, turn_right_com, strlen(turn_right_com))== 0) {
-		turn_right(htim);
+		int speed = get_integer_from_string((char *)UART2_rxBuffer, turn_right_com);
+		turn_right(htim, speed);
 		sprintf(MSG, "Command received: %s\n", turn_right_com);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
-	//esp command: "acc_030 " where 030 is the speed percentage
+	//esp command: "acc_030" where 030 is the speed percentage
 	else if(strncmp((char *)UART2_rxBuffer, accelerate_com, strlen(accelerate_com))== 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, accelerate_com);
 		accelerate(htim, speed);
