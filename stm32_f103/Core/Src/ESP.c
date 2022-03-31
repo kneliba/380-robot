@@ -35,25 +35,17 @@ char P_set_com[] = "P_kp";
 char PID_set_kp_com[] = "PID_kp";
 char PID_set_ki_com[] = "PID_ki";
 char PID_set_kd_com[] = "PID_kd";
+char set_L_offset_com[] = "L_offset";
+char set_min_dist_com[] = "min_dist";
 
 
-void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UART2_rxBuffer, UART_HandleTypeDef *huart2) {
+void ESP_Receive(TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UART2_rxBuffer, UART_HandleTypeDef *huart2) {
 	//esp command: "df_030" where 030 is the speed percentage
 	//	char *received_buff = (char*)UART2_rxBuffer;
 	if(strncmp((char *)UART2_rxBuffer, drive_forward_com, strlen(drive_forward_com)) == 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_forward_com);
-		drive_forward(htim2, speed);
+		drive_forward(speed);
 //		sprintf(MSG, "Command received: %s with %d \n", drive_forward_com, speed);
-//		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
-	}
-
-	//esp command: "dd_030_2.15" where 030 is the speed percentage, 2.15 is distance in m
-	else if(strncmp((char *)UART2_rxBuffer, drive_distance_com, strlen(drive_distance_com)) == 0) {
-		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_distance_com);
-		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_distance_com, 5);
-
-		drive_distance(htim1, htim2, hi2c2, speed, distance);
-//		sprintf(MSG, "Command received: %s with %d \n", drive_distance_com, speed);
 //		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
@@ -62,7 +54,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_until_com);
 		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_until_com, 5);
 
-		drive_until(htim2, htim3, hi2c2, speed, distance);
+		drive_until( htim3, hi2c2, speed, distance);
 
 		sprintf(MSG, "Command received: %s with %d \n", drive_until_com, speed);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
@@ -78,7 +70,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 	//esp command: "tr_030"
 	else if(strncmp((char *)UART2_rxBuffer, turn_right_com, strlen(turn_right_com))== 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, turn_right_com);
-		turn_right(htim2, speed);
+		turn_right( speed);
 //		sprintf(MSG, "Command received: %s\n", turn_right_com);
 //		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
@@ -86,7 +78,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 	//esp command: "td_090" where 090 is the angle
 	else if(strncmp((char *)UART2_rxBuffer, turn_right_com, strlen(turn_degree_com))== 0) {
 		int angle = get_integer_from_string((char *)UART2_rxBuffer, turn_degree_com);
-		turn_degree(htim2, hi2c2, angle);
+		turn_degree( hi2c2, angle);
 
 		sprintf(MSG, "Command received: %s\n", turn_degree_com);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
@@ -114,7 +106,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, adapt_decel_com);
 		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_distance_com, 5);
 
-		adapt_decel(htim2, htim3, hi2c2, speed, distance);
+		adapt_decel(htim3, hi2c2, speed, distance);
 
 		sprintf(MSG, "Command received: %s with %d \n", adapt_decel_com, speed);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
@@ -142,6 +134,18 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 	else if(strncmp((char *)UART2_rxBuffer, PID_set_kd_com, strlen(PID_set_kd_com))== 0) {
 		double kd = get_double_from_string((char *)UART2_rxBuffer, PID_set_kd_com, 1);
 		set_PID_Kd(kd);
+	}
+
+	//esp command: "Loffset_1.10"
+	else if(strncmp((char *)UART2_rxBuffer, set_L_offset_com, strlen(set_L_offset_com))== 0) {
+		double L_offset = get_double_from_string((char *)UART2_rxBuffer, set_L_offset_com, 1);
+		set_L_offset(L_offset);
+	}
+
+	//esp command: "min_dist_40.5"
+	else if(strncmp((char *)UART2_rxBuffer, set_min_dist_com, strlen(set_min_dist_com))== 0) {
+		double min_dist = get_double_from_string((char *)UART2_rxBuffer, set_min_dist_com, 1);
+		set_min_dist(min_dist);
 	}
 
 }

@@ -284,6 +284,14 @@ void set_PID_Kd (float PID_Kp_value) {
 	PID_Kp = PID_Kp_value;
 }
 
+void set_L_offset (double L_offset_value) {
+	L_offset = L_offset_value;
+}
+
+void set_min_dist (float min_dist_value){
+	min_dist = min_dist_value;
+}
+
 uint8_t get_P_control_Kp () {
 	return P_control_Kp;
 }
@@ -298,6 +306,14 @@ float get_PID_Ki () {
 
 float get_PID_Kd () {
 	return PID_Kd;
+}
+
+double get_L_offset () {
+	return L_offset;
+}
+
+float get_min_dist () {
+	return min_dist;
 }
 
 

@@ -54,11 +54,15 @@ void set_P_control_Kp (uint8_t P_Kp_value);
 void set_PID_Kp (float PID_Kp_value);
 void set_PID_Ki (float PID_Ki_value);
 void set_PID_Kd (float PID_Kd_value);
+void set_L_offset (double L_offset_value);
+void set_min_dist (float min_dist_value);
 
 uint8_t get_P_control_Kp ();
 float get_PID_Kp ();
 float get_PID_Ki ();
 float get_PID_Kd ();
+double get_L_offset ();
+float get_min_dist ();
 
 void help_im_stuck_stepbro();
 
