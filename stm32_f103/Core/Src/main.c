@@ -81,7 +81,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
     ESP_Receive(&htim2, UART2_rxBuffer, &huart2);
-    memset(UART2_rxBuffer, '\0', RX_BUFF_SIZE);
+    memset(UART2_rxBuffer, 0, RX_BUFF_SIZE);
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
 }
 /* USER CODE END 0 */
 
@@ -151,6 +155,7 @@ int main(void)
 //  reset_distance(&htim1);
 
   HAL_UART_Receive_IT (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -637,6 +642,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SWITCH_Pin */
   GPIO_InitStruct.Pin = SWITCH_Pin;

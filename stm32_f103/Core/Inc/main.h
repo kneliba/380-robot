@@ -78,8 +78,6 @@ void turn_angle (double angle);
 #define LEFT_PWM_GPIO_Port GPIOA
 #define RIGHT_PWM_Pin GPIO_PIN_1
 #define RIGHT_PWM_GPIO_Port GPIOA
-#define BATTERY_Pin GPIO_PIN_4
-#define BATTERY_GPIO_Port GPIOA
 #define SWITCH_Pin GPIO_PIN_5
 #define SWITCH_GPIO_Port GPIOA
 #define FRONT_TRIG_Pin GPIO_PIN_6
