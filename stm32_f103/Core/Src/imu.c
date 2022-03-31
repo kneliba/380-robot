@@ -380,6 +380,11 @@ void get_imu_data(I2C_HandleTypeDef *hi2c)
 	curr_pose.dt = dt;
 }
 
+void reset_pose(){
+	curr_pose.roll = 0;
+	curr_pose.pitch = 0;
+	curr_pose.yaw = 0;
+}
 void IMU_Init()
 {
 	tick_rate = HAL_GetTickFreq();

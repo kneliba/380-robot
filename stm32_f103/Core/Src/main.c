@@ -194,23 +194,25 @@ int main(void)
 //	  reset_distance(&htim1);
 
 	  // DRIVE STRAIGHT TEST --------------------------------
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(1);
-//	  yaw_main = 0;
-//	  IMU_Init();
-//	  accelerate(speed);
+	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+	  HAL_Delay(1);
+	  reset_pose();
+	  yaw_main = curr_pose.yaw;
+	  IMU_Init();
+//	  accelerate(&htim2, speed);
 //      for (int i = 0; i<30; i++)
 //      {
 //    	  get_imu_data(&hi2c2);
 //          yaw_main += curr_pose.yaw;
 //		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
 //		  last_tick = HAL_GetTick();
-//          drive_straight_PID(speed, &hi2c2, 0, yaw_main, dt);
+//          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
 ////          HAL_Delay(5);
 //      }
 //      decelerate(&htim2);
-//      reset_PID_controller();
-//      HAL_Delay(3000);
+	  turn_degree(&htim2, &hi2c2, 90);
+      reset_PID_controller();
+      HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ULTRASONIC ----------------------
 	    IMU_Init();
