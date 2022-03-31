@@ -49,5 +49,14 @@ void accelerate (TIM_HandleTypeDef *htim, double speed);
 void decelerate (TIM_HandleTypeDef *htim);
 void adapt_decel (TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance);
 
+void set_P_control_Kp (uint8_t P_Kp_value);
+void set_PID_Kp (float PID_Kp_value);
+void set_PID_Ki (float PID_Ki_value);
+void set_PID_Kd (float PID_Kd_value);
+
+uint8_t get_P_control_Kp ();
+float get_PID_Kp ();
+float get_PID_Ki ();
+float get_PID_Kd ();
 
 #endif /* ESC_H_ */

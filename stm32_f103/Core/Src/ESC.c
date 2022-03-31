@@ -14,6 +14,11 @@ static float prev_error = 0;
 
 static double min_dist = 20; // distance to slow down [cm]
 
+static uint8_t P_control_Kp = 8;
+static float PID_Kp = 7;
+static float PID_Ki = 0;
+static float PID_Kd = 0;
+
 uint16_t constrain_value(uint16_t input, uint16_t min_val, uint16_t max_val){
 	if (input < min_val) return min_val;
 	else if (input > max_val) return max_val;
@@ -302,5 +307,38 @@ void decelerate (TIM_HandleTypeDef *htim)
 		HAL_Delay(10);
 	}
 }
+
+void set_P_control_Kp (uint8_t P_Kp_value) {
+	P_control_Kp = P_Kp_value;
+}
+
+void set_PID_Kp (float PID_Kp_value) {
+	PID_Kp = PID_Kp_value;
+}
+
+void set_PID_Ki (float PID_Ki_value) {
+	PID_Ki = PID_Ki_value;
+}
+
+void set_PID_Kd (float PID_Kp_value) {
+	PID_Kp = PID_Kp_value;
+}
+
+uint8_t get_P_control_Kp () {
+	return P_control_Kp;
+}
+
+float get_PID_Kp () {
+	return PID_Kp;
+}
+
+float get_PID_Ki () {
+	return PID_Ki;
+}
+
+float get_PID_Kd () {
+	return PID_Kd;
+}
+
 
 // decelerate relative to distance (ultrasonic)

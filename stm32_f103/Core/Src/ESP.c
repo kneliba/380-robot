@@ -20,13 +20,15 @@ uint8_t MSG[35] = {'\0'};
 char drive_forward_com[] = "df";
 char stop_com[] = "stop";
 char turn_right_com[] = "tr";
-char accelerate_com[] = "acc";
+char accelerate_com[] = "ac";
 char decelerate_com[] = "decel";
 
+char Pcontr_set_kp[] = "Pcontr_set_kp";
+char PIDcon_get_kp[] = "PIDcon_set_kp";
 
 void ESP_Receive(TIM_HandleTypeDef *htim, uint8_t *UART2_rxBuffer, UART_HandleTypeDef *huart2) {
 	//esp command: "df_030" where 030 is the speed percentage
-//	char *received_buff = (char*)UART2_rxBuffer;
+	//	char *received_buff = (char*)UART2_rxBuffer;
 	if(strncmp((char *)UART2_rxBuffer, drive_forward_com, strlen(drive_forward_com)) == 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_forward_com);
 		drive_forward(htim, speed);
@@ -49,7 +51,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim, uint8_t *UART2_rxBuffer, UART_HandleTy
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
-	//esp command: "acc_030" where 030 is the speed percentage
+	//esp command: "ac_030" where 030 is the speed percentage
 	else if(strncmp((char *)UART2_rxBuffer, accelerate_com, strlen(accelerate_com))== 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, accelerate_com);
 		accelerate(htim, speed);
