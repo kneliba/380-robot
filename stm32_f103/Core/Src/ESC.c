@@ -194,7 +194,8 @@ void drive_distance (TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, I2C_Han
 	double encoder_dist = get_distance_travelled();
 	double yaw = 0;
 	while (encoder_dist < distance) {
-		yaw += get_imu_data(hi2c2);
+		get_imu_data(hi2c2);
+		yaw += curr_pose.yaw;
 		drive_straight(htim2, speed, hi2c2, 0, yaw);
 	}
 	stop(htim2);
@@ -214,7 +215,8 @@ void drive_until (TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_Handle
 	double error = ultrasonic_dist - distance;
 //	drive_forward(htim2, speed);
 	while (error > min_dist) {
-		yaw += get_imu_data(hi2c2);
+		get_imu_data(hi2c2);
+		yaw += curr_pose.yaw;
 		drive_straight(htim2, speed, hi2c2, 0, yaw);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
@@ -250,10 +252,8 @@ void turn_degree (TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double angl
 	double error = curr_angle - (-angle);
 	while (error > 5) {
 		turn_right(htim, speed);
-		ICM_ReadAccelGyro(hi2c2);
-		ICM_CorrectAccelGyro(hi2c2, accel_data, gyro_data);
-		dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
-		curr_angle += gyro_yaw(hi2c2, dt);
+		get_imu_data(hi2c2);
+		curr_angle += curr_pose.yaw;
 		last_tick = HAL_GetTick();
 	}
 	stop(htim);
@@ -280,7 +280,8 @@ void adapt_decel (TIM_HandleTypeDef *htim2, TIM_HandleTypeDef *htim3, I2C_Handle
 	while (speed > 10)
 	{
 		double error = ultrasonic_dist-distance;
-		yaw += get_imu_data(hi2c2);
+		get_imu_data(hi2c2);
+		yaw += curr_pose.yaw;
 		speed = speed/(0.5/error);
 		drive_straight(htim2, speed, hi2c2, 0, yaw);
 		HCSR04_Read_Front(htim3);
