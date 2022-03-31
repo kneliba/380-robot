@@ -22,7 +22,7 @@
 // drive forward
 void drive_forward (double speed);
 
-void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt);
+void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float current_angle, uint16_t dt);
 
 void drive_straight_ultrasonic_P(TIM_HandleTypeDef *htim, double speed, double ideal_block_distance);
 
@@ -52,5 +52,6 @@ void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double spe
 
 void help_im_stuck_stepbro();
 
+void drive_pit (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance);
 
 #endif /* ESC_H_ */

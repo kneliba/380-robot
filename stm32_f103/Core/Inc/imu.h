@@ -69,5 +69,6 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c);
 void ICM_CorrectAccelGyro(I2C_HandleTypeDef *hi2c, int16_t raw_accel_data[3], int16_t raw_gyro_data[3]);
 void get_imu_data(I2C_HandleTypeDef *hi2c);
 void reset_pose();
+void IMU_Init();
 
 #endif /* IMU_H */

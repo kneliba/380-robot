@@ -4,6 +4,7 @@
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f103xb.h"
 #include <imu.h>
+#include <stdbool.h>
 //#include "ultrasonic.h"
 //#include "right_motor_encoder.h"
 
@@ -16,7 +17,9 @@ static float imu_prev_error = 0;
 static float us_integration_sum = 0;
 static float us_prev_error = 0;
 
-static double min_dist = 40; // distance to slow down [cm]
+static float min_dist = 40; // distance to slow down [cm]
+
+static float desired_angle = 0;
 
 uint16_t constrain_value(uint16_t input, uint16_t min_val, uint16_t max_val){
 	if (input < min_val) return min_val;
@@ -37,7 +40,7 @@ void drive_forward (double speed)
 	TIM2->CCR2 = commandR; // right
 }
 
-void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt)
+void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float current_angle, uint16_t dt)
 {
     static const float Kp = 7;
     static const float Ki = 0.0;
@@ -118,7 +121,7 @@ void drive_straight_ultrasonic (double speed, double ideal_block_distance)
 	}
 }
 
-void drive_straight_path(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance, double desired_angle)
+void drive_straight_path(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance)
 {
 	static const float Kp = 0.8;
 	static const float Ki = 0;
@@ -141,7 +144,7 @@ void drive_straight_path(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, dou
 		desired_angle += correction;
 	}
 
-	drive_straight_PID(speed, hi2c2, desired_angle, curr_pose.yaw, curr_pose.dt);
+	drive_straight_PID(speed, hi2c2, curr_pose.yaw, curr_pose.dt);
 }
 
 void reset_PID_controller(){
@@ -149,6 +152,7 @@ void reset_PID_controller(){
 	imu_prev_error = 0;
 	us_integration_sum = 0;
 	us_prev_error = 0;
+	desired_angle = 0;
 }
 
 void stop ()
@@ -159,12 +163,13 @@ void stop ()
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance)
 {
+	reset_PID_controller();
 	HCSR04_Read_Front(htim3);
 	double ultrasonic_dist = get_front_distance();
 	double error = ultrasonic_dist - distance;
 	while (error > min_dist) {
 		get_imu_data(hi2c2);
-		drive_straight_PID(speed, hi2c2, 0, curr_pose.yaw, curr_pose.dt);
+		drive_straight_PID(speed, hi2c2, curr_pose.yaw, curr_pose.dt);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
 		error = ultrasonic_dist - distance;
@@ -236,7 +241,7 @@ void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed)
 	{
 		get_imu_data(hi2c2);
 		yaw += curr_pose.yaw;
-		drive_straight_PID(speed, hi2c2, 0, yaw, curr_pose.dt);
+		drive_straight_PID(speed, hi2c2, yaw, curr_pose.dt);
 		speed += 1;
 		HAL_Delay(15);
 	}
@@ -252,7 +257,7 @@ void decelerate (I2C_HandleTypeDef *hi2c2)
 	{
 		get_imu_data(hi2c2);
 		yaw += curr_pose.yaw;
-		drive_straight_PID(speed, hi2c2, 0, yaw, curr_pose.dt);
+		drive_straight_PID(speed, hi2c2, yaw, curr_pose.dt);
 		speed -= 1;
 		HAL_Delay(20);
 	}
@@ -269,7 +274,7 @@ void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double spe
 	{
 		get_imu_data(hi2c2);
 		speed = constrain_value(speed - (speed*Kp)/error, 0, speed);
-		drive_straight_PID(speed, hi2c2, 0, curr_pose.yaw, curr_pose.dt);
+		drive_straight_PID(speed, hi2c2, curr_pose.yaw, curr_pose.dt);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
 	}
@@ -280,4 +285,37 @@ void help_im_stuck_stepbro(){
 	drive_forward(60);
 	HAL_Delay(1000);
 	stop();
+}
+
+void drive_pit (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance) {
+	bool pitched_down = false;
+	bool pitched_up = false;
+	float p_threshold = 1.0;
+	reset_PID_controller(); // how often do we reset?
+	// drive until reach pit
+	while(!pitched_down)
+	{
+		get_imu_data(hi2c2);
+		drive_straight_path(htim3, hi2c2, speed, ideal_block_distance);
+		if(curr_pose.pitch < -p_threshold)
+		{
+			pitched_down = true;
+		}
+	}
+	//speed up inside pit
+	while(!pitched_up)
+	{
+		get_imu_data(hi2c2);
+		accelerate(hi2c2, speed*1.2); // TODO: may need to adjust
+		if(curr_pose.pitch > 0)
+		{
+			pitched_up = true;
+		}
+	}
+	//still on an angle, finish climbing
+	while(curr_pose.pitch > p_threshold)
+	{
+		get_imu_data(hi2c2);
+		drive_straight_path(htim3, hi2c2, speed, ideal_block_distance);
+	}
 }

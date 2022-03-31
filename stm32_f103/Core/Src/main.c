@@ -50,15 +50,7 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-extern HCSR04_Type Front_US;
-extern HCSR04_Type Side_US;
-uint16_t overflow = 0;
-float roll_main = 0;
-float pitch_main = 0;
-float yaw_main = 0;
-float dt = 0;
-double front_dist = 0;
-double side_dist = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,22 +119,21 @@ int main(void)
 
 //  // ESC Calibration Procedure
 //  drive_forward(&htim2, 100);
-  HAL_Delay(2000);
+//  HAL_Delay(2000);
 //  stop(&htim2);
-//
-//  // Delay for ESCs to detect PWM Signal
-//  HAL_Delay(10000);
+  HAL_Delay(2000);
 
+  // IMU Calibration
   ICM_PowerOn(&hi2c2);
   HAL_Delay(10);
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
   ICM_SelectBank(&hi2c2, USER_BANK_0);
   HAL_Delay(1);
-  uint16_t tick_rate = HAL_GetTickFreq();
-  uint32_t last_tick = HAL_GetTick();
+
   IMU_Init();
   reset_pose();
+  reset_PID_controller();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -150,10 +141,10 @@ int main(void)
   while (1)
   {
 //    DRIVE DISTANCE WITH ULTRASONIC w TURN ----------------------
-	  	HCSR04_Read_Front(&htim3);
-	  	double dist_cm = 10;
-		drive_until(&htim3, &hi2c2, speed, dist_cm); // distance in cm
-		HAL_Delay(3000);
+	HCSR04_Read_Front(&htim3);
+	double dist_cm = 15;
+	drive_until(&htim3, &hi2c2, speed, dist_cm); // distance in cm
+	HAL_Delay(3000);
 
     /* USER CODE END WHILE */
 
