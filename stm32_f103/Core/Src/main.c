@@ -202,19 +202,21 @@ int main(void)
 	  // DRIVE STRAIGHT TEST --------------------------------
 	  ICM_SelectBank(&hi2c2, USER_BANK_0);
 	  HAL_Delay(1);
-	  yaw_main = 0;
+	  reset_pose();
+	  yaw_main = curr_pose.yaw;
 	  IMU_Init();
-	  accelerate(&htim2, speed);
-      for (int i = 0; i<30; i++)
-      {
-    	  get_imu_data(&hi2c2);
-          yaw_main += curr_pose.yaw;
-		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-		  last_tick = HAL_GetTick();
-          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
-//          HAL_Delay(5);
-      }
-      decelerate(&htim2);
+//	  accelerate(&htim2, speed);
+//      for (int i = 0; i<30; i++)
+//      {
+//    	  get_imu_data(&hi2c2);
+//          yaw_main += curr_pose.yaw;
+//		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+//		  last_tick = HAL_GetTick();
+//          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
+////          HAL_Delay(5);
+//      }
+//      decelerate(&htim2);
+	  turn_degree(&htim2, &hi2c2, 90);
       reset_PID_controller();
       HAL_Delay(3000);
 

@@ -237,24 +237,46 @@ void turn_right (TIM_HandleTypeDef *htim, double speed)
 	// hold right motor
 	pulse_width = 1.0;
 	command = (pulse_width/20.0)*ARR;
-	TIM2->CCR2 = command;
+	TIM2->CCR2 = constrain_value(command, 2000, 4000);
 }
 
 void turn_degree (TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double angle)
 {
-	uint16_t tick_rate = HAL_GetTickFreq();
-	uint32_t last_tick = HAL_GetTick();
-	double speed = 15;
+	reset_PID_controller();
+
+	static const float Kp = 0.23;
+	static const float Ki = 0.0;
+	static const float Kd = 0.008;
+
+	static const uint8_t threshold = 5; // Acceptable angular setpoint error in degrees
+
+	get_imu_data(hi2c2);
 	double curr_angle = 0;
-	float dt = 0;
+
+	// FIXME: Does this need to be here?
 	ICM_SelectBank(hi2c2, USER_BANK_0);
 	HAL_Delay(1);
-	double error = curr_angle - (-angle);
-	while (error > 5) {
-		turn_right(htim, speed);
+
+	float current_error = curr_angle - (-angle);
+
+	// This is the PID controller calcs
+	integration_sum += (current_error * (curr_pose.dt/1000.0));
+	float correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(curr_pose.dt/1000.0);
+	prev_error = current_error;
+	// Only Turning Right for now, dw about left
+
+	while (current_error > threshold) {
+		turn_right(htim, correction);
 		get_imu_data(hi2c2);
 		curr_angle += curr_pose.yaw;
-		last_tick = HAL_GetTick();
+
+		current_error = curr_angle - (-angle);
+
+		// This is the PID controller calcs
+		integration_sum += (current_error * (curr_pose.dt/1000.0));
+		correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(curr_pose.dt/1000.0);
+		prev_error = current_error;
+
 	}
 	stop(htim);
 }
