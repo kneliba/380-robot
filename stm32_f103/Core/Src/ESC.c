@@ -12,7 +12,7 @@ static double L_offset = 1.1;
 static float integration_sum = 0;
 static float prev_error = 0;
 
-static double min_dist = 20; // distance to slow down [cm]
+static double min_dist = 40; // distance to slow down [cm]
 
 uint16_t constrain_value(uint16_t input, uint16_t min_val, uint16_t max_val){
 	if (input < min_val) return min_val;
@@ -190,24 +190,27 @@ void stop ()
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance)
 {
-	double ultrasonic_dist = 0;
-	for (int i = 0; i<5; i++)
-	{
-		HCSR04_Read_Front(htim3);
-		ultrasonic_dist = get_front_distance();
-		HAL_Delay(30);
-	}
+	int dt = 0;
+	HCSR04_Read_Front(htim3);
+	double ultrasonic_dist = get_front_distance();
+//	for (int i = 0; i<5; i++)
+//	{
+//		HCSR04_Read_Front(htim3);
+//		ultrasonic_dist = get_front_distance();
+//		HAL_Delay(30);
+//	}
 	double yaw = 0;
 	double error = ultrasonic_dist - distance;
 //	drive_forward(htim2, speed);
 	while (error > min_dist) {
 		get_imu_data(hi2c2);
+		dt = curr_pose.dt;
 		yaw += curr_pose.yaw;
-		drive_straight(htim2, speed, hi2c2, 0, yaw);
+		drive_straight(speed, hi2c2, 0, yaw);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
 		error = ultrasonic_dist - distance;
-		HAL_Delay(15);
+//		HAL_Delay(15);
 	}
 //	decelerate();
 	adapt_decel(htim3, hi2c2, speed, distance);
@@ -237,7 +240,7 @@ void turn_degree (I2C_HandleTypeDef *hi2c2, double angle)
 	HAL_Delay(1);
 	double error = curr_angle - (-angle);
 	while (error > 5) {
-		turn_right(htim, speed);
+		turn_right(speed);
 		get_imu_data(hi2c2);
 		curr_angle += curr_pose.yaw;
 		last_tick = HAL_GetTick();
@@ -246,12 +249,15 @@ void turn_degree (I2C_HandleTypeDef *hi2c2, double angle)
 }
 
 // accelerate to desired speed
-void accelerate (double final_speed)
+void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed)
 {
 	double speed = (((TIM2->CCR1)/ARR)*20.0 - 1)*100;
+	float yaw = 0;
 	while (speed < final_speed)
 	{
-		drive_forward(speed);
+		get_imu_data(hi2c2);
+		yaw += curr_pose.yaw;
+		drive_straight_PID(speed, hi2c2, 0, yaw, curr_pose.dt);
 		speed += 1;
 		HAL_Delay(20);
 	}
@@ -272,16 +278,16 @@ void decelerate ()
 
 void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance)
 {
-	float
+	float Kp = 6;
 	HCSR04_Read_Front(htim3);
-	double ultrasonic_dist = get_front_distance();
+	float ultrasonic_dist = get_front_distance();
+	float error = ultrasonic_dist-distance;
 	//at a distance where we want to slow down
-	while (speed > 10)
+	while (error > 10)
 	{
-		double error = ultrasonic_dist-distance;
 		get_imu_data(hi2c2);
 		yaw += curr_pose.yaw;
-		speed = speed/(0.5/error);
+		speed = constrain_value(speed - (speed*Kp)/error, 0, speed);
 		drive_straight(speed, hi2c2, 0, yaw);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();

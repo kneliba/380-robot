@@ -42,7 +42,7 @@ void turn_right (double speed);
 void turn_degree (I2C_HandleTypeDef *hi2c2, double angle);
 
 // accelerate
-void accelerate (double speed);
+void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed);
 
 // decelerate
 void decelerate ();

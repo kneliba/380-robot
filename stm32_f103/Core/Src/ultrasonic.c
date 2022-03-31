@@ -121,8 +121,8 @@ double get_front_distance (void)
 
 	// Filter sensor data
 	Front_US.SENSOR_VAL = Front_US.DIFFERENCE * .034/2;
-	Front_US.DISTANCE = filter(Front_US.SENSOR_VAL, Front_US.DISTANCE);
-	return Front_US.DISTANCE;
+//	Front_US.DISTANCE = filter(Front_US.SENSOR_VAL, Front_US.DISTANCE);
+	return Front_US.SENSOR_VAL;
 
 }
 
@@ -142,8 +142,8 @@ double get_side_distance (void)
 
 	// Filter sensor data
 	Side_US.SENSOR_VAL = Side_US.DIFFERENCE * .034/2;
-	Side_US.DISTANCE = filter(Side_US.SENSOR_VAL, Side_US.DISTANCE);
-	return Side_US.DISTANCE;
+//	Side_US.DISTANCE = filter(Side_US.SENSOR_VAL, Side_US.DISTANCE);
+	return Side_US.SENSOR_VAL;
 }
 
 double filter (double Sv, double old_Kv)

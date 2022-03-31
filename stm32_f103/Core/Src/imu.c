@@ -359,15 +359,7 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 	accel_offset[0] /= 50;
 	accel_offset[1] /= 50;
 	accel_offset[2] /= 50;
-//	accel_offset[2] += 4096.0; // 4096 LSB/g
 
-	// Calibrate gyroscope
-//	for(int i=0; i<50; i++){
-//		ICM_ReadAccelGyro(hi2c);
-//
-//		HAL_Delay(15);
-//	}
-//
 	gyro_offset[0] /= 50;
 	gyro_offset[1] /= 50;
 	gyro_offset[2] /= 50;

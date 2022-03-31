@@ -86,7 +86,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	double speed = 22;
+	double speed = 15;
 
   /* USER CODE END 1 */
 
@@ -147,13 +147,13 @@ int main(void)
   while (1)
   {
 	  // ultrasonic testing
-	  IMU_Init();
-	  HCSR04_Read_Front(&htim3);
-	  front_dist = get_front_distance();
-	  dt = get_imu_data(&hi2c2);
-	  HCSR04_Read_Side(&htim3);
-	  side_dist = get_side_distance();
-	  HAL_Delay(10);
+//	  IMU_Init();
+//	  HCSR04_Read_Front(&htim3);
+//	  front_dist = get_front_distance();
+//	  dt = get_imu_data(&hi2c2);
+//	  HCSR04_Read_Side(&htim3);
+//	  side_dist = get_side_distance();
+//	  HAL_Delay(10);
 
 	  // encoder testing
 //	  encoder_cnt = get_encoder_count();
@@ -194,29 +194,30 @@ int main(void)
 //	  reset_distance(&htim1);
 
 	  // DRIVE STRAIGHT TEST --------------------------------
-	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-	  HAL_Delay(1);
-	  yaw_main = 0;
-	  IMU_Init();
-	  accelerate(speed);
-      for (int i = 0; i<30; i++)
-      {
-    	  get_imu_data(&hi2c2);
-          yaw_main += curr_pose.yaw;
-		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-		  last_tick = HAL_GetTick();
-          drive_straight_PID(speed, &hi2c2, 0, yaw_main, dt);
-//          HAL_Delay(5);
-      }
-      decelerate(&htim2);
-      reset_PID_controller();
-      HAL_Delay(3000);
+//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+//	  HAL_Delay(1);
+//	  yaw_main = 0;
+//	  IMU_Init();
+//	  accelerate(speed);
+//      for (int i = 0; i<30; i++)
+//      {
+//    	  get_imu_data(&hi2c2);
+//          yaw_main += curr_pose.yaw;
+//		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+//		  last_tick = HAL_GetTick();
+//          drive_straight_PID(speed, &hi2c2, 0, yaw_main, dt);
+////          HAL_Delay(5);
+//      }
+//      decelerate(&htim2);
+//      reset_PID_controller();
+//      HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ULTRASONIC ----------------------
-//	  	HCSR04_Read_Front(&htim3);
-//	  	double dist_cm = 10;
-//		drive_until(&htim2, &htim3, &hi2c2, speed, dist_cm); // distance in cm
-//		HAL_Delay(3000);
+	    IMU_Init();
+	  	HCSR04_Read_Front(&htim3);
+	  	double dist_cm = 10;
+		drive_until(&htim3, &hi2c2, speed, dist_cm); // distance in cm
+		HAL_Delay(3000);
 
 //    DRIVE DISTANCE WITH ENCODER ----------------------
 //	  	drive_distance(&htim2, &hi2c2, speed, 1.0);  // distance in m
