@@ -29,7 +29,7 @@ char turn_degree_com[] = "td";
 
 char accelerate_com[] = "ac";
 char decelerate_com[] = "decel";
-char adapt_decel_com[] = "a_decel";
+char adapt_decel_com[] = "a_dec";
 
 char Pcontr_set_kp[] = "Pcontr_set_kp";
 char PIDcon_get_kp[] = "PIDcon_set_kp";
@@ -44,12 +44,21 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
-	//esp command: "dd_030_2.15" add dashes so length is met
+	//esp command: "dd_030_2.15" where 030 is the speed percentage, 2.15 is distance in m
 	else if(strncmp((char *)UART2_rxBuffer, drive_distance_com, strlen(drive_distance_com)) == 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_distance_com);
 		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_distance_com);
 		drive_distance(htim1, htim2, hi2c2, speed, distance);
 		sprintf(MSG, "Command received: %s with %d \n", drive_distance_com, speed);
+		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
+	}
+
+	//esp command: "du_030_2.15" where 030 is the speed percentage, 2.15 is distance in m
+	else if(strncmp((char *)UART2_rxBuffer, drive_until_com, strlen(drive_until_com)) == 0) {
+		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_until_com);
+		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_until_com);
+		drive_until(htim2, htim3, hi2c2, speed, distance);
+		sprintf(MSG, "Command received: %s with %d \n", drive_until_com, speed);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
@@ -68,6 +77,14 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
+	//esp command: "td_090" where 090 is the angle
+		else if(strncmp((char *)UART2_rxBuffer, turn_right_com, strlen(turn_degree_com))== 0) {
+			int angle = get_integer_from_string((char *)UART2_rxBuffer, turn_degree_com);
+			turn_degree(htim2, hi2c2, angle);
+			sprintf(MSG, "Command received: %s\n", turn_degree_com);
+			HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
+		}
+
 	//esp command: "ac_030" where 030 is the speed percentage
 	else if(strncmp((char *)UART2_rxBuffer, accelerate_com, strlen(accelerate_com))== 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, accelerate_com);
@@ -84,6 +101,16 @@ void ESP_Receive(TIM_HandleTypeDef *htim1, TIM_HandleTypeDef *htim2, TIM_HandleT
 		sprintf(MSG, "Command received: %s\n", decelerate_com);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
+
+	//esp command: "adec_030_2.15" where 030 is the speed percentage, 2.15 is distance in m
+	else if(strncmp((char *)UART2_rxBuffer, adapt_decel_com, strlen(adapt_decel_com))== 0) {
+		int speed = get_integer_from_string((char *)UART2_rxBuffer, adapt_decel_com);
+		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_distance_com);
+		adapt_decel(htim2, htim3, hi2c2, speed, distance);
+		sprintf(MSG, "Command received: %s with %d \n", adapt_decel_com, speed);
+		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
+	}
+
 }
 
 //3 digits numbers currently
