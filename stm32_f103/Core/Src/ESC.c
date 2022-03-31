@@ -9,7 +9,7 @@
 //#include "right_motor_encoder.h"
 
 static double ARR = 40000.0;
-static double L_offset = 1.1;
+static double L_offset = 1.15;
 
 static float imu_integration_sum = 0;
 static float imu_prev_error = 0;
@@ -22,7 +22,7 @@ static float min_dist = 40; // distance to slow down [cm]
 static float desired_angle = 0;
 
 static uint8_t P_control_Kp = 8;
-static float PID_Kp = 7;
+static float PID_Kp = 4;
 static float PID_Ki = 0;
 static float PID_Kd = 0;
 
@@ -47,9 +47,14 @@ void drive_forward (double speed)
 
 void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float current_angle, uint16_t dt)
 {
-    static const float Kp = 7;
-    static const float Ki = 0.0;
-    static const float Kd = 0;
+//    static float Kp = 4;
+//    static float Ki = 0.1;
+//    static float Kd = 0;
+
+    static float Kp, Ki, Kd;
+	Kp = PID_Kp;
+    Ki = PID_Ki;
+    Kd = PID_Kd;
 
 //    current_angle = (int)current_angle%360;
 
@@ -172,6 +177,9 @@ void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double spe
 	HCSR04_Read_Front(htim3);
 	double ultrasonic_dist = get_front_distance();
 	double error = ultrasonic_dist - distance;
+	if (error > min_dist) {
+		accelerate(hi2c2, speed);
+	}
 	while (error > min_dist) {
 		get_imu_data(hi2c2);
 		drive_straight_PID(speed, hi2c2, curr_pose.yaw, curr_pose.dt);
@@ -179,8 +187,9 @@ void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double spe
 		ultrasonic_dist = get_front_distance();
 		error = ultrasonic_dist - distance;
 	}
-	adapt_decel(htim3, hi2c2, speed, distance);
-	turn_degree(hi2c2, 90);
+//	adapt_decel(htim3, hi2c2, speed, distance);
+	stop();
+//	turn_degree(hi2c2, 90);
 }
 
 // turn right
@@ -241,12 +250,10 @@ void turn_degree (I2C_HandleTypeDef *hi2c2, double angle)
 void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed)
 {
 	double speed = (((TIM2->CCR1)/ARR)*20.0 - 1)*100;
-	float yaw = 0;
 	while (speed < final_speed)
 	{
 		get_imu_data(hi2c2);
-		yaw += curr_pose.yaw;
-		drive_straight_PID(speed, hi2c2, yaw, curr_pose.dt);
+		drive_straight_PID(speed, hi2c2, curr_pose.yaw, curr_pose.dt);
 		speed += 1;
 		HAL_Delay(15);
 	}
@@ -257,12 +264,10 @@ void decelerate (I2C_HandleTypeDef *hi2c2)
 {
 	// get current speed
 	double speed = (((TIM2->CCR1)/ARR)*20.0 - 1)*100;
-	float yaw = 0;
 	while (speed > 0)
 	{
 		get_imu_data(hi2c2);
-		yaw += curr_pose.yaw;
-		drive_straight_PID(speed, hi2c2, yaw, curr_pose.dt);
+		drive_straight_PID(speed, hi2c2, curr_pose.yaw, curr_pose.dt);
 		speed -= 1;
 		HAL_Delay(20);
 	}
@@ -320,7 +325,7 @@ float get_min_dist () {
 // decelerate relative to distance (ultrasonic)
 void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance)
 {
-	float Kp = 6;
+	float Kp = 15;
 	HCSR04_Read_Front(htim3);
 	float ultrasonic_dist = get_front_distance();
 	float error = ultrasonic_dist-distance;
@@ -333,7 +338,7 @@ void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double spe
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
 	}
-//	stop();
+	stop();
 }
 
 void help_im_stuck_stepbro(){

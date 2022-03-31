@@ -69,7 +69,7 @@ void delay_us (uint32_t us);
 /* USER CODE BEGIN 0 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-	ESP_Receive(&htim2, &htim2, &hi2c2, &UART2_rxBuffer, &huart2);
+	ESP_Receive(&htim3, &hi2c2, &UART2_rxBuffer, &huart2);
 	memset(UART2_rxBuffer, 0, RX_BUFF_SIZE);
 }
 
@@ -139,9 +139,7 @@ int main(void)
   ICM_SelectBank(&hi2c2, USER_BANK_0);
   HAL_Delay(1);
 
-  IMU_Init();
-  reset_pose();
-  reset_PID_controller();
+
 
   HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE); // where should this go?
   /* USER CODE END 2 */
@@ -150,6 +148,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	IMU_Init();
+	reset_pose();
+	reset_PID_controller();
 //    DRIVE DISTANCE WITH ULTRASONIC w TURN ----------------------
 	HCSR04_Read_Front(&htim3);
 	double dist_cm = 15;
