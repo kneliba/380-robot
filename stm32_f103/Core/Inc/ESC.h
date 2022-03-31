@@ -26,6 +26,10 @@ void drive_straight (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *h
 
 void drive_straight_PID (TIM_HandleTypeDef *htim, double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt);
 
+void drive_straight_ultrasonic_P(TIM_HandleTypeDef *htim, double speed, double ideal_block_distance);
+
+void drive_straight_ultrasonic_IMU(TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance, double current_angle);
+
 void reset_PID_controller();
 
 // Helper Constrain function
