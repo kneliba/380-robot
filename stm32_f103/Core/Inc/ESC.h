@@ -22,8 +22,6 @@
 // drive forward
 void drive_forward (double speed);
 
-void drive_straight (double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle);
-
 void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt);
 
 void reset_PID_controller();
@@ -45,8 +43,10 @@ void turn_degree (I2C_HandleTypeDef *hi2c2, double angle);
 void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed);
 
 // decelerate
-void decelerate ();
+void decelerate (I2C_HandleTypeDef *hi2c2);
 void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance);
+
+void help_im_stuck_stepbro();
 
 
 #endif /* ESC_H_ */

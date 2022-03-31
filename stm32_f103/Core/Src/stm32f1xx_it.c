@@ -23,7 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "right_motor_encoder.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,21 +53,6 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint32_t position;
-int16_t oldpos = 0;
-extern double speed;
-int indx = 0;
-
-//values in meters
-double position_m;
-double oldpos_m;
-extern double velocity;
-
-//struct motor_encoder
-//{
-//  struct Motor_Encoder *p;
-//};
-extern Motor_Encoder right_encoder;
 
 /* USER CODE END 0 */
 
@@ -203,22 +188,6 @@ void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
-//	indx++;
-//	if ( indx == 500) //calculated every half second
-//	{
-//		//speed in clicks per second
-//		speed = ((position - oldpos)*2);
-//		right_encoder.speed = speed;
-//
-//		//velocity
-//		position_m = (2*3.1415*0.07042) * position /3;
-//		oldpos_m = (2*3.1415*0.07042) * oldpos /3;
-//		velocity = ((position_m - oldpos_m)*2);
-//		right_encoder.velocity = velocity;
-//
-//		oldpos = position;
-//		indx = 0;
-//	}
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */

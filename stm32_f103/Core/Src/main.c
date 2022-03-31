@@ -86,7 +86,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[35] = {'\0'};
-	double speed = 15;
+	double speed = 25;
 
   /* USER CODE END 1 */
 
@@ -137,133 +137,23 @@ int main(void)
   HAL_Delay(10);
   ICM20948_Calibrate(&hi2c2);
   HAL_Delay(100);
+  ICM_SelectBank(&hi2c2, USER_BANK_0);
+  HAL_Delay(1);
   uint16_t tick_rate = HAL_GetTickFreq();
   uint32_t last_tick = HAL_GetTick();
-//  reset_distance(&htim1);
+  IMU_Init();
+  reset_pose();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // ultrasonic testing
-//	  IMU_Init();
-//	  HCSR04_Read_Front(&htim3);
-//	  front_dist = get_front_distance();
-//	  dt = get_imu_data(&hi2c2);
-//	  HCSR04_Read_Side(&htim3);
-//	  side_dist = get_side_distance();
-//	  HAL_Delay(10);
-
-	  // encoder testing
-//	  encoder_cnt = get_encoder_count();
-//	  dist = get_distance_travelled();
-//	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(100);
-
-//	  // ESC testing
-//	  encoder_cnt = get_encoder_count();
-//	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//
-//	  accelerate(&htim2, speed);
-//	  sprintf(MSG, "speed = %f\r\n", speed);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  drive_forward(&htim2, speed);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  for (int i = 0; i<5; i++)
-//	  {
-//		  encoder_cnt = get_encoder_count();
-//		  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
-//		  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//		  HAL_Delay(1000);
-//	  }
-//	  decelerate(&htim2);
-//	  sprintf(MSG, "stop\r\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  stop(&htim2);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-
-//	  HAL_Delay(2000);
-//
-//	  sprintf(MSG, "Reset distance\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  reset_distance(&htim1);
-
-	  // DRIVE STRAIGHT TEST --------------------------------
-	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-	  HAL_Delay(1);
-	  reset_pose();
-	  yaw_main = curr_pose.yaw;
-	  IMU_Init();
-//	  accelerate(&htim2, speed);
-//      for (int i = 0; i<30; i++)
-//      {
-//    	  get_imu_data(&hi2c2);
-//          yaw_main += curr_pose.yaw;
-//		  dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-//		  last_tick = HAL_GetTick();
-//          drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
-////          HAL_Delay(5);
-//      }
-//      decelerate(&htim2);
-	  turn_degree(&htim2, &hi2c2, 90);
-      reset_PID_controller();
-      HAL_Delay(3000);
-
-//    DRIVE DISTANCE WITH ULTRASONIC ----------------------
-	    IMU_Init();
+//    DRIVE DISTANCE WITH ULTRASONIC w TURN ----------------------
 	  	HCSR04_Read_Front(&htim3);
 	  	double dist_cm = 10;
 		drive_until(&htim3, &hi2c2, speed, dist_cm); // distance in cm
 		HAL_Delay(3000);
-
-//    DRIVE DISTANCE WITH ENCODER ----------------------
-//	  	drive_distance(&htim2, &hi2c2, speed, 1.0);  // distance in m
-//		HAL_Delay(3000);
-
-//	 DRIVE OVER STEP ----------------------------------------
-//      accelerate(&htim2, 25);
-//      HAL_Delay(1000);
-//      decelerate(&htim2);
-//      HAL_Delay(5000);
-
-// 	  IMU testing -------------------------------------------
-//	  Select User Bank 0
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(1);
-
-	  // Obtain raw accelerometer and gyro data
-//	  ICM_ReadAccelGyro(&hi2c2);
-
-	  // Obtain raw magnetometer data
-//	  ICM_ReadMag(&hi2c2, mag_data);
-
-	  // Obtain corrected accelerometer and gyro data
-//	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-
-	  // Apply Madgwick to get pitch, roll, and yaw
-//	  dt = (double)(HAL_GetTick() -last_tick)/tick_rate;
-
-//	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-//	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-//	  						 mag_data[0], mag_data[1], mag_data[2], dt);
-
-//	  yaw_main += gyro_yaw(&hi2c2, dt);
-
-//	  last_tick = HAL_GetTick();
-
-//	  computeAngles();
-//	  roll_main = getRoll();
-//	  pitch_main = getPitch();
-//	  yaw_main = getYaw();
-
-//	  TURN 90------------------------
-//	  turn_degree(&htim2, &hi2c2, 90);
-//	  HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
@@ -623,12 +513,7 @@ void delay_us (uint32_t us)
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM1) //motor encoder
-	{
-		encoder_timer_input_CC (htim);
-	}
-
-	else if (htim->Instance == TIM3) //ultrasonic
+	if (htim->Instance == TIM3) // ultrasonic
 	{
 		HCSR04_timer_input_CC (htim);
 	}

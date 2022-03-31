@@ -374,9 +374,9 @@ void get_imu_data(I2C_HandleTypeDef *hi2c)
 	last_tick = HAL_GetTick();
 
 	// Calculate Roll, Pitch, Yaw by integrating Gyro Data
-	curr_pose.roll = corr_gyro_data[0]*dt/1000.0;
-	curr_pose.pitch = corr_gyro_data[1]*dt/1000.0;
-	curr_pose.yaw = corr_gyro_data[2]*dt/1000.0;
+	curr_pose.roll += corr_gyro_data[0]*dt/1000.0;
+	curr_pose.pitch += corr_gyro_data[1]*dt/1000.0;
+	curr_pose.yaw += corr_gyro_data[2]*dt/1000.0;
 	curr_pose.dt = dt;
 }
 

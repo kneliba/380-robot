@@ -3,14 +3,18 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f103xb.h"
+#include <imu.h>
 //#include "ultrasonic.h"
 //#include "right_motor_encoder.h"
 
 static double ARR = 40000.0;
 static double L_offset = 1.1;
 
-static float integration_sum = 0;
-static float prev_error = 0;
+static float imu_integration_sum = 0;
+static float imu_prev_error = 0;
+
+static float us_integration_sum = 0;
+static float us_prev_error = 0;
 
 static double min_dist = 40; // distance to slow down [cm]
 
@@ -33,57 +37,6 @@ void drive_forward (double speed)
 	TIM2->CCR2 = commandR; // right
 }
 
-
-void drive_straight (double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle)
-{
-    uint8_t kp = 8;
-
-//    current_angle = (int)current_angle%360;
-
-    double pulse_widthL = 1.0 + (speed*L_offset/100.0);
-    double commandL = (pulse_widthL/20.0)*ARR;
-
-    double pulse_widthR = 1.0 + (speed/100.0);
-    double commandR = (pulse_widthR/20.0)*ARR;
-
-
-    float error = current_angle - desired_angle;
-
-    if (error < 0){
-        // Correct by turning left
-        double new_command = commandL + error*kp; //results in decrease bc negative error
-        if (new_command < 2000)
-        {
-            TIM2->CCR1 = 2000;
-            TIM2->CCR2 = commandR;
-        }
-        else
-        {
-            TIM2->CCR1 = new_command;
-            TIM2->CCR2 = commandR;
-        }
-    }
-    else if (error > 0){
-        // Correct by turning right
-        double new_command = commandR - error*kp;
-        if (new_command < 2000)
-        {
-            TIM2->CCR2 = 2000;
-            TIM2->CCR1 = commandL;
-        }
-        else
-        {
-            TIM2->CCR2 = new_command;
-            TIM2->CCR1 = commandL;
-        }
-    }
-    else
-    {
-    	TIM2->CCR1 = commandL;
-    	TIM2->CCR2 = commandR;
-    }
-}
-
 void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float desired_angle, float current_angle, uint16_t dt)
 {
     static const float Kp = 7;
@@ -104,9 +57,9 @@ void drive_straight_PID (double speed, I2C_HandleTypeDef *hi2c2, float desired_a
     float current_error = current_angle - desired_angle;
 
     // This is the PID controller calcs
-    integration_sum += (current_error * (dt/1000.0));
-    float correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(dt/1000.0);
-    prev_error = current_error;
+    imu_integration_sum += (current_error * (dt/1000.0));
+    float correction = Kp * current_error + Ki * imu_integration_sum + Kd * (current_error - imu_prev_error)/(dt/1000.0);
+    imu_prev_error = current_error;
 
     if (current_error < 0){
         // Correct by turning left
@@ -165,21 +118,37 @@ void drive_straight_ultrasonic (double speed, double ideal_block_distance)
 	}
 }
 
-void drive_straight_ultrasonic_IMU(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance, double current_angle)
+void drive_straight_path(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance, double desired_angle)
 {
-	uint8_t kp = 0.8;
+	static const float Kp = 0.8;
+	static const float Ki = 0;
+	static const float Kd = 0;
 	HCSR04_Read_Side(htim3);
 	double distance_from_wall = get_side_distance();
 
-	float distance_error = distance_from_wall - ideal_block_distance;
-	float desired_angle = distance_error*kp*(-1)+current_angle;
+	float current_error = distance_from_wall - ideal_block_distance;
+	get_imu_data(hi2c2); // calculate yaw
 
-	drive_straight(speed, hi2c2, desired_angle, current_angle);
+	// This is the PID controller calcs
+	us_integration_sum += (current_error * (curr_pose.dt/1000.0));
+	float correction = Kp * current_error + Ki * us_integration_sum + Kd * (current_error - us_prev_error)/(curr_pose.dt/1000.0);
+	us_prev_error = current_error;
+
+	if (current_error < 0){ // too close to wall
+		desired_angle -= correction;
+	}
+	else if (current_error > 0){ // too far from wall
+		desired_angle += correction;
+	}
+
+	drive_straight_PID(speed, hi2c2, desired_angle, curr_pose.yaw, curr_pose.dt);
 }
 
 void reset_PID_controller(){
-	integration_sum = 0;
-	prev_error = 0;
+	imu_integration_sum = 0;
+	imu_prev_error = 0;
+	us_integration_sum = 0;
+	us_prev_error = 0;
 }
 
 void stop ()
@@ -190,30 +159,18 @@ void stop ()
 // drive until a distance (with ultrasonic)
 void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance)
 {
-	int dt = 0;
 	HCSR04_Read_Front(htim3);
 	double ultrasonic_dist = get_front_distance();
-//	for (int i = 0; i<5; i++)
-//	{
-//		HCSR04_Read_Front(htim3);
-//		ultrasonic_dist = get_front_distance();
-//		HAL_Delay(30);
-//	}
-	double yaw = 0;
 	double error = ultrasonic_dist - distance;
-//	drive_forward(htim2, speed);
 	while (error > min_dist) {
 		get_imu_data(hi2c2);
-		dt = curr_pose.dt;
-		yaw += curr_pose.yaw;
-		drive_straight(speed, hi2c2, 0, yaw);
+		drive_straight_PID(speed, hi2c2, 0, curr_pose.yaw, curr_pose.dt);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
 		error = ultrasonic_dist - distance;
-//		HAL_Delay(15);
 	}
-//	decelerate();
 	adapt_decel(htim3, hi2c2, speed, distance);
+	turn_degree(hi2c2, 90);
 }
 
 // turn right
@@ -231,6 +188,7 @@ void turn_right (double speed)
 
 void turn_degree (I2C_HandleTypeDef *hi2c2, double angle)
 {
+	IMU_Init();
 	reset_PID_controller();
 
 	static const float Kp = 0.23;
@@ -249,23 +207,22 @@ void turn_degree (I2C_HandleTypeDef *hi2c2, double angle)
 	float current_error = curr_angle - (-angle);
 
 	// This is the PID controller calcs
-	integration_sum += (current_error * (curr_pose.dt/1000.0));
-	float correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(curr_pose.dt/1000.0);
-	prev_error = current_error;
+	imu_integration_sum += (current_error * (curr_pose.dt/1000.0));
+	float correction = Kp * current_error + Ki * imu_integration_sum + Kd * (current_error - imu_prev_error)/(curr_pose.dt/1000.0);
+	imu_prev_error = current_error;
 	// Only Turning Right for now, dw about left
 
 	while (current_error > threshold) {
-		turn_right(htim, correction);
+		turn_right(correction);
 		get_imu_data(hi2c2);
 		curr_angle += curr_pose.yaw;
 
 		current_error = curr_angle - (-angle);
 
 		// This is the PID controller calcs
-		integration_sum += (current_error * (curr_pose.dt/1000.0));
-		correction = Kp * current_error + Ki * integration_sum + Kd * (current_error - prev_error)/(curr_pose.dt/1000.0);
-		prev_error = current_error;
-
+		imu_integration_sum += (current_error * (curr_pose.dt/1000.0));
+		correction = Kp * current_error + Ki * imu_integration_sum + Kd * (current_error - imu_prev_error)/(curr_pose.dt/1000.0);
+		imu_prev_error = current_error;
 	}
 	stop();
 }
@@ -281,20 +238,23 @@ void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed)
 		yaw += curr_pose.yaw;
 		drive_straight_PID(speed, hi2c2, 0, yaw, curr_pose.dt);
 		speed += 1;
-		HAL_Delay(20);
+		HAL_Delay(15);
 	}
 }
 
 // decelerate to 0
-void decelerate ()
+void decelerate (I2C_HandleTypeDef *hi2c2)
 {
 	// get current speed
 	double speed = (((TIM2->CCR1)/ARR)*20.0 - 1)*100;
+	float yaw = 0;
 	while (speed > 0)
 	{
-		drive_forward(speed);
+		get_imu_data(hi2c2);
+		yaw += curr_pose.yaw;
+		drive_straight_PID(speed, hi2c2, 0, yaw, curr_pose.dt);
 		speed -= 1;
-		HAL_Delay(10);
+		HAL_Delay(20);
 	}
 }
 
@@ -305,17 +265,19 @@ void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double spe
 	float ultrasonic_dist = get_front_distance();
 	float error = ultrasonic_dist-distance;
 	//at a distance where we want to slow down
-	while (error > 10)
+	while (error > 15 && speed > 5)
 	{
 		get_imu_data(hi2c2);
-		yaw += curr_pose.yaw;
 		speed = constrain_value(speed - (speed*Kp)/error, 0, speed);
-		drive_straight(speed, hi2c2, 0, yaw);
+		drive_straight_PID(speed, hi2c2, 0, curr_pose.yaw, curr_pose.dt);
 		HCSR04_Read_Front(htim3);
 		ultrasonic_dist = get_front_distance();
 	}
-	stop();
+//	stop();
 }
 
-
-// decelerate relative to distance (ultrasonic)
+void help_im_stuck_stepbro(){
+	drive_forward(60);
+	HAL_Delay(1000);
+	stop();
+}
