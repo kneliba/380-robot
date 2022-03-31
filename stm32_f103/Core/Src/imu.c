@@ -25,6 +25,10 @@ float corr_gyro_data[3] = {};
 int16_t gyro_offset[3];
 int16_t accel_offset[3];
 
+static uint16_t tick_rate;
+static uint32_t last_tick;
+static double dt = 0;
+
 void ICM_WriteOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *pData) // ***
 {
 	reg = reg & 0x7F;
@@ -368,8 +372,22 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 }
 
 // Calculate yaw by integrating gyro data
-float gyro_yaw(I2C_HandleTypeDef *hi2c, float dt)
+double gyro_yaw(I2C_HandleTypeDef *hi2c, float dt)
 {
-	return (corr_gyro_data[2]*dt/1000);
+	return (corr_gyro_data[2]*dt/1000.0);
 }
 
+double get_imu_data(I2C_HandleTypeDef *hi2c)
+{
+	ICM_ReadAccelGyro(hi2c);
+	ICM_CorrectAccelGyro(hi2c, accel_data, gyro_data);
+	dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
+	last_tick = HAL_GetTick();
+	return gyro_yaw(hi2c, dt);
+}
+
+void IMU_Init()
+{
+	tick_rate = HAL_GetTickFreq();
+	last_tick = HAL_GetTick();
+}

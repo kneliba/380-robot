@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -40,7 +40,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c2;
 
@@ -72,32 +72,23 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
-void delay_us (uint32_t us);
+void delay_us(uint32_t us);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-    ESP_Receive(&htim2, UART2_rxBuffer, &huart2);
-    memset(UART2_rxBuffer, 0, RX_BUFF_SIZE);
-}
 
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
-    HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-}
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t MSG[35] = {'\0'};
-	double speed = 20;
+  uint8_t MSG[35] = {'\0'};
+  double speed = 22;
 
   /* USER CODE END 1 */
 
@@ -126,7 +117,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  //Right Motor Encoder
+  // Right Motor Encoder
   HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
 
   // Initialize Timer3 for delay purposes
@@ -138,140 +129,143 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // start PWM signal at 1ms (0 speed)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
-//  // ESC Calibration Procedure
-//  drive_forward(&htim2, 100);
-//  HAL_Delay(5000);
-//  stop(&htim2);
-//
-//  // Delay for ESCs to detect PWM Signal
-//  HAL_Delay(10000);
+  //  // ESC Calibration Procedure
+  //  drive_forward(&htim2, 100);
+  HAL_Delay(2000);
+  //  stop(&htim2);
+  //
+  //  // Delay for ESCs to detect PWM Signal
+  //  HAL_Delay(10000);
 
-//  ICM_PowerOn(&hi2c2);
-//  HAL_Delay(10);
-//  ICM20948_Calibrate(&hi2c2);
-//  HAL_Delay(100);
-//  uint16_t tick_rate = HAL_GetTickFreq();
-//  uint32_t last_tick = HAL_GetTick();
-//  reset_distance(&htim1);
-
-  HAL_UART_Receive_IT (&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
-
+  ICM_PowerOn(&hi2c2);
+  HAL_Delay(10);
+  ICM20948_Calibrate(&hi2c2);
+  HAL_Delay(100);
+  uint16_t tick_rate = HAL_GetTickFreq();
+  uint32_t last_tick = HAL_GetTick();
+  reset_distance(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // ultrasonic testing
-//	  HCSR04_Read_Front(&htim3);
-//	  front_dist = get_front_distance();
-//	  HAL_Delay(20);
-//	  HCSR04_Read_Side(&htim3);
-//	  side_dist = get_side_distance();
-//	  sprintf(MSG, "Distance: %d\n", 100);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  HAL_Delay(100);
+    // ultrasonic testing
+    //	  HCSR04_Read_Front(&htim3);
+    //	  front_dist = get_front_distance();
+    //	  HAL_Delay(20);
+    //	  HCSR04_Read_Side(&htim3);
+    //	  side_dist = get_side_distance();
+    //	  sprintf(MSG, "Distance: %f\n", dist);
+    //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    //	  HAL_Delay(20);
 
-	  // encoder testing
-//	  encoder_cnt = get_encoder_count();
-//	  dist = get_distance_travelled();
-//	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  HAL_Delay(100);
+    // encoder testing
+    //	  encoder_cnt = get_encoder_count();
+    //	  dist = get_distance_travelled();
+    //	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
+    //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    //	  HAL_Delay(100);
 
-//	  // ESC testing
-//	  encoder_cnt = get_encoder_count();
-//	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//
-//	  accelerate(&htim2, speed);
-//	  sprintf(MSG, "speed = %f\r\n", speed);
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  drive_forward(&htim2, speed);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	  for (int i = 0; i<5; i++)
-//	  {
-//		  encoder_cnt = get_encoder_count();
-//		  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
-//		  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//		  HAL_Delay(1000);
-//	  }
-//	  decelerate(&htim2);
-//	  sprintf(MSG, "stop\r\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  stop(&htim2);
-//	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    //	  // ESC testing
+    //	  encoder_cnt = get_encoder_count();
+    //	  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
+    //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //
+    //	  accelerate(&htim2, speed);
+    //	  sprintf(MSG, "speed = %f\r\n", speed);
+    //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //	  drive_forward(&htim2, speed);
+    //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    //	  for (int i = 0; i<5; i++)
+    //	  {
+    //		  encoder_cnt = get_encoder_count();
+    //		  sprintf(MSG, "Encoder Count: %d\r\n", encoder_cnt);
+    //		  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //		  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    //		  HAL_Delay(1000);
+    //	  }
+    //	  decelerate(&htim2);
+    //	  sprintf(MSG, "stop\r\n");
+    //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //	  stop(&htim2);
+    //	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
-//	  HAL_Delay(2000);
-//
-//	  sprintf(MSG, "Reset distance\n");
-//	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-//	  reset_distance(&htim1);
+    //	  HAL_Delay(2000);
+    //
+    //	  sprintf(MSG, "Reset distance\n");
+    //	  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+    //	  reset_distance(&htim1);
 
-	  // DRIVE STRAIGHT TEST --------------------------------
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(1);
-//	  yaw_main = 0;
-////	  accelerate(&htim2, speed);
-//      for (int i = 0; i<100; i++)
-//      {
-//          ICM_ReadAccelGyro(&hi2c2);
-//          ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-//          dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-//          yaw_main += gyro_yaw(&hi2c2, dt);
-//          last_tick = HAL_GetTick();
-//          drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
-//          HAL_Delay(10);
-//      }
-//      decelerate(&htim2);
-//      HAL_Delay(3000);
+    // DRIVE STRAIGHT TEST --------------------------------
+    ICM_SelectBank(&hi2c2, USER_BANK_0);
+    HAL_Delay(1);
+    yaw_main = 0;
+    IMU_Init();
+    accelerate(&htim2, speed);
+    for (int i = 0; i < 30; i++)
+    {
+      yaw_main += get_imu_data(&hi2c2);
+      dt = (double)(HAL_GetTick() - last_tick) / tick_rate;
+      last_tick = HAL_GetTick();
+      drive_straight_PID(&htim2, speed, &hi2c2, 0, yaw_main, dt);
+      //          HAL_Delay(5);
+    }
+    decelerate(&htim2);
+    reset_PID_controller();
+    HAL_Delay(3000);
 
-//    DRIVE DISTANCE WITH ULTRASONIC ----------------------
-//      drive_until(speed, 50); // distance in cm
-//      HAL_Delay(3000);
+    //    DRIVE DISTANCE WITH ULTRASONIC ----------------------
+    //	  	HCSR04_Read_Front(&htim3);
+    //	  	double dist_cm = 10;
+    //		drive_until(&htim2, &htim3, &hi2c2, speed, dist_cm); // distance in cm
+    //		HAL_Delay(3000);
 
-//    DRIVE DISTANCE WITH ENCODER ----------------------
-//	  	drive_distance(speed, 1.0);  // distance in m
-//		HAL_Delay(3000);
+    //    DRIVE DISTANCE WITH ENCODER ----------------------
+    //	  	drive_distance(&htim2, &hi2c2, speed, 1.0);  // distance in m
+    //		HAL_Delay(3000);
 
-//	 DRIVE OVER STEP ----------------------------------------
-//      accelerate(&htim2, 25);
-//      HAL_Delay(1000);
-//      decelerate(&htim2);
-//      HAL_Delay(5000);
+    //	 DRIVE OVER STEP ----------------------------------------
+    //      accelerate(&htim2, 25);
+    //      HAL_Delay(1000);
+    //      decelerate(&htim2);
+    //      HAL_Delay(5000);
 
-// 	  IMU testing -------------------------------------------
-//	  Select User Bank 0
-//	  ICM_SelectBank(&hi2c2, USER_BANK_0);
-//	  HAL_Delay(1);
+    // 	  IMU testing -------------------------------------------
+    //	  Select User Bank 0
+    //	  ICM_SelectBank(&hi2c2, USER_BANK_0);
+    //	  HAL_Delay(1);
 
-	  // Obtain raw accelerometer and gyro data
-//	  ICM_ReadAccelGyro(&hi2c2);
+    // Obtain raw accelerometer and gyro data
+    //	  ICM_ReadAccelGyro(&hi2c2);
 
-	  // Obtain raw magnetometer data
-//	  ICM_ReadMag(&hi2c2, mag_data);
+    // Obtain raw magnetometer data
+    //	  ICM_ReadMag(&hi2c2, mag_data);
 
-	  // Obtain corrected accelerometer and gyro data
-//	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
+    // Obtain corrected accelerometer and gyro data
+    //	  ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
 
-	  // Apply Madgwick to get pitch, roll, and yaw
-//	  dt = (double)(HAL_GetTick() -last_tick)/tick_rate;
+    // Apply Madgwick to get pitch, roll, and yaw
+    //	  dt = (double)(HAL_GetTick() -last_tick)/tick_rate;
 
-//	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-//	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-//	  						 mag_data[0], mag_data[1], mag_data[2], dt);
+    //	  MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
+    //	  			  	  	  	 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
+    //	  						 mag_data[0], mag_data[1], mag_data[2], dt);
 
-//	  yaw_main += gyro_yaw(&hi2c2, dt);
+    //	  yaw_main += gyro_yaw(&hi2c2, dt);
 
-//	  last_tick = HAL_GetTick();
+    //	  last_tick = HAL_GetTick();
 
-//	  computeAngles();
-//	  roll_main = getRoll();
-//	  pitch_main = getPitch();
-//	  yaw_main = getYaw();
+    //	  computeAngles();
+    //	  roll_main = getRoll();
+    //	  pitch_main = getPitch();
+    //	  yaw_main = getYaw();
+
+    //	  TURN 90------------------------
+    //	  turn_degree(&htim2, &hi2c2, 90);
+    //	  HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
@@ -281,9 +275,9 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -291,8 +285,8 @@ void SystemClock_Config(void)
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -303,9 +297,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -324,10 +317,10 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief ADC1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_ADC1_Init(void)
 {
 
@@ -342,7 +335,7 @@ static void MX_ADC1_Init(void)
   /* USER CODE END ADC1_Init 1 */
 
   /** Common config
-  */
+   */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -356,7 +349,7 @@ static void MX_ADC1_Init(void)
   }
 
   /** Configure Regular Channel
-  */
+   */
   sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
@@ -367,14 +360,13 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
-
 }
 
 /**
-  * @brief I2C2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief I2C2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_I2C2_Init(void)
 {
 
@@ -386,7 +378,7 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.ClockSpeed = 5000;
+  hi2c2.Init.ClockSpeed = 2500;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c2.Init.OwnAddress1 = 210;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -401,14 +393,13 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
-
 }
 
 /**
-  * @brief TIM1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM1_Init(void)
 {
 
@@ -451,14 +442,13 @@ static void MX_TIM1_Init(void)
   /* USER CODE BEGIN TIM1_Init 2 */
 
   /* USER CODE END TIM1_Init 2 */
-
 }
 
 /**
-  * @brief TIM2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM2_Init(void)
 {
 
@@ -474,9 +464,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 4-1;
+  htim2.Init.Prescaler = 4 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 40000-1;
+  htim2.Init.Period = 40000 - 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -514,14 +504,13 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 2 */
   HAL_TIM_MspPostInit(&htim2);
-
 }
 
 /**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM3 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM3_Init(void)
 {
 
@@ -537,7 +526,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 8-1;
+  htim3.Init.Prescaler = 8 - 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -576,14 +565,13 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART2_UART_Init(void)
 {
 
@@ -609,14 +597,13 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
-
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -634,7 +621,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(FRONT_TRIG_GPIO_Port, FRONT_TRIG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SIDE_TRIG_Pin|LED_R_Pin|LED_G_Pin|LED_B_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SIDE_TRIG_Pin | LED_R_Pin | LED_G_Pin | LED_B_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -642,11 +629,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PA4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SWITCH_Pin */
   GPIO_InitStruct.Pin = SWITCH_Pin;
@@ -669,125 +651,40 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(SIDE_TRIG_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_R_Pin LED_G_Pin LED_B_Pin */
-  GPIO_InitStruct.Pin = LED_R_Pin|LED_G_Pin|LED_B_Pin;
+  GPIO_InitStruct.Pin = LED_R_Pin | LED_G_Pin | LED_B_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
-void delay_us (uint32_t us)
+void delay_us(uint32_t us)
 {
-	__HAL_TIM_SET_COUNTER(&htim3,0);  // set the counter value a 0
-	while (__HAL_TIM_GET_COUNTER(&htim3) < us);  // wait for the counter to reach the us input in the parameter
+  __HAL_TIM_SET_COUNTER(&htim3, 0); // set the counter value a 0
+  while (__HAL_TIM_GET_COUNTER(&htim3) < us)
+    ; // wait for the counter to reach the us input in the parameter
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM1) //motor encoder
-	{
-		encoder_timer_input_CC (htim);
-	}
+  if (htim->Instance == TIM1) // motor encoder
+  {
+    encoder_timer_input_CC(htim);
+  }
 
-	else if (htim->Instance == TIM3) //ultrasonic
-	{
-		HCSR04_timer_input_CC (htim);
-	}
-
-}
-
-// drive a set distance (with encoder)
-void drive_distance (double speed, double distance)
-{
-	uint16_t tick_rate = HAL_GetTickFreq();
-	uint32_t last_tick = HAL_GetTick();
-	double dt = 0;
-	reset_distance(&htim1);
-	double encoder_dist = get_distance_travelled();
-	while (encoder_dist < distance) {
-		ICM_ReadAccelGyro(&hi2c2);
-		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-		dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-		yaw_main += gyro_yaw(&hi2c2, dt);
-		last_tick = HAL_GetTick();
-		drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
-		encoder_dist = get_distance_travelled();
-	}
-	stop(&htim2);
-}
-
-// drive until a distance (with ultrasonic)
-void drive_until (double speed, double distance)
-{
-	uint16_t tick_rate = HAL_GetTickFreq();
-	uint32_t last_tick = HAL_GetTick();
-	double dt = 0;
-	HCSR04_Read_Front(&htim3);
-	double start = get_front_distance();
-	double ultrasonic_dist = start;
-
-	drive_forward(&htim2, speed);
-
-	while (ultrasonic_dist > distance) {
-		ICM_ReadAccelGyro(&hi2c2);
-		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-		dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
-		yaw_main += gyro_yaw(&hi2c2, dt);
-		last_tick = HAL_GetTick();
-		drive_straight(&htim2, speed, &hi2c2, 0, yaw_main);
-//		HAL_Delay(10);
-		HCSR04_Read_Front(&htim3);
-		ultrasonic_dist = get_front_distance();
-	}
-	stop(&htim2);
-}
-
-// turn right a certain angle
-void turn_angle (double angle)
-{
-	uint16_t tick_rate = HAL_GetTickFreq();
-	uint32_t last_tick = HAL_GetTick();
-	float curr_angle = getYaw();
-	float final_angle = curr_angle + angle;
-	turn_right(&htim2);
-	while (curr_angle < final_angle) {
-		//	   Select User Bank 0
-		ICM_SelectBank(&hi2c2, USER_BANK_0);
-		HAL_Delay(5);
-
-		// Obtain raw accelerometer and gyro data
-		ICM_ReadAccelGyro(&hi2c2);
-
-		// Obtain raw magnetometer data
-		//	  int16_t mag_data[3];
-		ICM_ReadMag(&hi2c2, mag_data);
-
-		// Obtain corrected accelerometer and gyro data
-		ICM_CorrectAccelGyro(&hi2c2, accel_data, gyro_data);
-
-		// Apply Madgwick to get pitch, roll, and yaw
-		dt = (float)(HAL_GetTick() -last_tick)/tick_rate;
-		MadgwickAHRSupdate(corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2],
-						 corr_accel_data[0], corr_accel_data[1], corr_accel_data[2],
-						 mag_data[0], mag_data[1], mag_data[2], dt);
-
-		last_tick = HAL_GetTick();
-
-		computeAngles();
-
-		curr_angle = getYaw();
-	}
-	stop(&htim2);
+  else if (htim->Instance == TIM3) // ultrasonic
+  {
+    HCSR04_timer_input_CC(htim);
+  }
 }
 
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -799,14 +696,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
