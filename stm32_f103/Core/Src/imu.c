@@ -29,6 +29,8 @@ static uint16_t tick_rate;
 static uint32_t last_tick;
 static double dt = 0;
 
+robot_pose curr_pose = {0, 0, 0, 0};
+
 void ICM_WriteOneByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *pData) // ***
 {
 	reg = reg & 0x7F;
@@ -357,35 +359,32 @@ void ICM20948_Calibrate(I2C_HandleTypeDef *hi2c)
 	accel_offset[0] /= 50;
 	accel_offset[1] /= 50;
 	accel_offset[2] /= 50;
-//	accel_offset[2] += 4096.0; // 4096 LSB/g
 
-	// Calibrate gyroscope
-//	for(int i=0; i<50; i++){
-//		ICM_ReadAccelGyro(hi2c);
-//
-//		HAL_Delay(15);
-//	}
-//
 	gyro_offset[0] /= 50;
 	gyro_offset[1] /= 50;
 	gyro_offset[2] /= 50;
 }
 
-// Calculate yaw by integrating gyro data
-double gyro_yaw(I2C_HandleTypeDef *hi2c, float dt)
-{
-	return (corr_gyro_data[2]*dt/1000.0);
-}
 
-double get_imu_data(I2C_HandleTypeDef *hi2c)
+void get_imu_data(I2C_HandleTypeDef *hi2c)
 {
 	ICM_ReadAccelGyro(hi2c);
 	ICM_CorrectAccelGyro(hi2c, accel_data, gyro_data);
 	dt = (double)(HAL_GetTick() - last_tick)/tick_rate;
 	last_tick = HAL_GetTick();
-	return gyro_yaw(hi2c, dt);
+
+	// Calculate Roll, Pitch, Yaw by integrating Gyro Data
+	curr_pose.roll += corr_gyro_data[0]*dt/1000.0;
+	curr_pose.pitch += corr_gyro_data[1]*dt/1000.0;
+	curr_pose.yaw += corr_gyro_data[2]*dt/1000.0;
+	curr_pose.dt = dt;
 }
 
+void reset_pose(){
+	curr_pose.roll = 0;
+	curr_pose.pitch = 0;
+	curr_pose.yaw = 0;
+}
 void IMU_Init()
 {
 	tick_rate = HAL_GetTickFreq();

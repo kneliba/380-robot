@@ -1,22 +1,22 @@
 /* USER CODE BEGIN Header */
 /**
- ******************************************************************************
- * @file           : main.h
- * @brief          : Header for main.c file.
- *                   This file contains the common defines of the application.
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
- * All rights reserved.</center></h2>
- *
- * This software component is licensed by ST under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the
- * License. You may obtain a copy of the License at:
- *                        opensource.org/licenses/BSD-3-Clause
- *
- ******************************************************************************
- */
+  ******************************************************************************
+  * @file           : main.h
+  * @brief          : Header for main.c file.
+  *                   This file contains the common defines of the application.
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -34,14 +34,14 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 #include <stdio.h>
-#include <string.h>
+#include <string.h>	
 #include "ultrasonic.h"
 #include "ESC.h"
 #include "ESP.h"
-#include "imu.h"
+#include "imu.h"	
 #include "MadgwickAHRS.h"
 #include "right_motor_encoder.h"
-#include "tim_capture_callback.h"
+#include <aux_functions.h>
 
 /* USER CODE END Includes */
 
@@ -66,7 +66,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-  void delay_us(uint32_t us);
+void delay_us (uint32_t us);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -74,6 +74,8 @@ void Error_Handler(void);
 #define LEFT_PWM_GPIO_Port GPIOA
 #define RIGHT_PWM_Pin GPIO_PIN_1
 #define RIGHT_PWM_GPIO_Port GPIOA
+#define BATTERY_Pin GPIO_PIN_4
+#define BATTERY_GPIO_Port GPIOA
 #define SWITCH_Pin GPIO_PIN_5
 #define SWITCH_GPIO_Port GPIOA
 #define FRONT_TRIG_Pin GPIO_PIN_6
