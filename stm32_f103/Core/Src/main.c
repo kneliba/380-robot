@@ -76,6 +76,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -86,7 +87,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[70] = { '\0' };
-	double speed = 20;
 
   /* USER CODE END 1 */
 
@@ -154,7 +154,7 @@ int main(void)
 //    DRIVE DISTANCE WITH ULTRASONIC w TURN ----------------------
 	HCSR04_Read_Front(&htim3);
 	double dist_cm = 15;
-	drive_until(&htim3, &hi2c2, speed, dist_cm); // distance in cm
+	drive_until(&htim3, &hi2c2, get_speed(), dist_cm); // distance in cm
 	HAL_Delay(3000);
 
   // dashboard example ?

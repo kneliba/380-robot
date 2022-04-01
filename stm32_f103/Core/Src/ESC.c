@@ -8,6 +8,8 @@
 //#include "ultrasonic.h"
 //#include "right_motor_encoder.h"
 
+static double speed = 20;
+
 static double ARR = 40000.0;
 static double L_offset = 1.15;
 
@@ -273,6 +275,10 @@ void decelerate (I2C_HandleTypeDef *hi2c2)
 	}
 }
 
+void set_speed(double speed_value) {
+	speed = speed_value;
+}
+
 void set_P_control_Kp (uint8_t P_Kp_value) {
 	P_control_Kp = P_Kp_value;
 }
@@ -295,6 +301,10 @@ void set_L_offset (double L_offset_value) {
 
 void set_min_dist (float min_dist_value){
 	min_dist = min_dist_value;
+}
+
+double get_speed() {
+	return speed;
 }
 
 uint8_t get_P_control_Kp () {
