@@ -76,6 +76,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE);
 }
+
 /* USER CODE END 0 */
 
 /**

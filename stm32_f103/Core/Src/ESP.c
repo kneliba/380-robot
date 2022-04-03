@@ -31,13 +31,15 @@ char accelerate_com[] = "ac";
 char decelerate_com[] = "decel";
 char adapt_decel_com[] = "a_dec";
 
+char set_speed_com[] = "speed";
+
 char P_set_com[] = "P_kp";
 char PID_set_kp_com[] = "PID_kp";
 char PID_set_ki_com[] = "PID_ki";
 char PID_set_kd_com[] = "PID_kd";
 char set_L_offset_com[] = "L_offset";
 char set_min_dist_com[] = "min_dist";
-
+char reset_pid_com[] = "rst_pid";
 
 void ESP_Receive(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UART2_rxBuffer, UART_HandleTypeDef *huart2) {
 	//esp command: "df_030" where 030 is the speed percentage
@@ -112,6 +114,12 @@ void ESP_Receive(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UA
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
 	}
 
+	//esp command: "speed_030"
+	else if(strncmp((char *)UART2_rxBuffer, set_speed_com, strlen(set_speed_com))== 0) {
+		int speed = get_integer_from_string((char *)UART2_rxBuffer, set_speed_com);
+		set_speed(speed);
+	}
+
 	//esp command: "P_kp_8.00"
 	else if(strncmp((char *)UART2_rxBuffer, P_set_com, strlen(P_set_com))== 0) {
 		double kp = get_double_from_string((char *)UART2_rxBuffer, P_set_com, 1);
@@ -147,7 +155,10 @@ void ESP_Receive(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UA
 		double min_dist = get_double_from_string((char *)UART2_rxBuffer, set_min_dist_com, 1);
 		set_min_dist(min_dist);
 	}
-
+	//esp command: "rst_pid"
+	else if(strncmp((char *)UART2_rxBuffer, reset_pid_com, strlen(reset_pid_com))== 0) {
+		reset_PID_controller();
+	}
 }
 
 //3 digits numbers currently
