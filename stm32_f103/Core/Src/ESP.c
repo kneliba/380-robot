@@ -54,7 +54,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UA
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, drive_until_com);
 		double distance = get_double_from_string((char *)UART2_rxBuffer, drive_until_com, 5);
 
-		drive_until(htim3, hi2c2, speed, distance);
+//		drive_until(htim3, hi2c2, speed, distance);
 
 		sprintf(MSG, "Command received: %s with %d \n", drive_until_com, speed);
 		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
@@ -87,7 +87,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UA
 	//esp command: "ac_030" where 030 is the speed percentage
 	else if(strncmp((char *)UART2_rxBuffer, accelerate_com, strlen(accelerate_com))== 0) {
 		int speed = get_integer_from_string((char *)UART2_rxBuffer, accelerate_com);
-		accelerate(hi2c2, speed);
+//		accelerate(htim3, hi2c2, speed);
 
 //		sprintf(MSG, "Command received: %s with %d \n", accelerate_com, speed);
 //		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);
@@ -95,7 +95,7 @@ void ESP_Receive(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, uint8_t *UA
 
 	//esp command: "decel" add dashes so length is met
 	else if(strncmp((char *)UART2_rxBuffer, decelerate_com, strlen(decelerate_com))== 0) {
-		decelerate(hi2c2);
+		decelerate(hi2c2, 0);
 
 //		sprintf(MSG, "Command received: %s\n", decelerate_com);
 //		HAL_UART_Transmit(huart2, MSG, sizeof(MSG), 100);

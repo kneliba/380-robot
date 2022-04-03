@@ -35,6 +35,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <string.h>	
+#include <stdlib.h>
 #include "ultrasonic.h"
 #include "ESC.h"
 #include "ESP.h"
@@ -42,6 +43,7 @@ extern "C" {
 #include "MadgwickAHRS.h"
 #include "right_motor_encoder.h"
 #include <aux_functions.h>
+#include "run_course_hard_code.h"
 
 /* USER CODE END Includes */
 
@@ -74,8 +76,6 @@ void delay_us (uint32_t us);
 #define LEFT_PWM_GPIO_Port GPIOA
 #define RIGHT_PWM_Pin GPIO_PIN_1
 #define RIGHT_PWM_GPIO_Port GPIOA
-#define BATTERY_Pin GPIO_PIN_4
-#define BATTERY_GPIO_Port GPIOA
 #define SWITCH_Pin GPIO_PIN_5
 #define SWITCH_GPIO_Port GPIOA
 #define FRONT_TRIG_Pin GPIO_PIN_6

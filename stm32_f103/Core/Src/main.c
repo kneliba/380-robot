@@ -86,7 +86,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint8_t MSG[70] = { '\0' };
-	double speed = 20;
+	double speed = 15;
 
   /* USER CODE END 1 */
 
@@ -126,9 +126,9 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // enable interrupt on TIM3 CH3
 
 //  // ESC Calibration Procedure
-//  drive_forward(&htim2, 100);
-//  HAL_Delay(2000);
-//  stop(&htim2);
+//  drive_forward(100);
+//  HAL_Delay(6000);
+//  stop();
   HAL_Delay(2000);
 
   // IMU Calibration
@@ -139,9 +139,16 @@ int main(void)
   ICM_SelectBank(&hi2c2, USER_BANK_0);
   HAL_Delay(1);
 
-
-
   HAL_UART_Receive_IT(&huart2, UART2_rxBuffer, RX_BUFF_SIZE); // where should this go?
+
+  for (int i=0; i<5; i++){
+	  HCSR04_Read_Front(&htim3);
+	  double ultrasonic_dist = get_front_distance();
+	  HAL_Delay(20);
+	  HCSR04_Read_Side(&htim3);
+	  ultrasonic_dist = get_side_distance();
+	  HAL_Delay(20);
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -153,9 +160,51 @@ int main(void)
 	reset_PID_controller();
 //    DRIVE DISTANCE WITH ULTRASONIC w TURN ----------------------
 	HCSR04_Read_Front(&htim3);
-	double dist_cm = 15;
-	drive_until(&htim3, &hi2c2, speed, dist_cm); // distance in cm
+	double ultrasonic_dist = get_front_distance();
+	HAL_Delay(16);
+	HCSR04_Read_Side(&htim3);
+	double ultrasonic_dist_side = get_side_distance();
+	HAL_Delay(16);
+////	sprintf(MSG, "<F_ULT %4.3f >", ultrasonic_dist);
+////	HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
+////	memset(MSG, 0, 70);
+//	double dist_cm = 15;
+//	double side_dist = 12;
+//	drive_until(&htim3, &hi2c2, speed, dist_cm, side_dist); // distance in cm
+//	turn_degree(&hi2c2, 90);
+//	HAL_Delay(2000);
+
+	drive_course(&htim3, &hi2c2, speed);
+//	get_imu_data(&hi2c2);
+//	for (int i = 0; i<400; i++){
+//		drive_straight_PID(25, &hi2c2, curr_pose.yaw, curr_pose.dt);
+//		HAL_Delay(10);
+//	}
+//	stop();
+
+	HAL_Delay(5000);
+
+// Just drive straight for a bit
+//
+//	accelerate(&htim3, &hi2c2, speed);
+//
+//	for (int i=0; i < 250; i++){
+//		drive_straight_PID(speed, &hi2c2, curr_pose.yaw, curr_pose.dt);
+//		get_imu_data(&hi2c2); // calculate yaw
+//		HAL_Delay(10);
+//	}
+//
+//	decelerate(&hi2c2, speed);
+
+
+
+	// Print uWu
+
+//	sprintf(MSG, "<dt %4.3f yaw %4.3f c_yaw %4.3f F_ULT %4.3f >", curr_pose.dt, curr_pose.yaw, -curr_pose.yaw - 90, ultrasonic_dist);
+//	sprintf(MSG, "<dt %4.3f yaw %4.3f c_yaw %4.3f F_ULT %4.3f S_ULT %4.3f >\n", curr_pose.dt, curr_pose.yaw, -curr_pose.yaw - 90, ultrasonic_dist, ultrasonic_dist_side);
+//	HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
 	HAL_Delay(3000);
+	memset(MSG, 0, 70);
 
   // dashboard example ?
   // sprintf(MSG, "%4.3f %4.3f %4.3f %4.3f %4.3f %4.3f %4.3f \n", dt, yaw_main, front_dist, side_dist, corr_gyro_data[0], corr_gyro_data[1], corr_gyro_data[2]);
@@ -283,7 +332,7 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.ClockSpeed = 2500;
+  hi2c2.Init.ClockSpeed = 3000;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c2.Init.OwnAddress1 = 210;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;

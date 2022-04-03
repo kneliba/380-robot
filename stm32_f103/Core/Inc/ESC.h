@@ -28,6 +28,8 @@ void drive_straight_ultrasonic_P(TIM_HandleTypeDef *htim, double speed, double i
 
 void drive_straight_ultrasonic_IMU(TIM_HandleTypeDef *htim, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance, double current_angle);
 
+void drive_straight_path(TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double ideal_block_distance);
+
 void reset_PID_controller();
 
 // Helper Constrain function
@@ -37,17 +39,17 @@ uint16_t constrain_value(uint16_t input, uint16_t min_val, uint16_t max_val);
 void stop ();
 
 // drive distances
-void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance);
+void drive_until (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance, double side_dist);
 
 // turn right
 void turn_right (double speed);
 void turn_degree (I2C_HandleTypeDef *hi2c2, double angle);
 
 // accelerate
-void accelerate (I2C_HandleTypeDef *hi2c2, double final_speed);
+void accelerate (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double final_speed, double side_dist);
 
 // decelerate
-void decelerate (I2C_HandleTypeDef *hi2c2);
+void decelerate (I2C_HandleTypeDef *hi2c2, uint8_t final_speed);
 void adapt_decel (TIM_HandleTypeDef *htim3, I2C_HandleTypeDef *hi2c2, double speed, double distance);
 
 void set_P_control_Kp (uint8_t P_Kp_value);
